@@ -65,7 +65,6 @@ function createWindow() {
       path.resolve(__dirname, "../../frontend/build/index.html"),
     );
   }
-  mainWindow.webContents.openDevTools();
 }
 
 // Auto-updates
