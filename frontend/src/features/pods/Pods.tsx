@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import ResourceTable from "../../components/common/Table/ResourceTable";
 import { WatchResourcePayload } from "../../interfaces/socket";
 import { usePods } from "./usePod";
@@ -85,15 +84,6 @@ const getPodMemReq = (event: WatchResourcePayload<Pod>) => {
   return totalMem || "-";
 };
 
-const onAction = (e: { actionId: string; row: any }) => {
-  const { actionId, row } = e;
-
-  if (actionId === "edit") console.log("Edit", row);
-  if (actionId === "delete") console.log("Delete", row);
-  if (actionId === "logs") console.log("Logs", row);
-  if (actionId === "exec") console.log("Exec", row);
-};
-
 // --- Main Component ---
 
 function Pods() {
@@ -148,7 +138,10 @@ function Pods() {
   };
 
   const handleAction = (actionId: string, row: any) => {
-    console.log("Action triggered:", actionId, row);
+    if (actionId === "edit") console.log("Edit", row);
+    if (actionId === "delete") console.log("Delete", row);
+    if (actionId === "logs") console.log("Logs", row);
+    if (actionId === "exec") console.log("Exec", row);
     // Add logic: e.g., navigate to logs, open delete dialog, etc.
   };
 

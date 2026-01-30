@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { initSocket, closeSocket } from "./services/bootstrap";
@@ -17,8 +17,8 @@ function App() {
     };
   }, []);
 
-  const [mode, setMode] = useState<"light" | "dark">("dark");
-
+  //const [mode, _setMode] = useState<"light" | "dark">("dark");
+  const mode = "dark";
   const theme = useMemo(
     () => (mode === "dark" ? darkTheme : lightTheme),
     [mode],

@@ -16,7 +16,6 @@ import {
   ListItemText,
   IconButton,
   Menu,
-  Icon,
   Chip,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
