@@ -25,10 +25,11 @@ jobs:
           cd ../backend && npm install
 
       - name: Build All
+        env:
+          CI: false
         run: |
-          $env:CI = "false"
-          npm run build:frontend
-          npm run build:backend
+          CI=false npm run build:frontend
+          CI=false npm run build:backend
 
       - name: Publish Electron App
         env:
