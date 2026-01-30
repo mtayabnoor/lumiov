@@ -10,7 +10,7 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:electron": "wait-on http://localhost:3000 && tsc -p tsconfig.json && electron .",
     "clean": "rimraf dist release",
-    "build": "npm run clean && npm run build:frontend && npm run build:backend && tsc -p tsconfig.json",
+    "build": "npm run build:frontend && npm run build:backend && tsc -p tsconfig.json",
     "package": "npm run build && electron-builder",
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && npm run build",

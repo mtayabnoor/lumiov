@@ -25,3 +25,5 @@ yarn-debug.log*
 yarn-error.log*
 
 ./lumiov_dev.pfx
+
+commands.txt

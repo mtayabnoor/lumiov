@@ -26,7 +26,7 @@ jobs:
 
       - name: Build All
         env:
-          CI: false
+          CI: ""
         run: |
           npm run build:frontend
           npm run build:backend
