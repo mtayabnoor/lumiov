@@ -11,14 +11,18 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      # use 'npm install' to be safe against lockfile errors
       - name: Install All Dependencies
         run: |
-          npm ci
-          cd frontend && npm ci
-          cd ../backend && npm ci
+          npm install
+          cd frontend && npm install
+          cd ../backend && npm install
 
       - name: Build All
         run: |
@@ -27,7 +31,12 @@ jobs:
 
       - name: Publish Electron App
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 🔴 CRITICAL: Use the custom token here!
+          # We map 'GITHUB_TOKEN' (which electron-builder reads)
+          # to your 'RELEASE_TOKEN' (which has permission).
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+
+          # Your certificate secrets
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: npm run package -- --publish always
