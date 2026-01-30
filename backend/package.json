@@ -1,5 +1,5 @@
 {
-  "name": "kvision-backend",
+  "name": "backend",
   "version": "1.0.0",
   "description": "Kubernetes management backend for kVision",
   "main": "dist/server.js",
