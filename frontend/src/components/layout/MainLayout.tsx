@@ -14,7 +14,7 @@ function MainLayout() {
       >
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
-            Lumiov
+            Lumiov Test
           </Typography>
         </Toolbar>
       </AppBar>

@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import updater from "electron-updater";
-// ✅ Import the launcher
+import { UpdateDownloadedEvent } from "electron-updater";
 import { launchBackend, stopBackend } from "./backend-launcher.js";
 
 const { autoUpdater } = updater;
@@ -68,8 +68,30 @@ function createWindow() {
 }
 
 // Auto-updates
-autoUpdater.on("update-downloaded", () => {
-  autoUpdater.quitAndInstall();
+autoUpdater.on("update-downloaded", (info: UpdateDownloadedEvent) => {
+  // Ensure we have a valid string for the message
+  const releaseNotes =
+    typeof info.releaseNotes === "string"
+      ? info.releaseNotes
+      : "New features and bug fixes.";
+  const messageText =
+    process.platform === "win32" ? releaseNotes : info.releaseName;
+
+  const dialogOpts = {
+    type: "info" as const,
+    buttons: ["Restart", "Later"],
+    title: "Application Update",
+    // ✅ The '||' ensures that if messageText is null/undefined, we use the backup string
+    message: messageText || "A new version is available.",
+    detail:
+      "A new version has been downloaded. Restart the application to apply the updates.",
+  };
+
+  dialog.showMessageBox(dialogOpts).then((returnValue) => {
+    if (returnValue.response === 0) {
+      autoUpdater.quitAndInstall();
+    }
+  });
 });
 
 // Cleanup
