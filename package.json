@@ -24,7 +24,8 @@
       {
         "provider": "github",
         "owner": "muno1623",
-        "repo": "lumiov-releases"
+        "repo": "lumiov-releases",
+        "releaseType": "release"
       }
     ],
     "win": {
