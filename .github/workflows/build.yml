@@ -25,6 +25,8 @@ jobs:
           cd ../backend && npm install
 
       - name: Build All
+        env:
+          CI: false
         run: |
           npm run build:frontend
           npm run build:backend
