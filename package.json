@@ -1,0 +1,73 @@
+{
+  "name": "lumiov",
+  "version": "1.0.0",
+  "description": "Lumiov Kubernetes Manager",
+  "main": "dist/electron/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:electron\"",
+    "dev:frontend": "cd frontend && npm start",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:electron": "wait-on http://localhost:3000 && tsc -p tsconfig.json && electron .",
+    "clean": "rimraf dist release",
+    "build": "npm run clean && npm run build:frontend && npm run build:backend && tsc -p tsconfig.json",
+    "package": "npm run build && electron-builder",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "preversion": "npm run build",
+    "postversion": "git push && git push origin --tags"
+  },
+  "build": {
+    "appId": "com.lumiov.app",
+    "productName": "Lumiov",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "muno1623",
+        "repo": "lumiov"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "certificateFile": "lumiov_dev.pfx",
+      "certificatePassword": "MySecretPassword123"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": true
+    },
+    "files": [
+      "dist/electron/**/*",
+      "frontend/build/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "backend/dist",
+        "to": "backend"
+      },
+      {
+        "from": "backend/node_modules",
+        "to": "backend/node_modules"
+      }
+    ],
+    "directories": {
+      "output": "release"
+    }
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "electron": "^34.0.0",
+    "electron-builder": "^24.9.0",
+    "typescript": "^5.3.0",
+    "wait-on": "^7.2.0",
+    "rimraf": "^5.0.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.1.7"
+  }
+}
