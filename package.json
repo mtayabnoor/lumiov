@@ -32,8 +32,7 @@
       "target": [
         "nsis"
       ],
-      "certificateFile": "lumiov_dev.pfx",
-      "certificatePassword": "MySecretPassword123"
+      "certificateFile": "lumiov_dev.pfx"
     },
     "nsis": {
       "oneClick": false,
