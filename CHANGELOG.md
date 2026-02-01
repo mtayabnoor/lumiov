@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.4](https://github.com/mtayabnoor/lumiov/compare/v2.0.2...v2.0.4) (2026-02-01)
+
+
+### Bug Fixes
+
+* Backend launcher path fixed and build pipeline updated ([3d957f5](https://github.com/mtayabnoor/lumiov/commit/3d957f5cd2f1bb6572dcba18d1e52dd555cf6bfa))
+* Fix github username ([782cb73](https://github.com/mtayabnoor/lumiov/commit/782cb737e0bbbb0921db173f5a664ff7378a204e))
+* Fix github username ([8b66579](https://github.com/mtayabnoor/lumiov/commit/8b6657917e503b0ef269c09ff53035bcf3708173))
+
+
+### Maintenance
+
+* **release:** 2.0.2 ([fadb023](https://github.com/mtayabnoor/lumiov/commit/fadb02326c84b6db58dd1f46e615932bc394e0a2))
+* **release:** 2.0.3 ([932bf89](https://github.com/mtayabnoor/lumiov/commit/932bf8955ad030a1d0805712858b7ff5ebd5e900))
+
 ### [2.0.2](https://github.com/mtayabnoor/lumiov/compare/v2.0.1...v2.0.2) (2026-02-01)
 
 ### Maintenance
