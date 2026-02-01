@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/muno1623/lumiov/compare/v1.1.0...v2.0.0) (2026-02-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* Frontend - Migrated to vite react
+
+### Features
+
+* Frontend - Migrated to vite react ([181f2ec](https://github.com/muno1623/lumiov/commit/181f2ecbd47436555371117ffa64b56b1714b891))
+
+
+### Bug Fixes
+
+* NPM audit and upgraded packages ([2251a02](https://github.com/muno1623/lumiov/commit/2251a023dd876cfda1a7a409831190f5e6a6b404))
+* Removed codeql pipeline ([ef80fc8](https://github.com/muno1623/lumiov/commit/ef80fc8aa1c46adb61c0316e7e67a9d3a603cffa))
+
+
+### Maintenance
+
+* **release:** 1.1.0 ([6e3bdaf](https://github.com/muno1623/lumiov/commit/6e3bdaf0caaf53c8eb3b6865a0bfc57697309333))
+
 ## [1.1.0](https://github.com/muno1623/lumiov/compare/v1.0.11...v1.1.0) (2026-02-01)
 
 
