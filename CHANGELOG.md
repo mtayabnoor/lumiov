@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.3](https://github.com/muno1623/lumiov/compare/v2.0.2...v2.0.3) (2026-02-01)
+
+
+### Bug Fixes
+
+* Backend launcher path fixed and build pipeline updated ([3d957f5](https://github.com/muno1623/lumiov/commit/3d957f5cd2f1bb6572dcba18d1e52dd555cf6bfa))
+
+
+### Maintenance
+
+* **release:** 2.0.2 ([fadb023](https://github.com/muno1623/lumiov/commit/fadb02326c84b6db58dd1f46e615932bc394e0a2))
+
 ### [2.0.2](https://github.com/muno1623/lumiov/compare/v2.0.1...v2.0.2) (2026-02-01)
 
 
