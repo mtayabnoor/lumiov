@@ -1,44 +1,88 @@
 name: Build and Release
+
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - master
 
 jobs:
   release:
     runs-on: windows-latest
     permissions:
       contents: write
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for changelog generation
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
 
-      # use 'npm install' to be safe against lockfile errors
+      # Install dependencies
       - name: Install All Dependencies
         run: |
           npm install
           cd frontend && npm install
           cd ../backend && npm install
 
+      # Security audit before building
+      - name: Security Audit
+        run: |
+          npm audit --audit-level=high
+          cd frontend && npm audit --audit-level=high
+          cd ../backend && npm audit --audit-level=high
+        continue-on-error: false
+
+      # Build all components
       - name: Build All
         env:
           CI: false
         run: |
           npm run build:frontend
           npm run build:backend
+          npx tsc -p tsconfig.json
 
+      # Configure git for version bump
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Bump version and generate changelog
+      - name: Bump Version and Generate Changelog
+        id: version
+        run: |
+          npm run release
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          echo "new_version=$version" >> $env:GITHUB_OUTPUT
+          echo "tag=v$version" >> $env:GITHUB_OUTPUT
+
+      # Push version commit and tag
+      - name: Push Changes
+        run: |
+          git push origin master --follow-tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and publish Electron app
       - name: Publish Electron App
         env:
-          # 🔴 CRITICAL: Use the custom token here!
-          # We map 'GITHUB_TOKEN' (which electron-builder reads)
-          # to your 'RELEASE_TOKEN' (which has permission).
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
-          # Your certificate secrets
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: npm run package -- --publish always
+
+      # Create GitHub Release with changelog
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          release_name: Release ${{ steps.version.outputs.tag }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
