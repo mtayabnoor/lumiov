@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/muno1623/lumiov/compare/v2.0.0...v2.0.1) (2026-02-01)
+
+
+### Maintenance
+
+* **deps:** bump typescript from 4.9.5 to 5.9.3 in /frontend ([36c5cf5](https://github.com/muno1623/lumiov/commit/36c5cf58781e3c0a9306dcd10a79ba343c33beac))
+* **release:** 2.0.0 ([8900215](https://github.com/muno1623/lumiov/commit/8900215c69961c96e4a9c3d37e30b975956b88a7))
+
+
+### Documentation
+
+* Detailed documentation added TECH_STACK.md ([9d3bd2d](https://github.com/muno1623/lumiov/commit/9d3bd2da37be1057c46cea16871ab1483f090878))
+
 ## [2.0.0](https://github.com/muno1623/lumiov/compare/v1.1.0...v2.0.0) (2026-02-01)
 
 
