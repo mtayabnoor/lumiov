@@ -62,7 +62,7 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(
-      path.resolve(__dirname, "../../frontend/build/index.html"),
+      path.resolve(__dirname, "../../frontend/dist/index.html"),
     );
   }
 }
