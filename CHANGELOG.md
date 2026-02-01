@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://github.com/muno1623/lumiov/compare/v2.0.1...v2.0.2) (2026-02-01)
+
+
+### Maintenance
+
+* **release:** 2.0.1 ([f6ffcd3](https://github.com/muno1623/lumiov/commit/f6ffcd3c1ee60eb82de3f3df184ec6541be6eeca))
+* Stop tracking dist folder ([d613b9f](https://github.com/muno1623/lumiov/commit/d613b9f362baa5f8317344f32e29c5dadb508c51))
+
 ### [2.0.1](https://github.com/muno1623/lumiov/compare/v2.0.0...v2.0.1) (2026-02-01)
 
 
