@@ -10,7 +10,7 @@ updates:
       time: "06:00"
     open-pull-requests-limit: 10
     reviewers:
-      - "muno1623"
+      - "mtayabnoor"
     labels:
       - "dependencies"
       - "automated"
@@ -27,7 +27,7 @@ updates:
       time: "06:00"
     open-pull-requests-limit: 10
     reviewers:
-      - "muno1623"
+      - "mtayabnoor"
     labels:
       - "dependencies"
       - "frontend"
@@ -45,7 +45,7 @@ updates:
       time: "06:00"
     open-pull-requests-limit: 10
     reviewers:
-      - "muno1623"
+      - "mtayabnoor"
     labels:
       - "dependencies"
       - "backend"
@@ -63,7 +63,7 @@ updates:
       time: "06:00"
     open-pull-requests-limit: 5
     reviewers:
-      - "muno1623"
+      - "mtayabnoor"
     labels:
       - "dependencies"
       - "ci/cd"

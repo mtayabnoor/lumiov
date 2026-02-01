@@ -12,7 +12,7 @@ A production-grade Kubernetes management desktop application built with Electron
 
 ## Installation
 
-Download the latest release from the [Releases](https://github.com/muno1623/lumiov-releases/releases) page.
+Download the latest release from the [Releases](https://github.com/mtayabnoor/lumiov-releases/releases) page.
 
 ## Development
 
@@ -28,7 +28,7 @@ Download the latest release from the [Releases](https://github.com/muno1623/lumi
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/muno1623/lumiov.git
+   git clone https://github.com/mtayabnoor/lumiov.git
    cd lumiov
    ```
 
@@ -185,9 +185,9 @@ lumiov/
 
 ## Support
 
-- 📖 [Documentation](https://github.com/muno1623/lumiov/wiki)
-- 🐛 [Issue Tracker](https://github.com/muno1623/lumiov/issues)
-- 💬 [Discussions](https://github.com/muno1623/lumiov/discussions)
+- 📖 [Documentation](https://github.com/mtayabnoor/lumiov/wiki)
+- 🐛 [Issue Tracker](https://github.com/mtayabnoor/lumiov/issues)
+- 💬 [Discussions](https://github.com/mtayabnoor/lumiov/discussions)
 
 ---
 

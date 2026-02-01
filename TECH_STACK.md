@@ -380,7 +380,7 @@ Latest stable Electron with Chromium 134 and Node.js 22
   "publish": [
     {
       "provider": "github",
-      "owner": "muno1623",
+      "owner": "mtayabnoor",
       "repo": "lumiov-releases",
       "releaseType": "release"
     }
@@ -675,7 +675,7 @@ lumiov/
 
 ```bash
 # Clone repository
-git clone https://github.com/muno1623/lumiov.git
+git clone https://github.com/mtayabnoor/lumiov.git
 cd lumiov
 
 # Install dependencies
