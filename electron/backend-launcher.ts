@@ -26,9 +26,19 @@ export async function launchBackend(isDev: boolean): Promise<ChildProcess> {
 
   if (isDev) {
     // --- DEVELOPMENT MODE ---
-    cwd = path.join(__dirname, "../../backend");
-    binPath = "npx";
-    args = ["tsx", "src/server.ts"];
+    // Development Mode
+    // process.cwd() is usually "T:\Projects\lumiov\electron"
+    // So we just go up one level to the root, then into backend.
+    cwd = path.resolve(process.cwd(), "../backend");
+
+    // Double check it exists to be safe
+    if (!fs.existsSync(cwd)) {
+      console.warn("⚠️ standard path failed, trying fallback...");
+      // Fallback: If running from inside 'dist' for some reason
+      cwd = path.resolve(__dirname, "../../../backend");
+    }
+    binPath = "node";
+    args = ["dist/server.js"];
   } else {
     // --- PRODUCTION MODE ---
     const resourceRoot = path.join(process.resourcesPath, "backend");
