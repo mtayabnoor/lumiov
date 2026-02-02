@@ -5,7 +5,7 @@
   "main": "electron/dist/electron/main.js",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:electron\"",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "cd frontend && npm start",
     "dev:backend": "cd backend && npm run dev",
     "dev:electron": "wait-on http://localhost:3000 && tsc -p tsconfig.json && electron .",
@@ -75,6 +75,7 @@
     "wait-on": "^7.2.0"
   },
   "dependencies": {
-    "electron-updater": "^6.1.7"
+    "electron-updater": "^6.1.7",
+    "ws": "8.19.0"
   }
 }

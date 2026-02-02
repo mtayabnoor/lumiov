@@ -1,37 +1,38 @@
-import * as k8s from '@kubernetes/client-node';
+import { KubeConfig, Exec, Watch, V1Status } from '@kubernetes/client-node';
 import { loadKubeConfig } from '../config/k8s.js';
+import { Writable, PassThrough } from 'stream';
+import WebSocket from 'ws';
 
-type ResourceType = 'pods' | 'deployments' | 'services';
+export interface ShellSession {
+  write: (data: string) => void;
+  kill: () => void;
+  resize?: (cols: number, rows: number) => void;
+}
 
 export class K8sService {
-  private kc: k8s.KubeConfig | null = null;
-  private watch: k8s.Watch | null = null;
+  private kc: KubeConfig | null = null;
+  private watch: Watch | null = null;
+  private exec: Exec | null = null;
   private isInitialized = false;
 
+  // 1. Initialize Configuration
   public async initialize(): Promise<void> {
     try {
       this.kc = loadKubeConfig();
-      this.watch = new k8s.Watch(this.kc);
+      // Initialize Watch here (it's lightweight)
+      this.watch = new Watch(this.kc);
+      this.exec = new Exec(this.kc);
       this.isInitialized = true;
       console.log('✅ K8s Service Initialized');
     } catch (err) {
       console.error('❌ K8s Init Failed:', err);
-      process.exit(1); // Fatal error if we can't connect
+      process.exit(1);
     }
   }
 
-  private getPath(resource: ResourceType): string {
-    const map: Record<ResourceType, string> = {
-      pods: '/api/v1/pods',
-      deployments: '/apis/apps/v1/deployments',
-      services: '/api/v1/services',
-    };
-    return map[resource];
-  }
-
-  // Returns a function to STOP the watch
+  // 3. Watch Resource
   public watchResource(
-    resource: ResourceType,
+    resource: 'pods' | 'deployments' | 'services',
     onData: (action: string, obj: any) => void,
     onError: (err: any) => void,
   ): () => void {
@@ -40,13 +41,18 @@ export class K8sService {
       return () => {};
     }
 
-    const path = this.getPath(resource);
+    const endpoints = {
+      pods: '/api/v1/pods',
+      deployments: '/apis/apps/v1/deployments',
+      services: '/api/v1/services',
+    };
+
+    const path = endpoints[resource];
     let req: any = null;
     let isActive = true;
 
     const startStream = async () => {
       if (!isActive) return;
-
       try {
         req = await this.watch!.watch(
           path,
@@ -56,25 +62,90 @@ export class K8sService {
           },
           (err) => {
             if (!isActive) return;
-            if (err) console.error(`⚠️ Watch error (${resource}):`, err);
-            // Auto-reconnect after 3s
-            setTimeout(() => startStream(), 3000);
+            console.error(`⚠️ Watch error (${resource}):`, err);
+            setTimeout(startStream, 3000);
           },
         );
       } catch (e) {
-        if (isActive) setTimeout(() => startStream(), 3000);
+        if (isActive) setTimeout(startStream, 3000);
       }
     };
 
     startStream();
 
-    // The cleanup function
     return () => {
       isActive = false;
       if (req) req.abort();
     };
   }
+
+  // 4. Exec Pod
+  public execPod(
+    namespace: string,
+    pod: string,
+    container: string,
+    onData: (data: string) => void,
+    onError: (data: string) => void,
+  ): ShellSession {
+    const inputStream = new PassThrough();
+
+    // Combine stdout/stderr logic
+    const outputStream = new Writable({
+      write(chunk, encoding, callback) {
+        onData(chunk.toString());
+        callback();
+      },
+    });
+
+    console.log(`🚀 [K8S] Connecting to shell: ${pod}`);
+
+    let socketConnection: WebSocket | null = null;
+
+    this.exec!.exec(
+      namespace,
+      pod,
+      container,
+      [
+        '/bin/sh',
+        '-c',
+        'export TERM=xterm; [ -x /bin/bash ] && exec /bin/bash || exec /bin/sh',
+      ],
+      outputStream,
+      outputStream,
+      inputStream,
+      true, // tty
+      (status: V1Status) => {
+        if (status.status === 'Failure') {
+          onError(`\r\nConnection Failed: ${status.message}\r\n`);
+        }
+      },
+    )
+      .then((conn) => {
+        socketConnection = conn as unknown as WebSocket;
+        console.log('✅ [K8S] WebSocket Connected!');
+      })
+      .catch((err) => {
+        console.error('❌ [K8S] Exec Connection Error:', err);
+        onError(`\r\nError connecting to pod: ${err.message}\r\n`);
+      });
+
+    return {
+      write: (data) => {
+        if (inputStream.writable) inputStream.write(data);
+      },
+      kill: () => {
+        console.log('🛑 [K8S] Closing session');
+        inputStream.end();
+        if (socketConnection) {
+          try {
+            socketConnection.close();
+          } catch (e) {
+            /* ignore */
+          }
+        }
+      },
+    };
+  }
 }
 
-// Singleton export
 export const k8sService = new K8sService();

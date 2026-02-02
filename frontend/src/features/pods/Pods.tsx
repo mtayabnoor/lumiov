@@ -9,6 +9,8 @@ import ArticleIcon from "@mui/icons-material/Article";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import { Box, CircularProgress, Alert } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
+import { useState } from "react";
+import PodExecDialog from "../../components/dialogs/PodExecDialog";
 
 // --- Helper Functions (Defined outside the component) ---
 
@@ -89,6 +91,14 @@ const getPodMemReq = (event: WatchResourcePayload<Pod>) => {
 function Pods() {
   const { pods, error, loading } = usePods();
 
+  const [execDialogOpen, setExecDialogOpen] = useState(false);
+  const [selectedPod, setSelectedPod] = useState<{
+    namespace: string;
+    podName: string;
+    containers: { name: string }[];
+    defaultContainer?: string;
+  } | null>(null);
+
   const podConfig: ResourceTableConfig = {
     columns: [
       { key: "object.metadata.namespace", header: "NAMESPACE" },
@@ -141,8 +151,23 @@ function Pods() {
     if (actionId === "edit") console.log("Edit", row);
     if (actionId === "delete") console.log("Delete", row);
     if (actionId === "logs") console.log("Logs", row);
-    if (actionId === "exec") console.log("Exec", row);
-    // Add logic: e.g., navigate to logs, open delete dialog, etc.
+    if (actionId === "exec") {
+      const namespace = row.object.metadata.namespace;
+      const podName = row.object.metadata.name;
+      const containers =
+        row.object.spec.containers?.map((c: any) => ({
+          name: c.name,
+        })) || [];
+      const defaultContainer = containers[0]?.name;
+
+      setSelectedPod({ namespace, podName, containers, defaultContainer });
+      setExecDialogOpen(true);
+    }
+  };
+
+  const handleCloseExecDialog = () => {
+    setExecDialogOpen(false);
+    setSelectedPod(null);
   };
 
   if (loading)
@@ -159,7 +184,19 @@ function Pods() {
     );
 
   return (
-    <ResourceTable config={podConfig} data={pods} onAction={handleAction} />
+    <>
+      <ResourceTable config={podConfig} data={pods} onAction={handleAction} />
+      {selectedPod && (
+        <PodExecDialog
+          open={execDialogOpen}
+          onClose={handleCloseExecDialog}
+          namespace={selectedPod.namespace}
+          podName={selectedPod.podName}
+          containers={selectedPod.containers}
+          defaultContainer={selectedPod.defaultContainer}
+        />
+      )}
+    </>
   );
 }
 

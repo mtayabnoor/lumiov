@@ -15,12 +15,15 @@
     "@types/jest": "^27.5.2",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router-dom": "^7.12.0",
     "socket.io-client": "^4.8.3",
     "typescript": "^5.9.3",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "ws": "^8.19.0"
   },
   "scripts": {
     "start": "vite",
@@ -47,6 +50,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.2.0",
+    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^5.1.2",
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^6.0.5"
