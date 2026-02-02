@@ -10,7 +10,7 @@ import TerminalIcon from "@mui/icons-material/Terminal";
 import { Box, CircularProgress, Alert } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
 import { useState } from "react";
-import PodExecDialog from "../../components/dialogs/PodExecDialog";
+import PodExecDrawer from "../../components/drawer/PodExecDrawer";
 
 // --- Helper Functions (Defined outside the component) ---
 
@@ -89,7 +89,7 @@ const getPodMemReq = (event: WatchResourcePayload<Pod>) => {
 // --- Main Component ---
 
 function Pods() {
-  const { pods, error, loading } = usePods();
+  const { pods, error, loading, socket } = usePods();
 
   const [execDialogOpen, setExecDialogOpen] = useState(false);
   const [selectedPod, setSelectedPod] = useState<{
@@ -187,13 +187,14 @@ function Pods() {
     <>
       <ResourceTable config={podConfig} data={pods} onAction={handleAction} />
       {selectedPod && (
-        <PodExecDialog
+        <PodExecDrawer
           open={execDialogOpen}
           onClose={handleCloseExecDialog}
           namespace={selectedPod.namespace}
           podName={selectedPod.podName}
           containers={selectedPod.containers}
           defaultContainer={selectedPod.defaultContainer}
+          socket={socket}
         />
       )}
     </>

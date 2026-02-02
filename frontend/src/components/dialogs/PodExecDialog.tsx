@@ -14,7 +14,9 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { usePodExec } from "../../hooks/usePodExec";
+import { Socket } from "socket.io-client";
+import { Terminal } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 
 interface Container {
@@ -28,6 +30,7 @@ interface PodExecDialogProps {
   podName: string;
   containers: Container[];
   defaultContainer?: string;
+  socket: Socket | null;
 }
 
 function PodExecDialog({
@@ -37,149 +40,161 @@ function PodExecDialog({
   podName,
   containers,
   defaultContainer,
+  socket,
 }: PodExecDialogProps) {
-  const terminalRef = useRef<HTMLDivElement>(null);
-  const hasConnectedRef = useRef(false);
+  const terminalContainerRef = useRef<HTMLDivElement>(null);
 
-  // Create hook inside component so terminal can be disposed and recreated per dialog lifecycle
-  const { terminal, fitAddon, isConnected, error, connect, disconnect } =
-    usePodExec();
+  // Store instances to survive re-renders
+  const termInstance = useRef<Terminal | null>(null);
+  const fitAddonInstance = useRef<FitAddon | null>(null);
 
-  // Container selection state
   const [selectedContainer, setSelectedContainer] = useState<string>(
     defaultContainer || containers[0]?.name || "",
   );
-  const [isTerminalReady, setIsTerminalReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
-  // Reset connection state and container when dialog opens
+  // Reset state on open
   useEffect(() => {
     if (open) {
-      hasConnectedRef.current = false;
-      setIsTerminalReady(false);
       setSelectedContainer(defaultContainer || containers[0]?.name || "");
+      setError(null);
+      setIsConnected(false);
     }
   }, [open, defaultContainer, containers]);
 
-  const [retryCount, setRetryCount] = useState(0);
-
-  // Check if terminal is ready
   useEffect(() => {
-    if (open && !isTerminalReady) {
-      if (terminal && terminalRef.current) {
-        setIsTerminalReady(true);
+    if (!open || !socket || !terminalContainerRef.current) return;
+
+    let animationFrameId: number;
+    const container = terminalContainerRef.current;
+
+    // --- CLEANUP FUNCTION ---
+    const cleanup = () => {
+      cancelAnimationFrame(animationFrameId);
+
+      socket.emit("exec:stop");
+      socket.off("exec:data");
+      socket.off("exec:error");
+
+      if (termInstance.current) {
+        termInstance.current.dispose();
+        termInstance.current = null;
+      }
+      setIsConnected(false);
+    };
+
+    // --- INITIALIZATION ---
+    const initTerminal = () => {
+      // prevent double init
+      if (termInstance.current) return;
+
+      console.log("🚀 Container is ready (Height > 0). Initializing XTerm...");
+
+      const term = new Terminal({
+        cursorBlink: true,
+        theme: { background: "#1e1e1e", foreground: "#ffffff" },
+        fontSize: 14,
+        fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+      });
+
+      const fitAddon = new FitAddon();
+      term.loadAddon(fitAddon);
+
+      // Open in DOM
+      term.open(container);
+      termInstance.current = term;
+      fitAddonInstance.current = fitAddon;
+
+      // Fit immediately
+      try {
+        fitAddon.fit();
+      } catch (e) {}
+
+      // Socket Listeners
+      const handleData = (data: string) => {
+        term.write(data);
+        setIsConnected(true);
+      };
+
+      const handleError = (err: any) => {
+        setError(typeof err === "string" ? err : "Unknown socket error");
+        term.writeln(`\r\n\x1b[31mError: ${err}\x1b[0m`);
+      };
+
+      socket.on("exec:data", handleData);
+      socket.on("exec:error", handleError);
+
+      term.onData((data) => {
+        socket.emit("exec:input", data);
+      });
+
+      // Start Session
+      socket.emit("exec:start", {
+        namespace,
+        podName,
+        container: selectedContainer,
+      });
+
+      // Sync Size
+      if (term.cols > 0 && term.rows > 0) {
+        socket.emit("exec:resize", { cols: term.cols, rows: term.rows });
+      }
+
+      // Add simple window resize listener as backup
+      window.addEventListener("resize", () => {
+        fitAddon.fit();
+        socket.emit("exec:resize", { cols: term.cols, rows: term.rows });
+      });
+    };
+
+    // --- THE FIX: POLLING LOOP ---
+    // We loop every frame until the Dialog animation finishes
+    // and the container actually has pixels.
+    const waitForDimensions = () => {
+      if (!container) return;
+
+      // CHECK: Is the div actually visible and has size?
+      if (container.clientWidth > 0 && container.clientHeight > 0) {
+        initTerminal(); // ✅ Yes! Launch it.
       } else {
-        // Poll for terminal readiness - actively force re-render
-        const pollTimer = setTimeout(() => {
-          setRetryCount((prev) => prev + 1);
-        }, 50);
-        return () => clearTimeout(pollTimer);
+        // ❌ No, still animating (height=0). Wait for next frame.
+        animationFrameId = requestAnimationFrame(waitForDimensions);
       }
-    }
-  }, [open, terminal, isTerminalReady, retryCount]);
+    };
 
-  // Handle terminal mounting and connection
-  useEffect(() => {
-    if (
-      open &&
-      isTerminalReady &&
-      terminal &&
-      terminalRef.current &&
-      selectedContainer
-    ) {
-      // Only open terminal if not already opened
-      const isTerminalMounted = terminalRef.current.querySelector(".xterm");
-      if (!isTerminalMounted) {
-        terminal.open(terminalRef.current);
-        console.log("📺 Terminal opened in DOM");
-      }
+    // Start the loop
+    waitForDimensions();
 
-      // Fit and connect after terminal is fully mounted in DOM
-      const setupTimer = setTimeout(() => {
-        // Fit terminal to container
-        if (fitAddon) {
-          fitAddon.fit();
-        }
-
-        // Connect only once per dialog open
-        if (!hasConnectedRef.current && selectedContainer && terminal) {
-          console.log("🔌 Connecting to pod exec...", {
-            namespace,
-            podName,
-            container: selectedContainer,
-          });
-          connect({ namespace, podName, container: selectedContainer });
-          hasConnectedRef.current = true;
-        }
-      }, 100);
-
-      // Handle window resize
-      const handleResize = () => {
-        if (fitAddon) {
-          fitAddon.fit();
-        }
-      };
-      window.addEventListener("resize", handleResize);
-
-      return () => {
-        clearTimeout(setupTimer);
-        window.removeEventListener("resize", handleResize);
-      };
-    }
-  }, [
-    open,
-    isTerminalReady,
-    terminal,
-    fitAddon,
-    namespace,
-    podName,
-    selectedContainer,
-    connect,
-  ]);
+    return cleanup;
+  }, [open, socket, namespace, podName, selectedContainer]);
 
   const handleContainerChange = (event: SelectChangeEvent<string>) => {
-    const newContainer = event.target.value;
-    setSelectedContainer(newContainer);
-
-    // Disconnect current session
-    if (isConnected) {
-      disconnect();
-      hasConnectedRef.current = false;
-
-      // Clear terminal
-      if (terminal) {
-        terminal.clear();
-      }
-
-      // Connect to new container after a brief delay
-      setTimeout(() => {
-        connect({ namespace, podName, container: newContainer });
-        hasConnectedRef.current = true;
-      }, 300);
-    }
-  };
-
-  const handleClose = () => {
-    disconnect();
-    hasConnectedRef.current = false;
-    onClose();
+    setSelectedContainer(event.target.value);
   };
 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={onClose}
       maxWidth="lg"
       fullWidth
+      keepMounted={false}
       slotProps={{
         paper: {
           sx: {
             height: "80vh",
             maxHeight: "800px",
+            bgcolor: "#1e1e1e",
+            display: "flex", // Flex column layout
+            flexDirection: "column",
           },
         },
       }}
     >
-      <DialogTitle sx={{ m: 0, p: 2, bgcolor: "grey.900", color: "white" }}>
+      <DialogTitle
+        sx={{ m: 0, p: 2, bgcolor: "#2d2d2d", color: "white", flexShrink: 0 }}
+      >
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box flex={1}>
             <Typography variant="h6" component="span">
@@ -188,13 +203,11 @@ function PodExecDialog({
             <Typography
               variant="caption"
               component="div"
-              sx={{ color: "grey.400", mt: 0.5 }}
+              sx={{ color: "grey.400" }}
             >
-              Namespace: {namespace}
+              {namespace}
             </Typography>
           </Box>
-
-          {/* Container Selection */}
           {containers.length > 1 && (
             <Box sx={{ minWidth: 200, mr: 2 }}>
               <FormControl fullWidth size="small">
@@ -203,34 +216,24 @@ function PodExecDialog({
                   value={selectedContainer}
                   label="Container"
                   onChange={handleContainerChange}
-                  disabled={!open}
                   sx={{
                     color: "white",
                     ".MuiOutlinedInput-notchedOutline": {
                       borderColor: "grey.600",
                     },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "grey.400",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "primary.main",
-                    },
-                    ".MuiSvgIcon-root": {
-                      color: "grey.400",
-                    },
+                    ".MuiSvgIcon-root": { color: "grey.400" },
                   }}
                 >
-                  {containers.map((container) => (
-                    <MenuItem key={container.name} value={container.name}>
-                      {container.name}
+                  {containers.map((c) => (
+                    <MenuItem key={c.name} value={c.name}>
+                      {c.name}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Box>
           )}
-
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box display="flex" gap={1}>
             {isConnected && (
               <Typography
                 variant="caption"
@@ -240,49 +243,47 @@ function PodExecDialog({
                   px: 1,
                   py: 0.5,
                   borderRadius: 1,
-                  fontWeight: 500,
                 }}
               >
                 Connected
               </Typography>
             )}
-            <IconButton
-              aria-label="close"
-              onClick={handleClose}
-              sx={{
-                color: "grey.300",
-                "&:hover": { color: "white" },
-              }}
-            >
+            <IconButton onClick={onClose} sx={{ color: "grey.300" }}>
               <CloseIcon />
             </IconButton>
           </Box>
         </Box>
       </DialogTitle>
+
       <DialogContent
         sx={{
           p: 0,
           bgcolor: "#1e1e1e",
-          overflow: "hidden",
+          flex: 1, // Grow to fill remaining space
+          minHeight: 0, // Fix for Firefox flex scrolling
+          position: "relative", // Context for child
         }}
       >
         {error && (
-          <Alert severity="error" sx={{ m: 2 }}>
+          <Alert
+            severity="error"
+            sx={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 10 }}
+          >
             {error}
           </Alert>
         )}
+
+        {/* TERMINAL CONTAINER */}
         <Box
-          ref={terminalRef}
+          ref={terminalContainerRef}
           sx={{
-            width: "100%",
-            height: "100%",
-            "& .xterm": {
-              padding: "10px",
-              height: "100%",
-            },
-            "& .xterm-viewport": {
-              overflow: "hidden",
-            },
+            position: "absolute", // Force fill
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            overflow: "hidden",
+            "& .xterm": { padding: "10px" },
           }}
         />
       </DialogContent>

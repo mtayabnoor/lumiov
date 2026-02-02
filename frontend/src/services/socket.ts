@@ -4,9 +4,6 @@ import {
   ServerToClientEvents,
 } from "../interfaces/socket";
 
-// The backend namespace for watching resources
-const NAMESPACE = "/api/watch";
-
 // Singleton instance
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
@@ -15,7 +12,7 @@ export const getSocket = (): Socket<
   ClientToServerEvents
 > => {
   if (!socket) {
-    socket = io(`http://localhost:3030${NAMESPACE}`, {
+    socket = io(`http://localhost:3030`, {
       transports: ["websocket"],
       autoConnect: false, // We will call connect() manually
       reconnection: true,

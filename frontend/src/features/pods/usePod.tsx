@@ -76,5 +76,5 @@ export const usePods = () => {
     };
   }, [socket]);
 
-  return { pods, error, loading };
+  return { pods, error, loading, socket };
 };

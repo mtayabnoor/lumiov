@@ -10,7 +10,7 @@ export function registerExecHandlers(socket: Socket) {
 
   // EVENT: Frontend requests to exec into pod
   socket.on(
-    'exec',
+    'exec:start',
     (params: { namespace: string; podName: string; container?: string }) => {
       console.log(
         `🎯 Starting exec for pod: ${params.podName} in namespace: ${params.namespace}`,
@@ -25,6 +25,9 @@ export function registerExecHandlers(socket: Socket) {
 
       // Determine container name (use first container if not specified)
       const containerName = params.container || 'main';
+      console.log(
+        `🎯 Starting exec for pod: ${params.podName} in namespace: ${params.namespace} and container: ${containerName}`,
+      );
 
       // Start exec session
       currentExecSession = k8sService.execPod(
@@ -34,26 +37,38 @@ export function registerExecHandlers(socket: Socket) {
         (data: string) => {
           // Send terminal output to frontend
           console.log(`📤 [EXEC STDOUT] ${data.length} bytes`); // noisy
-          socket.emit('exec-data', data);
+          socket.emit('exec:data', data);
         },
         (err: string) => {
-          socket.emit('exec-error', { message: err });
+          socket.emit('exec:error', { message: err });
         },
       );
     },
   );
 
   // EVENT: Frontend sends input to terminal
-  socket.on('exec-input', (data: string) => {
+  socket.on('exec:input', (data: string) => {
     if (currentExecSession) {
       currentExecSession.write(data);
     }
   });
 
   // EVENT: Frontend requests to resize terminal
-  socket.on('exec-resize', (dimensions: { rows: number; cols: number }) => {
-    // Terminal resize is handled by xterm on frontend
-    console.log(`Terminal resize: ${dimensions.cols}x${dimensions.rows}`);
+  socket.on('exec:resize', (dimensions: { rows: number; cols: number }) => {
+    if (currentExecSession && currentExecSession.resize) {
+      // Protect against 0x0 resizes which kill the output
+      if (dimensions.rows > 0 && dimensions.cols > 0) {
+        currentExecSession.resize(dimensions.cols, dimensions.rows);
+      }
+    }
+  });
+
+  socket.on('exec:stop', () => {
+    if (currentExecSession) {
+      console.log('🛑 Client requested exec stop');
+      currentExecSession.kill();
+      currentExecSession = null;
+    }
   });
 
   // CLEANUP on disconnect

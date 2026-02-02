@@ -27,15 +27,9 @@ console.log('Attempting to connect to K8s...');
 await k8sService.initialize();
 console.log('K8s connected.');
 
-const watchResource = io.of('/api/watch');
-const execNamespace = io.of('/api/exec');
-
 // 4. Bind Socket Controllers
-watchResource.on('connection', (socket) => {
+io.on('connection', (socket) => {
   registerSocketHandlers(socket);
-});
-
-execNamespace.on('connection', (socket) => {
   registerExecHandlers(socket);
 });
 
