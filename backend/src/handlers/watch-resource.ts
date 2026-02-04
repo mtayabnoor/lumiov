@@ -1,60 +1,63 @@
-// socketService.ts
 import { Socket } from 'socket.io';
 import { k8sService } from '../services/kubernetes.service.js';
+import { ResourceType } from '../types/socket.js';
 
-export function registerSocketHandlers(socket: Socket) {
-  console.log(`🔌 Client connected: ${socket.id}`);
+export const registerWatchResourceHandlers = (socket: Socket) => {
+  console.log('Electron UI Connected');
 
-  // TRACKER: Holds the "Stop Function" for the currently active watch.
-  // This is unique to this specific client connection.
-  let currentStopper: (() => void) | null = null;
+  // TRACKER: Keeps track of "Stop Functions" for this specific connection
+  // Key = 'pods', Value = function to stop the pod watcher
+  const activeWatchers = new Map<string, () => void>();
 
-  // EVENT: Frontend requests to watch a resource
-  socket.on('watch', (objectType: string) => {
-    // 1. CLEANUP PREVIOUS WATCH
-    // If the user was already watching something (e.g., pods), stop it
-    // before starting the new one (e.g., deployments).
-    if (currentStopper) {
-      console.log(`🔄 Switching context: Stopping previous watch...`);
-      currentStopper(); // Kill the old K8s loop
-      currentStopper = null;
-    }
-
-    console.log(`🎯 Starting watch for: ${objectType}`);
-
-    // 2. VALIDATE INPUT
-    if (objectType !== 'pods' && objectType !== 'deployments') {
-      socket.emit('error', { message: `Unknown resource: ${objectType}` });
+  // 1. Handle Subscribe
+  socket.on('subscribe', async (resource: ResourceType) => {
+    // A. If already watching, don't duplicate streams
+    if (activeWatchers.has(resource)) {
+      console.log(`Already watching ${resource}, ignoring.`);
       return;
     }
 
-    // 3. START NEW WATCH & SAVE THE STOPPER
-    // We assume k8sService.watchResource returns a function to stop the watch
-    currentStopper = k8sService.watchResource(
-      objectType as 'pods' | 'deployments',
-      (action: string, obj: any) => {
-        // Send data to frontend
-        socket.emit('data', {
-          resource: objectType,
-          action: action,
-          object: obj,
-        });
+    console.log(`Starting stream for: ${resource}`);
+
+    // B. Step 1: Send the INITIAL LIST immediately
+    // This prevents the "blank screen" while waiting for an event
+    try {
+      const items = await k8sService.listResource(resource);
+      socket.emit('k8s-list', { resource, items });
+    } catch (e) {
+      socket.emit('error', `Failed to list ${resource}`);
+    }
+
+    // C. Step 2: Start the Long-Running Watcher
+    const stopWatcher = k8sService.watchResource(
+      resource,
+      (type, object) => {
+        // Emit event specifically for this resource
+        // The frontend listens for 'k8s-event'
+        socket.emit('k8s-event', { resource, type, object });
       },
-      (err: Error) => {
-        socket.emit('error', { message: err.message });
+      (err) => {
+        console.error(`Watch error for ${resource}`, err);
       },
     );
+
+    // Save the stop function so we can call it later
+    activeWatchers.set(resource, stopWatcher);
   });
 
-  // 4. CLEANUP ON DISCONNECT
-  // If the user closes the app or refreshes, kill the active watch
-  socket.on('disconnect', () => {
-    if (currentStopper) {
-      console.log(`❌ Client ${socket.id} disconnected. Cleaning up watch.`);
-      currentStopper(); // Crucial: Stop the K8s connection
-      currentStopper = null;
-    } else {
-      console.log(`❌ Client ${socket.id} disconnected. No active watch.`);
+  // 2. Handle Unsubscribe
+  socket.on('unsubscribe', (resource: ResourceType) => {
+    const stop = activeWatchers.get(resource);
+    if (stop) {
+      stop(); // Kill the specific K8s connection
+      activeWatchers.delete(resource); // Remove from map
     }
   });
-}
+
+  // 3. Cleanup on App Close / Refresh
+  socket.on('disconnect', () => {
+    console.log('Electron UI Disconnected - Cleaning up all watchers');
+    activeWatchers.forEach((stopFunc) => stopFunc());
+    activeWatchers.clear();
+  });
+};

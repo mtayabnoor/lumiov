@@ -3,7 +3,7 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { k8sService } from './services/kubernetes.service.js';
-import { registerSocketHandlers } from './handlers/watch-resource.js';
+import { registerWatchResourceHandlers } from './handlers/watch-resource.js';
 import { registerExecHandlers } from './handlers/exec-pod.js';
 
 const PORT = 3030;
@@ -29,7 +29,7 @@ console.log('K8s connected.');
 
 // 4. Bind Socket Controllers
 io.on('connection', (socket) => {
-  registerSocketHandlers(socket);
+  registerWatchResourceHandlers(socket);
   registerExecHandlers(socket);
 });
 

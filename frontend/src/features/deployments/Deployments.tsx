@@ -1,39 +1,38 @@
-import { useDeployment } from "./useDeployment";
+import { useDeployments } from "../../hooks/useDeployments";
 import { ResourceTableConfig } from "../../interfaces/common";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ResourceTable from "../../components/common/Table/ResourceTable";
-import { WatchResourcePayload } from "../../interfaces/socket";
 import { Deployment } from "../../interfaces/deployment";
 import { Box, CircularProgress, Alert } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
 
-const getDeploymentReadyStatus = (event: WatchResourcePayload<Deployment>) => {
-  const desired = event?.object?.status?.replicas ?? 0;
-  const ready = event?.object?.status?.readyReplicas ?? 0;
+const getDeploymentReadyStatus = (event: Deployment) => {
+  const desired = event?.status?.replicas ?? 0;
+  const ready = event?.status?.readyReplicas ?? 0;
   return `${ready}/${desired}`;
 };
 
 function Deployments() {
-  const { deployments, error, loading } = useDeployment();
+  const { deployments, error, loading } = useDeployments();
 
   const podConfig: ResourceTableConfig = {
     columns: [
-      { key: "object.metadata.namespace", header: "NAMESPACE" },
-      { key: "object.metadata.name", header: "NAME" },
+      { key: "metadata.namespace", header: "NAMESPACE" },
+      { key: "metadata.name", header: "NAME" },
       {
-        key: "object.status.numberReady",
+        key: "status.numberReady",
         header: "READY",
         accessor: (row: any) => getDeploymentReadyStatus(row),
       },
-      { key: "object.status.updatedReplicas", header: "UP-TO-DATE" },
-      { key: "object.status.availableReplicas", header: "AVAILABLE" },
+      { key: "status.updatedReplicas", header: "UP-TO-DATE" },
+      { key: "status.availableReplicas", header: "AVAILABLE" },
       {
         key: "age",
         header: "AGE",
-        accessor: (row: any) => (
+        accessor: (deployment: Deployment) => (
           <ResourceLiveAge
-            creationTimestamp={row.object.metadata.creationTimestamp}
+            creationTimestamp={deployment.metadata.creationTimestamp}
           />
         ),
       },

@@ -1,6 +1,5 @@
 import ResourceTable from "../../components/common/Table/ResourceTable";
-import { WatchResourcePayload } from "../../interfaces/socket";
-import { usePods } from "./usePod";
+import { usePods } from "../../hooks/usePods";
 import { Pod } from "../../interfaces/pod";
 import { ResourceTableConfig } from "../../interfaces/common";
 import EditIcon from "@mui/icons-material/Edit";
@@ -14,25 +13,26 @@ import PodExecDrawer from "../../components/drawer/PodExecDrawer";
 
 // --- Helper Functions (Defined outside the component) ---
 
-const getPodReadyStatus = (event: WatchResourcePayload<Pod>) => {
-  const total = event.object?.spec?.containers?.length ?? 0;
+const getPodReadyStatus = (pod: Pod) => {
+  if (!pod || !pod.status) {
+    return "Unknown";
+  }
+  const total = pod?.spec?.containers?.length ?? 0;
   const ready =
-    event.object.status?.containerStatuses?.filter(
-      (c: { ready: boolean }) => c.ready,
-    ).length ?? 0;
+    pod.status?.containerStatuses?.filter((c: { ready: boolean }) => c.ready)
+      .length ?? 0;
   return `${ready}/${total}`;
 };
 
-const getPodStatus = (event: WatchResourcePayload<Pod>) => {
-  const status = event.object?.status?.phase?.toLowerCase();
-  const total = event.object?.spec?.containers?.length ?? 0;
+const getPodStatus = (pod: Pod) => {
+  const status = pod?.status?.phase?.toLowerCase();
+  const total = pod?.spec?.containers?.length ?? 0;
   const ready =
-    event.object.status?.containerStatuses?.filter(
-      (c: { ready: boolean }) => c.ready,
-    ).length ?? 0;
+    pod.status?.containerStatuses?.filter((c: { ready: boolean }) => c.ready)
+      .length ?? 0;
 
   // 1. Terminating check
-  if (event.object?.metadata?.deletionTimestamp) {
+  if (pod.metadata?.deletionTimestamp) {
     return {
       kind: "status",
       label: "Terminating",
@@ -62,24 +62,24 @@ const getPodStatus = (event: WatchResourcePayload<Pod>) => {
   }
 };
 
-const getPodRestarts = (event: WatchResourcePayload<Pod>) => {
-  const containers = event?.object?.status?.containerStatuses ?? [];
+const getPodRestarts = (pod: Pod) => {
+  const containers = pod?.status?.containerStatuses ?? [];
   return containers.reduce(
     (sum: number, c: any) => sum + (c.restartCount || 0),
     0,
   );
 };
 
-const getPodCpuReq = (event: WatchResourcePayload<Pod>) => {
-  const containers = event.object.spec?.containers ?? [];
+const getPodCpuReq = (pod: Pod) => {
+  const containers = pod.spec?.containers ?? [];
   const totalCpu = containers
     .map((c: any) => c.resources?.requests?.cpu || "ns")
     .join(", ");
   return totalCpu || "-";
 };
 
-const getPodMemReq = (event: WatchResourcePayload<Pod>) => {
-  const containers = event.object.spec?.containers ?? [];
+const getPodMemReq = (pod: Pod) => {
+  const containers = pod.spec?.containers ?? [];
   const totalMem = containers
     .map((c: any) => c.resources?.requests?.memory || "ns")
     .join(", ");
@@ -101,8 +101,8 @@ function Pods() {
 
   const podConfig: ResourceTableConfig = {
     columns: [
-      { key: "object.metadata.namespace", header: "NAMESPACE" },
-      { key: "object.metadata.name", header: "NAME" },
+      { key: "metadata.namespace", header: "NAMESPACE" },
+      { key: "metadata.name", header: "NAME" },
       {
         key: "ready",
         header: "READY",
@@ -132,12 +132,10 @@ function Pods() {
         key: "age",
         header: "AGE",
         accessor: (row) => (
-          <ResourceLiveAge
-            creationTimestamp={row.object.metadata.creationTimestamp}
-          />
+          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
         ),
       },
-      { key: "object.spec.nodeName", header: "NODE" },
+      { key: "spec.nodeName", header: "NODE" },
     ],
     actions: [
       { id: "edit", label: "Edit", icon: EditIcon },
@@ -147,15 +145,15 @@ function Pods() {
     ],
   };
 
-  const handleAction = (actionId: string, row: any) => {
-    if (actionId === "edit") console.log("Edit", row);
-    if (actionId === "delete") console.log("Delete", row);
-    if (actionId === "logs") console.log("Logs", row);
+  const handleAction = (actionId: string, pod: Pod) => {
+    if (actionId === "edit") console.log("Edit", pod);
+    if (actionId === "delete") console.log("Delete", pod);
+    if (actionId === "logs") console.log("Logs", pod);
     if (actionId === "exec") {
-      const namespace = row.object.metadata.namespace;
-      const podName = row.object.metadata.name;
+      const namespace = pod.metadata.namespace;
+      const podName = pod.metadata.name;
       const containers =
-        row.object.spec.containers?.map((c: any) => ({
+        pod.spec.containers?.map((c: any) => ({
           name: c.name,
         })) || [];
       const defaultContainer = containers[0]?.name;

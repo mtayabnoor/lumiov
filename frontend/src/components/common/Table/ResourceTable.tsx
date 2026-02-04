@@ -63,19 +63,17 @@ function ResourceTable({ config, data, onAction }: ResourceTableProps) {
   const namespaceList = useMemo(() => {
     // We assume standard K8s structure if we want generic filtering, or we need a prop for "how to get filter key"
     // For now keeping specific logic but safely typed-ish via 'any' escape for properties we assume exist
-    const namespaces = data.map(
-      (p: any) => p?.object?.metadata?.namespace || "",
-    );
+    const namespaces = data.map((p: any) => p?.metadata?.namespace || "");
     return Array.from(new Set(namespaces)).filter(Boolean).sort() as string[];
   }, [data]);
 
   // 2. Computed: Filtered & Sorted
   const filteredData = useMemo(() => {
     const sorted = [...data].sort((a: any, b: any) => {
-      const nsA = a?.object?.metadata?.namespace ?? "";
-      const nsB = b?.object?.metadata?.namespace ?? "";
-      const nameA = a?.object?.metadata?.name ?? "";
-      const nameB = b?.object?.metadata?.name ?? "";
+      const nsA = a?.metadata?.namespace ?? "";
+      const nsB = b?.metadata?.namespace ?? "";
+      const nameA = a?.metadata?.name ?? "";
+      const nameB = b?.metadata?.name ?? "";
 
       const nsCompare = nsA.localeCompare(nsB);
       if (nsCompare !== 0) return nsCompare;
@@ -85,7 +83,7 @@ function ResourceTable({ config, data, onAction }: ResourceTableProps) {
     if (selectedNamespaces.length === 0) return sorted;
 
     return sorted.filter((item: any) =>
-      selectedNamespaces.includes(item?.object?.metadata?.namespace),
+      selectedNamespaces.includes(item?.metadata?.namespace),
     );
   }, [data, selectedNamespaces]);
 
@@ -114,7 +112,7 @@ function ResourceTable({ config, data, onAction }: ResourceTableProps) {
   };
 
   const getRowStyle = (row: any) => {
-    if (row?.object?.metadata?.deletionTimestamp) {
+    if (row?.metadata?.deletionTimestamp) {
       return { backgroundColor: "#cd3d53ff", opacity: 0.7 };
     }
     return {};

@@ -7,13 +7,22 @@ export const SocketEvent = {
   EXEC_INPUT: "exec-input",
   EXEC_RESIZE: "exec-resize",
   EXEC_ERROR: "exec-error",
+  K8S_LIST: "k8s-list",
+  K8S_EVENT: "k8s-event",
+  SUBSCRIBE: "subscribe",
+  UNSUBSCRIBE: "unsubscribe",
 } as const;
 
 export type ResourceType = "pods" | "deployments";
 
-export interface WatchResourcePayload<T = any> {
+export interface K8sListPayload<T = any> {
   resource: ResourceType;
-  action: "ADDED" | "MODIFIED" | "DELETED";
+  items: T[];
+}
+
+export interface K8sEventPayload<T = any> {
+  resource: ResourceType;
+  type: "ADDED" | "MODIFIED" | "DELETED";
   object: T;
 }
 
@@ -34,15 +43,17 @@ export interface ExecResizeParams {
 
 // Map events to their payloads
 export interface ServerToClientEvents {
-  [SocketEvent.DATA]: (payload: WatchResourcePayload) => void;
+  [SocketEvent.K8S_EVENT]: (payload: K8sEventPayload) => void;
+  [SocketEvent.K8S_LIST]: (payload: K8sListPayload) => void;
   [SocketEvent.ERROR]: (payload: ErrorPayload) => void;
   [SocketEvent.EXEC_DATA]: (data: string) => void;
   [SocketEvent.EXEC_ERROR]: (payload: ErrorPayload) => void;
 }
 
 export interface ClientToServerEvents {
-  [SocketEvent.WATCH]: (resource: ResourceType) => void;
+  [SocketEvent.SUBSCRIBE]: (resource: ResourceType) => void;
   [SocketEvent.EXEC]: (params: ExecParams) => void;
   [SocketEvent.EXEC_INPUT]: (data: string) => void;
   [SocketEvent.EXEC_RESIZE]: (params: ExecResizeParams) => void;
+  [SocketEvent.UNSUBSCRIBE]: (resource: ResourceType) => void;
 }

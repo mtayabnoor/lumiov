@@ -1,7 +1,15 @@
-import { KubeConfig, Exec, Watch, V1Status } from '@kubernetes/client-node';
+import {
+  KubeConfig,
+  Exec,
+  Watch,
+  CoreV1Api,
+  AppsV1Api,
+  V1Status,
+} from '@kubernetes/client-node';
 import { loadKubeConfig } from '../config/k8s.js';
 import { Writable, PassThrough } from 'stream';
 import WebSocket from 'ws';
+import { ResourceType } from '../types/socket.js';
 
 export interface ShellSession {
   write: (data: string) => void;
@@ -13,26 +21,66 @@ export class K8sService {
   private kc: KubeConfig | null = null;
   private watch: Watch | null = null;
   private exec: Exec | null = null;
+
+  // REST Clients for fetching initial lists
+  private coreApi: CoreV1Api | null = null;
+  private appsApi: AppsV1Api | null = null;
+
   private isInitialized = false;
 
-  // 1. Initialize Configuration
   public async initialize(): Promise<void> {
     try {
       this.kc = loadKubeConfig();
-      // Initialize Watch here (it's lightweight)
       this.watch = new Watch(this.kc);
       this.exec = new Exec(this.kc);
+
+      // Initialize APIs for Listing
+      this.coreApi = this.kc.makeApiClient(CoreV1Api);
+      this.appsApi = this.kc.makeApiClient(AppsV1Api);
+
       this.isInitialized = true;
       console.log('✅ K8s Service Initialized');
     } catch (err) {
       console.error('❌ K8s Init Failed:', err);
-      process.exit(1);
+      // In Electron, don't exit process, just log error so UI can show it
     }
   }
 
-  // 3. Watch Resource
+  // NEW: Get the full list once (Snapshot)
+  // NEW: Get the full list from ALL namespaces
+  public async listResource(resource: ResourceType): Promise<any[]> {
+    if (!this.isInitialized) throw new Error('K8s Service not ready');
+
+    try {
+      switch (resource) {
+        case 'pods':
+          // CHANGED: listNamespacedPod -> listPodForAllNamespaces
+          return (await this.coreApi!.listPodForAllNamespaces()).items;
+
+        case 'services':
+          // CHANGED: listNamespacedService -> listServiceForAllNamespaces
+          return (await this.coreApi!.listServiceForAllNamespaces()).items;
+
+        case 'deployments':
+          // CHANGED: listNamespacedDeployment -> listDeploymentForAllNamespaces
+          return (await this.appsApi!.listDeploymentForAllNamespaces()).items;
+
+        case 'statefulsets':
+          // CHANGED: listNamespacedStatefulSet -> listStatefulSetForAllNamespaces
+          return (await this.appsApi!.listStatefulSetForAllNamespaces()).items;
+
+        default:
+          return [];
+      }
+    } catch (err) {
+      console.error(`Error listing ${resource}:`, err);
+      return [];
+    }
+  }
+
+  // WATCH: Stream updates
   public watchResource(
-    resource: 'pods' | 'deployments' | 'services',
+    resource: ResourceType,
     onData: (action: string, obj: any) => void,
     onError: (err: any) => void,
   ): () => void {
@@ -41,10 +89,11 @@ export class K8sService {
       return () => {};
     }
 
-    const endpoints = {
+    const endpoints: Record<ResourceType, string> = {
       pods: '/api/v1/pods',
       deployments: '/apis/apps/v1/deployments',
       services: '/api/v1/services',
+      statefulsets: '/apis/apps/v1/statefulsets',
     };
 
     const path = endpoints[resource];
@@ -62,7 +111,7 @@ export class K8sService {
           },
           (err) => {
             if (!isActive) return;
-            console.error(`⚠️ Watch error (${resource}):`, err);
+            console.warn(`⚠️ Watch interrupted (${resource}), reconnecting...`);
             setTimeout(startStream, 3000);
           },
         );
@@ -73,13 +122,15 @@ export class K8sService {
 
     startStream();
 
+    // Return a function to KILL this specific watcher
     return () => {
       isActive = false;
       if (req) req.abort();
+      console.log(`🛑 Stopped watching: ${resource}`);
     };
   }
 
-  // 4. Exec Pod
+  // ... (Keep your existing execPod method here exactly as it was) ...
   public execPod(
     namespace: string,
     pod: string,
@@ -122,10 +173,10 @@ export class K8sService {
     )
       .then((conn) => {
         socketConnection = conn as unknown as WebSocket;
-        console.log('✅ [K8S] WebSocket Connected!');
+        console.log('✅ Exec WebSocket Connected!');
       })
       .catch((err) => {
-        console.error('❌ [K8S] Exec Connection Error:', err);
+        console.error('❌ Exec Connection Error:', err);
         onError(`\r\nError connecting to pod: ${err.message}\r\n`);
       });
 
