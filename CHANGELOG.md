@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/mtayabnoor/lumiov/compare/v2.0.4...v2.1.0) (2026-02-04)
+
+
+### Features
+
+* Add common interfaces for table column definitions, actions, and resource table properties ([675744c](https://github.com/mtayabnoor/lumiov/commit/675744c13061074187d3799ec20e7d511cf59224))
+* Implement core Kubernetes dashboard functionality including resource listing, watching ([efd5e49](https://github.com/mtayabnoor/lumiov/commit/efd5e495d55f5a3b0c79e67543a778695437bc77))
+* Improved pod exec component and backend logic ([4e1b2a2](https://github.com/mtayabnoor/lumiov/commit/4e1b2a29d132eef543a7b3301e92550a1cebf4fc))
+* Pod exec added ([0c917cd](https://github.com/mtayabnoor/lumiov/commit/0c917cdece2e99d9674e532372b2c4a11c72d4ce))
+
+
+### Code Refactoring
+
+* Decompose project into separate backend and frontend packages ([40ad219](https://github.com/mtayabnoor/lumiov/commit/40ad21936c295c26ad6d0e7c18a617ea7ccf1214))
+
 ### [2.0.4](https://github.com/mtayabnoor/lumiov/compare/v2.0.2...v2.0.4) (2026-02-01)
 
 
