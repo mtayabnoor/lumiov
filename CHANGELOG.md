@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/mtayabnoor/lumiov/compare/v2.1.0...v2.2.0) (2026-02-04)
+
+
+### Features
+
+* Implement  k8s resource monitoring dashboard with overview pages, charts, and resource tables ([089f6c4](https://github.com/mtayabnoor/lumiov/commit/089f6c4d1a4ede22ead19ed7cc55c6b2f3441f1e))
+
+
+### Bug Fixes
+
+* Updated packages and types ([93eed7e](https://github.com/mtayabnoor/lumiov/commit/93eed7e0bed972f40ba704a0a36d2a1a99875b2e))
+
 ## [2.1.0](https://github.com/mtayabnoor/lumiov/compare/v2.0.4...v2.1.0) (2026-02-04)
 
 
