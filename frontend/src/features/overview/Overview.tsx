@@ -1,42 +1,128 @@
-import React from "react";
+import { Box, Grid } from "@mui/material";
 import { usePods } from "../../hooks/usePods";
 import { useDeployments } from "../../hooks/useDeployments";
-import Charts from "../../components/charts/Charts";
+import PodStatusChart from "../../components/charts/PodStatusChart";
+import DeploymentHealthChart from "../../components/charts/DeploymentHealthChart";
+import PodRestartChart from "../../components/charts/PodRestartChart";
+import NamespaceDistributionChart from "../../components/charts/NamespaceDistributionChart";
+import ContainerReadinessChart from "../../components/charts/ContainerReadinessChart";
+import SummaryCard from "../../components/charts/SummaryCard";
+import PageHeader from "../../components/common/PageHeader/PageHeader";
 
 function Overview() {
-  // These hooks run in parallel.
-  // The backend will receive 3 distinct subscribe events.
   const { pods, loading: podsLoading } = usePods();
   const { deployments, loading: depsLoading } = useDeployments();
 
-  const cpuData = [
-    { time: "10:00", usage: 20 },
-    { time: "10:05", usage: 35 },
-    { time: "10:10", usage: 50 },
-    { time: "10:15", usage: 45 },
-  ];
+  // Calculate summary metrics
+  const runningPods = pods.filter((p) => p.status?.phase === "Running").length;
+  const pendingPods = pods.filter((p) => p.status?.phase === "Pending").length;
+  const failedPods = pods.filter((p) => p.status?.phase === "Failed").length;
 
-  const memoryData = [
-    { time: "10:00", usage: 60 },
-    { time: "10:05", usage: 62 },
-    { time: "10:10", usage: 65 },
-    { time: "10:15", usage: 64 },
-  ];
+  const healthyDeployments = deployments.filter(
+    (d) => d.status?.readyReplicas === d.spec?.replicas,
+  ).length;
+
+  const totalContainers = pods.reduce(
+    (sum, p) => sum + (p.status?.containerStatuses?.length || 0),
+    0,
+  );
+
+  const podsWithRestarts = pods.filter((p) =>
+    p.status?.containerStatuses?.some((cs) => cs.restartCount > 0),
+  ).length;
 
   return (
-    <div className="dashboard-grid">
-      <div className="card">
-        <h3>Pods</h3>
-        <p>{podsLoading ? "Loading..." : pods.length}</p>
-      </div>
+    <Box sx={{ p: 3 }}>
+      <PageHeader
+        title="Overview"
+        description="Real-time monitoring dashboard"
+      />
 
-      <div className="card">
-        <h3>Deployments</h3>
-        <p>{depsLoading ? "Loading..." : deployments.length}</p>
-      </div>
-      <Charts title="CPU Usage" data={cpuData} color="#3b82f6" />
-      <Charts title="Memory Usage" data={memoryData} color="#8b5cf6" />
-    </div>
+      {/* Summary Cards Row */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+          <SummaryCard
+            title="Total Pods"
+            value={pods.length}
+            loading={podsLoading}
+            color="#3b82f6"
+          />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+          <SummaryCard
+            title="Running"
+            value={runningPods}
+            loading={podsLoading}
+            color="#22c55e"
+          />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+          <SummaryCard
+            title="Pending"
+            value={pendingPods}
+            loading={podsLoading}
+            color="#f59e0b"
+          />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+          <SummaryCard
+            title="Failed"
+            value={failedPods}
+            loading={podsLoading}
+            color="#ef4444"
+          />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+          <SummaryCard
+            title="Deployments"
+            value={deployments.length}
+            loading={depsLoading}
+            color="#8b5cf6"
+            subtitle={`${healthyDeployments} healthy`}
+          />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+          <SummaryCard
+            title="Containers"
+            value={totalContainers}
+            loading={podsLoading}
+            color="#06b6d4"
+          />
+        </Grid>
+      </Grid>
+
+      {/* Charts Grid */}
+      <Grid container spacing={3}>
+        {/* Pod Status Distribution */}
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          <PodStatusChart pods={pods} />
+        </Grid>
+
+        {/* Container Readiness */}
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          <ContainerReadinessChart pods={pods} />
+        </Grid>
+
+        {/* Namespace Distribution */}
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          <NamespaceDistributionChart
+            pods={pods}
+            deployments={deployments}
+            title="Resources by Namespace"
+          />
+        </Grid>
+
+        {/* Deployment Health */}
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <DeploymentHealthChart deployments={deployments} />
+        </Grid>
+
+        {/* Pod Restarts */}
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <PodRestartChart pods={pods} />
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
 

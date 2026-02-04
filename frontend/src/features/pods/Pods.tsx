@@ -6,7 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArticleIcon from "@mui/icons-material/Article";
 import TerminalIcon from "@mui/icons-material/Terminal";
-import { Box, CircularProgress, Alert } from "@mui/material";
+import { Box, CircularProgress, Alert, Typography } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
 import { useState } from "react";
 import PodExecDrawer from "../../components/drawer/PodExecDrawer";
@@ -182,7 +182,19 @@ function Pods() {
     );
 
   return (
-    <>
+    <Box sx={{ p: 3 }}>
+      {/* Page Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h4"
+          sx={{ fontWeight: 700, color: "text.primary", mb: 1 }}
+        >
+          Pods
+        </Typography>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          Real-time monitoring dashboard for pods
+        </Typography>
+      </Box>
       <ResourceTable config={podConfig} data={pods} onAction={handleAction} />
       {selectedPod && (
         <PodExecDrawer
@@ -195,7 +207,7 @@ function Pods() {
           socket={socket}
         />
       )}
-    </>
+    </Box>
   );
 }
 

@@ -29,4 +29,5 @@ export interface ResourceTableProps {
   // And usage is row.object.metadata...
   // So T implies DataUpdatePayload<Pod>.
   onAction?: (actionId: string, row: any) => void;
+  resourceType?: string;
 }

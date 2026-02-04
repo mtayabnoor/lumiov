@@ -4,8 +4,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ResourceTable from "../../components/common/Table/ResourceTable";
 import { Deployment } from "../../interfaces/deployment";
-import { Box, CircularProgress, Alert } from "@mui/material";
+import { Box, CircularProgress, Alert, Typography } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
+import PageHeader from "../../components/common/PageHeader/PageHeader";
 
 const getDeploymentReadyStatus = (event: Deployment) => {
   const desired = event?.status?.replicas ?? 0;
@@ -16,7 +17,7 @@ const getDeploymentReadyStatus = (event: Deployment) => {
 function Deployments() {
   const { deployments, error, loading } = useDeployments();
 
-  const podConfig: ResourceTableConfig = {
+  const deploymentConfig: ResourceTableConfig = {
     columns: [
       { key: "metadata.namespace", header: "NAMESPACE" },
       { key: "metadata.name", header: "NAME" },
@@ -62,11 +63,18 @@ function Deployments() {
     );
 
   return (
-    <ResourceTable
-      config={podConfig}
-      data={deployments}
-      onAction={handleAction}
-    />
+    <Box sx={{ p: 3 }}>
+      <PageHeader
+        title="Deployments"
+        description="Real-time monitoring dashboard for deployments"
+      />
+
+      <ResourceTable
+        config={deploymentConfig}
+        data={deployments}
+        onAction={handleAction}
+      />
+    </Box>
   );
 }
 

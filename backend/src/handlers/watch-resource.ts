@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 import { k8sService } from '../services/kubernetes.service.js';
-import { ResourceType } from '../types/socket.js';
+import { ResourceType } from '../types/common.js';
 
 export const registerWatchResourceHandlers = (socket: Socket) => {
   console.log('Electron UI Connected');
@@ -11,15 +11,7 @@ export const registerWatchResourceHandlers = (socket: Socket) => {
 
   // 1. Handle Subscribe
   socket.on('subscribe', async (resource: ResourceType) => {
-    // A. If already watching, don't duplicate streams
-    if (activeWatchers.has(resource)) {
-      console.log(`Already watching ${resource}, ignoring.`);
-      return;
-    }
-
-    console.log(`Starting stream for: ${resource}`);
-
-    // B. Step 1: Send the INITIAL LIST immediately
+    // Step 1: Send the INITIAL LIST immediately
     // This prevents the "blank screen" while waiting for an event
     try {
       const items = await k8sService.listResource(resource);
@@ -27,6 +19,14 @@ export const registerWatchResourceHandlers = (socket: Socket) => {
     } catch (e) {
       socket.emit('error', `Failed to list ${resource}`);
     }
+
+    // If already watching, don't duplicate streams
+    if (activeWatchers.has(resource)) {
+      console.log(`Already watching ${resource}, ignoring.`);
+      return;
+    }
+
+    console.log(`Starting stream for: ${resource}`);
 
     // C. Step 2: Start the Long-Running Watcher
     const stopWatcher = k8sService.watchResource(

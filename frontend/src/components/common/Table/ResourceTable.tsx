@@ -52,7 +52,12 @@ function getValue(row: any, col: ColumnDef): React.ReactNode {
 
 // --- Main Component ---
 
-function ResourceTable({ config, data, onAction }: ResourceTableProps) {
+function ResourceTable({
+  config,
+  data,
+  onAction,
+  resourceType,
+}: ResourceTableProps) {
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
 
   // State for Action Menu
@@ -121,26 +126,45 @@ function ResourceTable({ config, data, onAction }: ResourceTableProps) {
   return (
     <Box sx={{ width: "100%", overflow: "hidden" }}>
       {/* 1. Filter Section */}
-      <Box sx={{ p: 2 }}>
-        <FormControl sx={{ minWidth: 200, maxWidth: 400 }}>
-          <InputLabel>Filter by Namespace</InputLabel>
-          <Select
-            multiple
-            value={selectedNamespaces}
-            onChange={handleNamespaceChange}
-            renderValue={(selected) => selected.join(", ")}
-            label="Filter by Namespace"
+      {resourceType !== "namespaces" && (
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            justifyContent: "flex-start",
+            alignItems: "center",
+          }}
+        >
+          {" "}
+          {/* 1. Aligns content to left */}
+          <FormControl
+            size="small" // 2. Makes the height smaller (compact mode)
+            sx={{ minWidth: 150, maxWidth: 300 }} // 3. Reduced width (was 200/400)
           >
-            {namespaceList.map((ns) => (
-              <MenuItem key={ns} value={ns}>
-                <Checkbox checked={selectedNamespaces.indexOf(ns) > -1} />
-                <ListItemText primary={ns} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-
+            <InputLabel size="small">Namespace</InputLabel>{" "}
+            {/* 4. Ensure label matches small size */}
+            <Select
+              multiple
+              value={selectedNamespaces}
+              onChange={handleNamespaceChange}
+              renderValue={(selected) => selected.join(", ")}
+              label="Namespace"
+              // size="small" is inherited from FormControl, but you can add it here too to be safe
+            >
+              {namespaceList.map((ns) => (
+                <MenuItem key={ns} value={ns}>
+                  <Checkbox
+                    checked={selectedNamespaces.indexOf(ns) > -1}
+                    size="small"
+                  />{" "}
+                  {/* Optional: make checkbox small too */}
+                  <ListItemText primary={ns} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      )}
       {/* 2. Table Section */}
       <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
         <Table stickyHeader size="small" aria-label="k8s table">

@@ -29,6 +29,12 @@
         "owner": "mtayabnoor",
         "repo": "lumiov-releases",
         "releaseType": "release"
+      },
+      {
+        "provider": "github",
+        "owner": "mtayabnoor",
+        "repo": "lumiov",
+        "releaseType": "release"
       }
     ],
     "win": {

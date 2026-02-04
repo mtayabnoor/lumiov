@@ -5,12 +5,11 @@ import {
   K8sEventPayload,
   K8sListPayload,
 } from "../interfaces/socket";
-import { Deployment } from "../interfaces/deployment";
-
-export const useDeployments = () => {
+import { Namespace } from "../interfaces/namespace";
+export const useNamespaces = () => {
   const socket = useSocket();
   // State holds Pod[] (the data), not the events!
-  const [deployments, setDeployments] = useState<Deployment[]>([]);
+  const [namespaces, setNamespaces] = useState<Namespace[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,26 +17,26 @@ export const useDeployments = () => {
     if (!socket) return;
 
     // 1. Handle Initial List
-    const handleList = (payload: K8sListPayload<Deployment>) => {
-      if (payload.resource !== "deployments") return;
+    const handleList = (payload: K8sListPayload<Namespace>) => {
+      if (payload.resource !== "namespaces") return;
       // VALIDATION: Filter out any garbage immediately
       const validItems = (payload.items || []).filter(
         (item) => item && item.metadata,
       );
-      setDeployments(validItems);
+      setNamespaces(validItems);
       setLoading(false);
     };
 
     // 2. Handle Events
-    const handleEvent = (payload: K8sEventPayload<Deployment>) => {
-      if (payload.resource !== "deployments") return;
+    const handleEvent = (payload: K8sEventPayload<Namespace>) => {
+      if (payload.resource !== "namespaces") return;
 
       const { type, object } = payload;
 
       // VALIDATION: Don't process empty objects
       if (!object || !object.metadata) return;
 
-      setDeployments((prev) => {
+      setNamespaces((prev) => {
         switch (type) {
           case "ADDED":
             // Prevent duplicates
@@ -74,10 +73,10 @@ export const useDeployments = () => {
 
     // 2. Trigger Subscription
     if (socket.connected) {
-      socket.emit(SocketEvent.SUBSCRIBE, "deployments");
+      socket.emit(SocketEvent.SUBSCRIBE, "namespaces");
     } else {
       socket.once("connect", () => {
-        socket.emit(SocketEvent.SUBSCRIBE, "deployments");
+        socket.emit(SocketEvent.SUBSCRIBE, "namespaces");
       });
     }
 
@@ -89,9 +88,9 @@ export const useDeployments = () => {
 
       // IMPORTANT: Tell backend to stop watching deployments when this component unmounts
       // This prevents the "memory leak" of watchers on the backend
-      socket.emit(SocketEvent.UNSUBSCRIBE, "deployments");
+      socket.emit(SocketEvent.UNSUBSCRIBE, "namespaces");
     };
   }, [socket]);
 
-  return { deployments, error, loading };
+  return { namespaces, error, loading };
 };

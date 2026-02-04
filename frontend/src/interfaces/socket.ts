@@ -13,7 +13,7 @@ export const SocketEvent = {
   UNSUBSCRIBE: "unsubscribe",
 } as const;
 
-export type ResourceType = "pods" | "deployments";
+export type ResourceType = "pods" | "deployments" | "namespaces";
 
 export interface K8sListPayload<T = any> {
   resource: ResourceType;

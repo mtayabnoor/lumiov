@@ -9,13 +9,7 @@ import {
 import { loadKubeConfig } from '../config/k8s.js';
 import { Writable, PassThrough } from 'stream';
 import WebSocket from 'ws';
-import { ResourceType } from '../types/socket.js';
-
-export interface ShellSession {
-  write: (data: string) => void;
-  kill: () => void;
-  resize?: (cols: number, rows: number) => void;
-}
+import { ResourceType, ShellSession } from '../types/common.js';
 
 export class K8sService {
   private kc: KubeConfig | null = null;
@@ -53,22 +47,16 @@ export class K8sService {
 
     try {
       switch (resource) {
+        case 'namespaces':
+          return (await this.coreApi!.listNamespace()).items;
         case 'pods':
-          // CHANGED: listNamespacedPod -> listPodForAllNamespaces
           return (await this.coreApi!.listPodForAllNamespaces()).items;
-
         case 'services':
-          // CHANGED: listNamespacedService -> listServiceForAllNamespaces
           return (await this.coreApi!.listServiceForAllNamespaces()).items;
-
         case 'deployments':
-          // CHANGED: listNamespacedDeployment -> listDeploymentForAllNamespaces
           return (await this.appsApi!.listDeploymentForAllNamespaces()).items;
-
         case 'statefulsets':
-          // CHANGED: listNamespacedStatefulSet -> listStatefulSetForAllNamespaces
           return (await this.appsApi!.listStatefulSetForAllNamespaces()).items;
-
         default:
           return [];
       }
@@ -90,6 +78,7 @@ export class K8sService {
     }
 
     const endpoints: Record<ResourceType, string> = {
+      namespaces: '/api/v1/namespaces',
       pods: '/api/v1/pods',
       deployments: '/apis/apps/v1/deployments',
       services: '/api/v1/services',
