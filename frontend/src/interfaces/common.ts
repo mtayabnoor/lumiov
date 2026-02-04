@@ -1,4 +1,3 @@
-import { WatchResourcePayload } from "./socket";
 import { SvgIconComponent } from "@mui/icons-material";
 
 export type CellType = "text" | "number" | "duration" | "percent";
@@ -23,7 +22,7 @@ export interface ResourceTableConfig {
 
 export interface ResourceTableProps {
   config: ResourceTableConfig;
-  data: WatchResourcePayload<any>[]; // The generic wrapper DataUpdatePayload<T> is complex to type perfectly here quickly without breaking Pods, keeping any[] but casting locally or encouraging valid T. Ideally data: T[]
+  data: any[]; // The generic wrapper DataUpdatePayload<T> is complex to type perfectly here quickly without breaking Pods, keeping any[] but casting locally or encouraging valid T. Ideally data: T[]
   // Wait, data coming in is DataUpdatePayload<Pod>[].
   // But the table iterates rows. Let's make it data: T[] and let consumer handle wrapper unwrap if needed?
   // User's existing code passes `pods` which is DataUpdatePayload<Pod>[].
