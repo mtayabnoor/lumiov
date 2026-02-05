@@ -7,7 +7,7 @@ import PodRestartChart from "../../components/charts/PodRestartChart";
 import NamespaceDistributionChart from "../../components/charts/NamespaceDistributionChart";
 import ContainerReadinessChart from "../../components/charts/ContainerReadinessChart";
 import SummaryCard from "../../components/charts/SummaryCard";
-import PageHeader from "../../components/common/PageHeader/PageHeader";
+import PageLayout from "../../components/common/PageLayout/PageLayout";
 
 function Overview() {
   const { pods, loading: podsLoading } = usePods();
@@ -32,12 +32,7 @@ function Overview() {
   ).length;
 
   return (
-    <Box sx={{ p: 3 }}>
-      <PageHeader
-        title="Overview"
-        description="Real-time monitoring dashboard"
-      />
-
+    <PageLayout title="Overview" description="Real-time monitoring dashboard">
       {/* Summary Cards Row */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 6, sm: 4, md: 2 }}>
@@ -122,7 +117,7 @@ function Overview() {
           <PodRestartChart pods={pods} />
         </Grid>
       </Grid>
-    </Box>
+    </PageLayout>
   );
 }
 

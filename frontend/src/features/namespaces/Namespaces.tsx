@@ -5,7 +5,7 @@ import ResourceTable from "../../components/common/Table/ResourceTable";
 import { Namespace } from "../../interfaces/namespace";
 import { Box, CircularProgress, Alert } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageHeader from "../../components/common/PageHeader/PageHeader";
+import PageLayout from "../../components/common/PageLayout/PageLayout";
 
 function Namespaces() {
   const { namespaces, error, loading } = useNamespaces();
@@ -45,28 +45,17 @@ function Namespaces() {
     );
 
   return (
-    <Box
-      sx={{
-        p: 3,
-        display: "flex",
-        flexDirection: "column",
-        flexGrow: 1,
-        minHeight: 0,
-        overflow: "hidden",
-      }}
+    <PageLayout
+      title="Namespaces"
+      description="Real-time monitoring dashboard for namespaces"
     >
-      <PageHeader
-        title="Namespaces"
-        description="Real-time monitoring dashboard for namespaces"
-      />
-
       <ResourceTable
         config={namespaceConfig}
         data={namespaces}
         onAction={handleAction}
         resourceType="namespaces"
       />
-    </Box>
+    </PageLayout>
   );
 }
 

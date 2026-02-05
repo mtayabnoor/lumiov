@@ -6,7 +6,7 @@ import ResourceTable from "../../components/common/Table/ResourceTable";
 import { Deployment } from "../../interfaces/deployment";
 import { Box, CircularProgress, Alert, Typography } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageHeader from "../../components/common/PageHeader/PageHeader";
+import PageLayout from "../../components/common/PageLayout/PageLayout";
 
 const getDeploymentReadyStatus = (event: Deployment) => {
   const desired = event?.status?.replicas ?? 0;
@@ -63,27 +63,16 @@ function Deployments() {
     );
 
   return (
-    <Box
-      sx={{
-        p: 2,
-        display: "flex",
-        flexDirection: "column",
-        flexGrow: 1,
-        minHeight: 0,
-        overflow: "hidden",
-      }}
+    <PageLayout
+      title="Deployments"
+      description="Real-time monitoring dashboard for deployments"
     >
-      <PageHeader
-        title="Deployments"
-        description="Real-time monitoring dashboard for deployments"
-      />
-
       <ResourceTable
         config={deploymentConfig}
         data={deployments}
         onAction={handleAction}
       />
-    </Box>
+    </PageLayout>
   );
 }
 

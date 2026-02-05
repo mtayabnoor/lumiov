@@ -11,7 +11,7 @@ import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiv
 import { useState } from "react";
 import PodExecDrawer from "../../components/drawer/PodExecDrawer";
 import PodLogsDrawer from "../../components/drawer/PodLogsDrawer";
-import PageHeader from "../../components/common/PageHeader/PageHeader";
+import PageLayout from "../../components/common/PageLayout/PageLayout";
 
 // --- Helper Functions (Defined outside the component) ---
 
@@ -205,20 +205,10 @@ function Pods() {
     );
 
   return (
-    <Box
-      sx={{
-        p: 2,
-        display: "flex",
-        flexDirection: "column",
-        flexGrow: 1,
-        minHeight: 0,
-        overflow: "hidden",
-      }}
+    <PageLayout
+      title="Pods"
+      description="Real-time monitoring dashboard for pods"
     >
-      <PageHeader
-        title="Pods"
-        description="Real-time monitoring dashboard for pods"
-      />
       <ResourceTable config={podConfig} data={pods} onAction={handleAction} />
       {selectedPod && (
         <PodExecDrawer
@@ -242,7 +232,7 @@ function Pods() {
           socket={socket}
         />
       )}
-    </Box>
+    </PageLayout>
   );
 }
 
