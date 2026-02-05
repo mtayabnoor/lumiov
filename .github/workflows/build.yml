@@ -6,29 +6,40 @@ on:
       - master
 
 jobs:
-  release:
+  # 1. VALIDATION JOB
+  # Merged Lint, Typecheck, Security, and Build Test into one job.
+  # This saves 3 redundant 'npm install' runs.
+  validate:
+    name: Validate (Lint, Security, Build)
     runs-on: windows-latest
-    permissions:
-      contents: write
-
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for changelog generation
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
 
-      # Install dependencies
-      - name: Install All Dependencies
+      # Optimization: Use 'npm ci' (clean install) and install everything ONCE
+      - name: Install Dependencies
         run: |
-          npm install
-          cd frontend && npm install
-          cd ../backend && npm install
+          npm ci
+          cd frontend && npm ci
+          cd ../backend && npm ci
 
-      # Security audit before building
+      - name: Frontend Checks (Type & Build)
+        run: |
+          cd frontend
+          npm run build
+        env:
+          CI: false
+
+      - name: Backend Checks (Typecheck)
+        run: |
+          cd backend
+          npm run type-check
+
       - name: Security Audit
         run: |
           npm audit --audit-level=high
@@ -36,7 +47,37 @@ jobs:
           cd ../backend && npm audit --audit-level=high
         continue-on-error: false
 
-      # Build all components
+      - name: Electron Build Test
+        run: npx tsc -p tsconfig.json
+
+  # 2. RELEASE JOB
+  # Only runs if 'validate' succeeds
+  release:
+    name: Release & Publish
+    needs: validate # <--- CRITICAL: Waits for validation to pass
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      # We have to install again because this is a fresh VM,
+      # but now we have only done 2 installs total (instead of 4).
+      - name: Install Dependencies
+        run: |
+          npm ci
+          cd frontend && npm ci
+          cd ../backend && npm ci
+
+      # Re-build needed for the actual artifacts
       - name: Build All
         env:
           CI: false
@@ -45,13 +86,11 @@ jobs:
           npm run build:backend
           npx tsc -p tsconfig.json
 
-      # Configure git for version bump
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Bump version and generate changelog
       - name: Bump Version and Generate Changelog
         id: version
         run: |
@@ -60,14 +99,12 @@ jobs:
           echo "new_version=$version" >> $env:GITHUB_OUTPUT
           echo "tag=v$version" >> $env:GITHUB_OUTPUT
 
-      # Push version commit and tag
       - name: Push Changes
         run: |
           git push origin master --follow-tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build and publish Electron app
       - name: Publish Electron App
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
@@ -75,7 +112,6 @@ jobs:
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: npm run package -- --publish always
 
-      # Create GitHub Release with changelog
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         env:
