@@ -13,11 +13,26 @@ import {
   MenuItem,
   Divider,
   Chip,
+  Tooltip,
+  useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import TerminalIcon from "@mui/icons-material/Terminal";
 import "@xterm/xterm/css/xterm.css";
+
+import {
+  DRAWER_STYLES,
+  getDrawerPaperSx,
+  DRAWER_HEADER_SX,
+  getSelectSx,
+  getMenuProps,
+  ICON_BUTTON_SX,
+  CONNECTED_CHIP_SX,
+  PULSE_DOT_SX,
+  DIVIDER_SX,
+} from "./drawerStyles";
 
 // --- Types ---
 interface Container {
@@ -43,6 +58,8 @@ export default function PodExecDrawer({
   defaultContainer,
   socket,
 }: PodExecDrawerProps) {
+  const theme = useTheme();
+
   // --- State ---
   const [selectedContainer, setSelectedContainer] = useState(
     defaultContainer || containers[0]?.name || "",
@@ -51,11 +68,11 @@ export default function PodExecDrawer({
   const [error, setError] = useState<string | null>(null);
   const [height, setHeight] = useState("50vh");
 
-  // --- Refs (Mutable instances that don't trigger re-renders) ---
+  // --- Refs ---
   const termRef = useRef<Terminal | null>(null);
   const observerRef = useRef<ResizeObserver | null>(null);
 
-  // 1. Reset UI state when drawer opens
+  // Reset UI state when drawer opens
   useEffect(() => {
     if (open) {
       setSelectedContainer(defaultContainer || containers[0]?.name || "");
@@ -64,7 +81,7 @@ export default function PodExecDrawer({
     }
   }, [open, defaultContainer, containers]);
 
-  // 2. Cleanup Logic (Stops processes & clears memory)
+  // Cleanup Logic
   const cleanupSession = useCallback(() => {
     if (socket) {
       socket.emit("exec:stop");
@@ -85,38 +102,37 @@ export default function PodExecDrawer({
     setIsConnected(false);
   }, [socket]);
 
-  // 3. Initialize Terminal (Callback Ref Pattern)
-  // React calls this function automatically when the <div> mounts.
+  // Initialize Terminal
   const initTerminal = useCallback(
     (containerDiv: HTMLDivElement | null) => {
-      // If div is unmounted, run cleanup
       if (!containerDiv) {
         cleanupSession();
         return;
       }
 
-      // Prevent duplicate initialization
       if (termRef.current || !socket) return;
 
       console.log("🚀 Terminal DOM Ready. Initializing...");
 
-      // A. Setup XTerm
       const term = new Terminal({
         cursorBlink: true,
-        theme: { background: "#1e1e1e", foreground: "#ffffff" },
-        fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-        fontSize: 14,
-        cols: 80, // Default width
-        rows: 24, // Default height
+        theme: {
+          background: DRAWER_STYLES.paper.bodyBg,
+          foreground: "#e6e6e6",
+          cursor: theme.palette.primary.main,
+        },
+        fontFamily: '"JetBrains Mono", "Fira Code", Consolas, monospace',
+        fontSize: 13,
+        cols: 80,
+        rows: 24,
       });
 
       const fitAddon = new FitAddon();
       term.loadAddon(fitAddon);
       term.open(containerDiv);
-
       termRef.current = term;
 
-      // B. Setup Socket Listeners
+      // Socket Listeners
       socket.on("exec:data", (data) => {
         term.write(data);
         setIsConnected(true);
@@ -130,17 +146,16 @@ export default function PodExecDrawer({
 
       term.onData((data) => socket.emit("exec:input", data));
 
-      // C. Start Backend Session
+      // Start Backend Session
       socket.emit("exec:start", {
         namespace,
         podName,
         container: selectedContainer,
       });
 
-      // Force immediate resize to wake up the backend PTY
       socket.emit("exec:resize", { cols: 80, rows: 24 });
 
-      // D. Setup Auto-Resize Observer
+      // Auto-Resize Observer
       const observer = new ResizeObserver(() => {
         try {
           fitAddon.fit();
@@ -148,32 +163,30 @@ export default function PodExecDrawer({
             socket.emit("exec:resize", { cols: term.cols, rows: term.rows });
           }
         } catch (e) {
-          // Ignore resize errors if hidden
+          /* ignore */
         }
       });
 
       observer.observe(containerDiv);
       observerRef.current = observer;
 
-      // E. Initial Fit
       setTimeout(() => {
         try {
           fitAddon.fit();
-        } catch (e) {}
+        } catch (e) {
+          /* ignore */
+        }
       }, 50);
     },
-    [socket, namespace, podName, selectedContainer, cleanupSession],
+    [socket, namespace, podName, selectedContainer, cleanupSession, theme],
   );
 
-  // 4. Handle Close
   const handleClose = () => {
     cleanupSession();
     onClose();
   };
 
-  const toggleHeight = () => {
-    setHeight((h) => (h === "50vh" ? "85vh" : "50vh"));
-  };
+  const toggleHeight = () => setHeight((h) => (h === "50vh" ? "85vh" : "50vh"));
 
   return (
     <Drawer
@@ -182,117 +195,62 @@ export default function PodExecDrawer({
       onClose={handleClose}
       slotProps={{
         paper: {
-          sx: {
-            height,
-            bgcolor: "#1e1e1e",
-            color: "white",
-            display: "flex",
-            flexDirection: "column",
-            transition: "height 0.3s ease-in-out",
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
-          },
+          sx: getDrawerPaperSx(height),
         },
       }}
     >
       {/* --- HEADER --- */}
-      <Box
-        sx={{
-          p: 1.5,
-          bgcolor: "#2d2d2d",
-          display: "flex",
-          justifyContent: "space-between",
-          borderTop: "1px solid #444",
-          flexShrink: 0,
-        }}
-      >
+      <Box sx={DRAWER_HEADER_SX}>
         {/* Left: Pod Info */}
         <Box display="flex" alignItems="center" gap={2}>
-          {/* SECTION 1: Pod Context */}
-          <Box display="flex" flexDirection="column">
-            <Typography
-              variant="subtitle2"
-              sx={{
-                fontWeight: 600,
-                color: "white",
-                lineHeight: 1.2,
-              }}
-            >
-              {podName}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "grey.500",
-                fontFamily: "monospace", // Makes namespace look technical
-                fontSize: "0.7rem",
-              }}
-            >
-              {namespace}
-            </Typography>
+          {/* Icon & Title */}
+          <Box display="flex" alignItems="center" gap={1}>
+            <TerminalIcon
+              sx={{ color: theme.palette.primary.main, fontSize: 20 }}
+            />
+            <Box display="flex" flexDirection="column">
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 600,
+                  color: DRAWER_STYLES.text.primary,
+                  lineHeight: 1.2,
+                }}
+              >
+                {podName}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: DRAWER_STYLES.text.muted,
+                  fontFamily: "monospace",
+                  fontSize: "0.7rem",
+                }}
+              >
+                {namespace}
+              </Typography>
+            </Box>
           </Box>
 
-          {/* SECTION 2: Container Selector (Only shows if multiple) */}
+          {/* Container Selector */}
           {containers.length > 1 && (
             <>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={{
-                  bgcolor: "grey.700",
-                  mx: 1,
-                  height: 24,
-                  alignSelf: "center",
-                }}
-              />
-
+              <Divider orientation="vertical" flexItem sx={DIVIDER_SX} />
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography
                   variant="caption"
-                  sx={{ color: "grey.500", fontWeight: 500 }}
+                  sx={{ color: DRAWER_STYLES.text.secondary, fontWeight: 500 }}
                 >
                   Container:
                 </Typography>
-
                 <FormControl size="small" sx={{ minWidth: 140 }}>
                   <Select
                     value={selectedContainer}
                     onChange={(e) => setSelectedContainer(e.target.value)}
                     displayEmpty
                     variant="outlined"
-                    sx={{
-                      height: 32, // Sleek, compact height
-                      color: "white",
-                      fontSize: "0.875rem",
-                      bgcolor: "rgba(255,255,255,0.05)", // Subtle background
-                      ".MuiOutlinedInput-notchedOutline": {
-                        borderColor: "grey.700", // Darker, subtler border
-                      },
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "grey.500",
-                      },
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "primary.main",
-                      },
-                      ".MuiSvgIcon-root": {
-                        color: "grey.400",
-                      },
-                    }}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          bgcolor: "#2d2d2d",
-                          color: "white",
-                          "& .MuiMenuItem-root": {
-                            fontSize: "0.875rem",
-                            "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
-                            "&.Mui-selected": {
-                              bgcolor: "rgba(33, 150, 243, 0.2)",
-                            }, // Blue tint for selected
-                          },
-                        },
-                      },
-                    }}
+                    sx={getSelectSx(theme.palette.primary.main)}
+                    MenuProps={getMenuProps()}
                   >
                     {containers.map((c) => (
                       <MenuItem key={c.name} value={c.name}>
@@ -307,64 +265,64 @@ export default function PodExecDrawer({
         </Box>
 
         {/* Right: Controls */}
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box display="flex" alignItems="center" gap={0.5}>
           {isConnected && (
             <Chip
               size="small"
               label="Connected"
-              sx={{
-                bgcolor: "rgba(46, 160, 67, 0.2)",
-                color: "#3fb950",
-                fontSize: "0.75rem",
-                height: 24,
-              }}
-              icon={
-                <Box
-                  sx={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    bgcolor: "#3fb950",
-                    ml: 1,
-                    animation: "pulse 2s infinite",
-                    "@keyframes pulse": {
-                      "0%, 100%": { opacity: 1 },
-                      "50%": { opacity: 0.5 },
-                    },
-                  }}
-                />
-              }
+              sx={CONNECTED_CHIP_SX}
+              icon={<Box sx={PULSE_DOT_SX} />}
             />
           )}
-          <IconButton
-            onClick={toggleHeight}
-            size="small"
-            sx={{ color: "grey.300" }}
-          >
-            {height === "50vh" ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </IconButton>
-          <IconButton
-            onClick={handleClose}
-            size="small"
-            sx={{ color: "grey.300" }}
-          >
-            <CloseIcon />
-          </IconButton>
+
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ ...DIVIDER_SX, mx: 0.5 }}
+          />
+
+          <Tooltip title={height === "50vh" ? "Expand" : "Collapse"}>
+            <IconButton onClick={toggleHeight} size="small" sx={ICON_BUTTON_SX}>
+              {height === "50vh" ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Close">
+            <IconButton onClick={handleClose} size="small" sx={ICON_BUTTON_SX}>
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Box>
 
       {/* --- TERMINAL BODY --- */}
-      <Box sx={{ flex: 1, position: "relative", p: 1, minHeight: 0 }}>
+      <Box
+        sx={{
+          flex: 1,
+          position: "relative",
+          p: 1,
+          minHeight: 0,
+          bgcolor: DRAWER_STYLES.paper.bodyBg,
+        }}
+      >
         {error && (
           <Alert
             severity="error"
-            sx={{ position: "absolute", top: 10, left: 10, zIndex: 10 }}
+            sx={{
+              position: "absolute",
+              top: 10,
+              left: 10,
+              right: 10,
+              zIndex: 10,
+              bgcolor: DRAWER_STYLES.status.error.bg,
+              color: DRAWER_STYLES.status.error.text,
+              "& .MuiAlert-icon": { color: DRAWER_STYLES.status.error.text },
+            }}
           >
             {error}
           </Alert>
         )}
 
-        {/* Only render div if open. 'ref' triggers initTerminal automatically. */}
         {open && (
           <div
             ref={initTerminal}

@@ -30,6 +30,19 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import DownloadIcon from "@mui/icons-material/Download";
 import VerticalAlignBottomIcon from "@mui/icons-material/VerticalAlignBottom";
+import ArticleIcon from "@mui/icons-material/Article";
+
+import {
+  DRAWER_STYLES,
+  getDrawerPaperSx,
+  DRAWER_HEADER_SX,
+  getSelectSx,
+  getMenuProps,
+  ICON_BUTTON_SX,
+  CONNECTED_CHIP_SX,
+  PULSE_DOT_SX,
+  DIVIDER_SX,
+} from "./drawerStyles";
 
 // --- Types ---
 interface Container {
@@ -60,8 +73,6 @@ interface LogRowProps {
 // --- Constants ---
 const LINE_HEIGHT = 22;
 const MAX_LINES = 10000;
-const LOG_BG = "#0d1117";
-const LOG_HEADER_BG = "#161b22";
 
 // --- Helpers ---
 const parseLogLine = (line: string, id: number): LogLine => {
@@ -88,10 +99,13 @@ const downloadLogs = (logs: LogLine[], podName: string) => {
   URL.revokeObjectURL(url);
 };
 
-// --- Row Component for react-window v2 ---
+// --- Row Component ---
 function LogRow({ index, style, logs }: RowComponentProps<LogRowProps>) {
   const log = logs[index];
   if (!log) return null;
+
+  const isError = log.content.toLowerCase().includes("error");
+  const isWarn = log.content.toLowerCase().includes("warn");
 
   return (
     <Box
@@ -104,12 +118,12 @@ function LogRow({ index, style, logs }: RowComponentProps<LogRowProps>) {
         px: 1.5,
         boxSizing: "border-box",
         "&:hover": {
-          bgcolor: "rgba(255, 255, 255, 0.03)",
+          bgcolor: "rgba(255, 255, 255, 0.02)",
         },
-        borderLeft: log.content.toLowerCase().includes("error")
-          ? "2px solid #f85149"
-          : log.content.toLowerCase().includes("warn")
-            ? "2px solid #d29922"
+        borderLeft: isError
+          ? `2px solid ${DRAWER_STYLES.status.error.text}`
+          : isWarn
+            ? `2px solid ${DRAWER_STYLES.status.warning.text}`
             : "2px solid transparent",
       }}
     >
@@ -117,7 +131,7 @@ function LogRow({ index, style, logs }: RowComponentProps<LogRowProps>) {
       <Typography
         component="span"
         sx={{
-          color: "#484f58",
+          color: DRAWER_STYLES.text.muted,
           minWidth: 50,
           textAlign: "right",
           mr: 2,
@@ -134,7 +148,7 @@ function LogRow({ index, style, logs }: RowComponentProps<LogRowProps>) {
         <Typography
           component="span"
           sx={{
-            color: "#7ee787",
+            color: DRAWER_STYLES.status.connected.text,
             minWidth: 200,
             mr: 2,
             fontSize: "inherit",
@@ -149,7 +163,7 @@ function LogRow({ index, style, logs }: RowComponentProps<LogRowProps>) {
       <Typography
         component="span"
         sx={{
-          color: "#e6edf3",
+          color: "#e6e6e6",
           flex: 1,
           whiteSpace: "pre",
           overflow: "hidden",
@@ -271,7 +285,7 @@ export default function PodLogsDrawer({
         align: "end",
       });
     }
-  }, [filteredLogs.length, isPaused, listRef]);
+  }, [filteredLogs.length, isPaused]);
 
   const handleResume = useCallback(() => {
     setLogs((prev) => [...prev, ...pausedLogsRef.current].slice(-MAX_LINES));
@@ -292,7 +306,7 @@ export default function PodLogsDrawer({
         align: "end",
       });
     }
-  }, [filteredLogs.length, listRef]);
+  }, [filteredLogs.length]);
 
   const handleClose = useCallback(() => {
     setLogs([]);
@@ -308,67 +322,51 @@ export default function PodLogsDrawer({
       onClose={handleClose}
       slotProps={{
         paper: {
-          sx: {
-            height,
-            bgcolor: "#1e1e1e",
-            color: "white",
-            display: "flex",
-            flexDirection: "column",
-            transition: "height 0.3s ease-in-out",
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
-          },
+          sx: getDrawerPaperSx(height),
         },
       }}
     >
       {/* --- HEADER --- */}
-      <Box
-        sx={{
-          p: 1.5,
-          bgcolor: LOG_HEADER_BG,
-          display: "flex",
-          justifyContent: "space-between",
-          borderTop: "1px solid #30363d",
-          flexShrink: 0,
-        }}
-      >
+      <Box sx={DRAWER_HEADER_SX}>
         {/* Left: Pod Info */}
         <Box display="flex" alignItems="center" gap={2}>
-          <Box display="flex" flexDirection="column">
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: 600, color: "white", lineHeight: 1.2 }}
-            >
-              📜 {podName}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "#8b949e",
-                fontFamily: "monospace",
-                fontSize: "0.7rem",
-              }}
-            >
-              {namespace}
-            </Typography>
+          {/* Icon & Title */}
+          <Box display="flex" alignItems="center" gap={1}>
+            <ArticleIcon
+              sx={{ color: theme.palette.primary.main, fontSize: 20 }}
+            />
+            <Box display="flex" flexDirection="column">
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 600,
+                  color: DRAWER_STYLES.text.primary,
+                  lineHeight: 1.2,
+                }}
+              >
+                {podName}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: DRAWER_STYLES.text.muted,
+                  fontFamily: "monospace",
+                  fontSize: "0.7rem",
+                }}
+              >
+                {namespace}
+              </Typography>
+            </Box>
           </Box>
 
+          {/* Container Selector */}
           {containers.length > 1 && (
             <>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={{
-                  bgcolor: "#30363d",
-                  mx: 1,
-                  height: 24,
-                  alignSelf: "center",
-                }}
-              />
+              <Divider orientation="vertical" flexItem sx={DIVIDER_SX} />
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography
                   variant="caption"
-                  sx={{ color: "#8b949e", fontWeight: 500 }}
+                  sx={{ color: DRAWER_STYLES.text.secondary, fontWeight: 500 }}
                 >
                   Container:
                 </Typography>
@@ -378,37 +376,8 @@ export default function PodLogsDrawer({
                     onChange={(e) => setSelectedContainer(e.target.value)}
                     displayEmpty
                     variant="outlined"
-                    sx={{
-                      height: 32,
-                      color: "white",
-                      fontSize: "0.875rem",
-                      bgcolor: "rgba(255,255,255,0.05)",
-                      ".MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#30363d",
-                      },
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#8b949e",
-                      },
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: theme.palette.primary.main,
-                      },
-                      ".MuiSvgIcon-root": { color: "#8b949e" },
-                    }}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          bgcolor: LOG_HEADER_BG,
-                          color: "white",
-                          "& .MuiMenuItem-root": {
-                            fontSize: "0.875rem",
-                            "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
-                            "&.Mui-selected": {
-                              bgcolor: "rgba(56, 139, 253, 0.15)",
-                            },
-                          },
-                        },
-                      },
-                    }}
+                    sx={getSelectSx(theme.palette.primary.main)}
+                    MenuProps={getMenuProps()}
                   >
                     {containers.map((c) => (
                       <MenuItem key={c.name} value={c.name}>
@@ -421,11 +390,7 @@ export default function PodLogsDrawer({
             </>
           )}
 
-          <Divider
-            orientation="vertical"
-            flexItem
-            sx={{ bgcolor: "#30363d", mx: 1, height: 24, alignSelf: "center" }}
-          />
+          <Divider orientation="vertical" flexItem sx={DIVIDER_SX} />
 
           {/* Search */}
           <TextField
@@ -437,7 +402,9 @@ export default function PodLogsDrawer({
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon sx={{ color: "#8b949e", fontSize: 18 }} />
+                    <SearchIcon
+                      sx={{ color: DRAWER_STYLES.controls.icon, fontSize: 18 }}
+                    />
                   </InputAdornment>
                 ),
               },
@@ -446,11 +413,15 @@ export default function PodLogsDrawer({
               width: 200,
               "& .MuiOutlinedInput-root": {
                 height: 32,
-                color: "white",
+                color: DRAWER_STYLES.text.primary,
                 fontSize: "0.875rem",
-                bgcolor: "rgba(255,255,255,0.05)",
-                "& fieldset": { borderColor: "#30363d" },
-                "&:hover fieldset": { borderColor: "#8b949e" },
+                bgcolor: DRAWER_STYLES.controls.inputBg,
+                "& fieldset": {
+                  borderColor: DRAWER_STYLES.controls.inputBorder,
+                },
+                "&:hover fieldset": {
+                  borderColor: DRAWER_STYLES.controls.inputBorderHover,
+                },
                 "&.Mui-focused fieldset": {
                   borderColor: theme.palette.primary.main,
                 },
@@ -460,76 +431,60 @@ export default function PodLogsDrawer({
         </Box>
 
         {/* Right: Controls */}
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box display="flex" alignItems="center" gap={0.5}>
+          {/* Line count */}
           <Chip
             size="small"
             label={`${filteredLogs.length.toLocaleString()} lines`}
             sx={{
-              bgcolor: "rgba(255,255,255,0.1)",
-              color: "#8b949e",
+              bgcolor: "rgba(255,255,255,0.08)",
+              color: DRAWER_STYLES.text.secondary,
               fontSize: "0.75rem",
               height: 24,
             }}
           />
 
+          {/* Paused indicator */}
           {isPaused && pausedLogsRef.current.length > 0 && (
             <Chip
               size="small"
               label={`+${pausedLogsRef.current.length} buffered`}
               sx={{
-                bgcolor: "rgba(210, 153, 34, 0.2)",
-                color: "#d29922",
+                bgcolor: DRAWER_STYLES.status.warning.bg,
+                color: DRAWER_STYLES.status.warning.text,
                 fontSize: "0.75rem",
                 height: 24,
               }}
             />
           )}
 
+          {/* Connected status */}
           {isConnected && (
             <Chip
               size="small"
               label="Connected"
-              sx={{
-                bgcolor: "rgba(46, 160, 67, 0.2)",
-                color: "#3fb950",
-                fontSize: "0.75rem",
-                height: 24,
-              }}
-              icon={
-                <Box
-                  sx={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    bgcolor: "#3fb950",
-                    ml: 1,
-                    animation: "pulse 2s infinite",
-                    "@keyframes pulse": {
-                      "0%, 100%": { opacity: 1 },
-                      "50%": { opacity: 0.5 },
-                    },
-                  }}
-                />
-              }
+              sx={CONNECTED_CHIP_SX}
+              icon={<Box sx={PULSE_DOT_SX} />}
             />
           )}
 
           <Divider
             orientation="vertical"
             flexItem
-            sx={{
-              bgcolor: "#30363d",
-              mx: 0.5,
-              height: 24,
-              alignSelf: "center",
-            }}
+            sx={{ ...DIVIDER_SX, mx: 0.5 }}
           />
 
+          {/* Action buttons */}
           <Tooltip title={isPaused ? "Resume" : "Pause"}>
             <IconButton
               onClick={isPaused ? handleResume : () => setIsPaused(true)}
               size="small"
-              sx={{ color: isPaused ? "#d29922" : "#8b949e" }}
+              sx={{
+                ...ICON_BUTTON_SX,
+                color: isPaused
+                  ? DRAWER_STYLES.status.warning.text
+                  : DRAWER_STYLES.controls.icon,
+              }}
             >
               {isPaused ? <PlayArrowIcon /> : <PauseIcon />}
             </IconButton>
@@ -539,18 +494,14 @@ export default function PodLogsDrawer({
             <IconButton
               onClick={handleScrollToBottom}
               size="small"
-              sx={{ color: "#8b949e" }}
+              sx={ICON_BUTTON_SX}
             >
               <VerticalAlignBottomIcon />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Clear logs">
-            <IconButton
-              onClick={handleClear}
-              size="small"
-              sx={{ color: "#8b949e" }}
-            >
+            <IconButton onClick={handleClear} size="small" sx={ICON_BUTTON_SX}>
               <DeleteSweepIcon />
             </IconButton>
           </Tooltip>
@@ -559,7 +510,7 @@ export default function PodLogsDrawer({
             <IconButton
               onClick={() => downloadLogs(logs, podName)}
               size="small"
-              sx={{ color: "#8b949e" }}
+              sx={ICON_BUTTON_SX}
             >
               <DownloadIcon />
             </IconButton>
@@ -568,35 +519,31 @@ export default function PodLogsDrawer({
           <Divider
             orientation="vertical"
             flexItem
-            sx={{
-              bgcolor: "#30363d",
-              mx: 0.5,
-              height: 24,
-              alignSelf: "center",
-            }}
+            sx={{ ...DIVIDER_SX, mx: 0.5 }}
           />
 
-          <IconButton
-            onClick={toggleHeight}
-            size="small"
-            sx={{ color: "#8b949e" }}
-          >
-            {height === "50vh" ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </IconButton>
+          <Tooltip title={height === "50vh" ? "Expand" : "Collapse"}>
+            <IconButton onClick={toggleHeight} size="small" sx={ICON_BUTTON_SX}>
+              {height === "50vh" ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Tooltip>
 
-          <IconButton
-            onClick={handleClose}
-            size="small"
-            sx={{ color: "#8b949e" }}
-          >
-            <CloseIcon />
-          </IconButton>
+          <Tooltip title="Close">
+            <IconButton onClick={handleClose} size="small" sx={ICON_BUTTON_SX}>
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Box>
 
       {/* --- LOG BODY --- */}
       <Box
-        sx={{ flex: 1, position: "relative", minHeight: 0, bgcolor: LOG_BG }}
+        sx={{
+          flex: 1,
+          position: "relative",
+          minHeight: 0,
+          bgcolor: DRAWER_STYLES.paper.bodyBg,
+        }}
       >
         {error && (
           <Alert
@@ -607,9 +554,9 @@ export default function PodLogsDrawer({
               left: 10,
               right: 10,
               zIndex: 10,
-              bgcolor: "rgba(248, 81, 73, 0.15)",
-              color: "#f85149",
-              "& .MuiAlert-icon": { color: "#f85149" },
+              bgcolor: DRAWER_STYLES.status.error.bg,
+              color: DRAWER_STYLES.status.error.text,
+              "& .MuiAlert-icon": { color: DRAWER_STYLES.status.error.text },
             }}
           >
             {error}
@@ -623,7 +570,7 @@ export default function PodLogsDrawer({
               alignItems: "center",
               justifyContent: "center",
               height: "100%",
-              color: "#8b949e",
+              color: DRAWER_STYLES.text.secondary,
             }}
           >
             <Typography variant="body2">
