@@ -6,13 +6,13 @@ import Sidebar from "./Sidebar";
 // import logoImg from "../assets/logo.png";
 
 // OPTION B: Reference public folder directly
-const LOGO_SRC = "/lumiov.ico"; // Or "/icon.png"
+const LOGO_SRC = "lumiov.ico"; // Or "/icon.png"
 
 const HEADER_HEIGHT = "50px";
 
 function MainLayout() {
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <CssBaseline />
 
       {/* Header */}
@@ -73,7 +73,16 @@ function MainLayout() {
 
       <Sidebar />
 
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         <Box sx={{ height: HEADER_HEIGHT }} />
         <Outlet />
       </Box>

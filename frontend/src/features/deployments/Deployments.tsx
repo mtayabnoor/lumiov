@@ -63,7 +63,16 @@ function Deployments() {
     );
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Box
+      sx={{
+        p: 2,
+        display: "flex",
+        flexDirection: "column",
+        flexGrow: 1,
+        minHeight: 0,
+        overflow: "hidden",
+      }}
+    >
       <PageHeader
         title="Deployments"
         description="Real-time monitoring dashboard for deployments"

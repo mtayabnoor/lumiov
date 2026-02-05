@@ -205,7 +205,16 @@ function Pods() {
     );
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Box
+      sx={{
+        p: 2,
+        display: "flex",
+        flexDirection: "column",
+        flexGrow: 1,
+        minHeight: 0,
+        overflow: "hidden",
+      }}
+    >
       <PageHeader
         title="Pods"
         description="Real-time monitoring dashboard for pods"

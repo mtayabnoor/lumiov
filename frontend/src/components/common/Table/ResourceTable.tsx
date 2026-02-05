@@ -124,7 +124,17 @@ function ResourceTable({
   };
 
   return (
-    <Box sx={{ width: "100%", overflow: "hidden" }}>
+    <Box
+      sx={{
+        width: "100%",
+        flexGrow: 1, // Take remaining space
+        minHeight: 0, // Allow shrinking for scroll
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start", // ensure items start at top
+      }}
+    >
       {/* 1. Filter Section */}
       {resourceType !== "namespaces" && (
         <Box
@@ -166,7 +176,15 @@ function ResourceTable({
         </Box>
       )}
       {/* 2. Table Section */}
-      <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          flexGrow: 0, // Don't grow if content is small
+          flexShrink: 1, // Shrink if content is large (to trigger scroll)
+          minHeight: 0, // Allow shrinking
+          overflow: "auto",
+        }}
+      >
         <Table stickyHeader size="small" aria-label="k8s table">
           <TableHead>
             <TableRow>

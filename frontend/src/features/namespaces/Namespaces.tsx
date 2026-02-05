@@ -45,7 +45,16 @@ function Namespaces() {
     );
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box
+      sx={{
+        p: 3,
+        display: "flex",
+        flexDirection: "column",
+        flexGrow: 1,
+        minHeight: 0,
+        overflow: "hidden",
+      }}
+    >
       <PageHeader
         title="Namespaces"
         description="Real-time monitoring dashboard for namespaces"
