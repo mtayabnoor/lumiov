@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/mtayabnoor/lumiov/compare/v2.3.0...v2.4.0) (2026-02-05)
+
+
+### Features
+
+* Improved logs compnent by adding more options ([7cfc075](https://github.com/mtayabnoor/lumiov/commit/7cfc075dc1dd102e17574afcc5e16cb5d7ed8bc5))
+* Updated drawer styles ([acab17c](https://github.com/mtayabnoor/lumiov/commit/acab17c3580325e5406067aabaa182ac7ffb7de1))
+
+
+### Bug Fixes
+
+* Connection status icon label updated ([81de7ba](https://github.com/mtayabnoor/lumiov/commit/81de7ba3ff854d3254e4eaa5850bcf196b0d8abf))
+* Fixed logs streaming after pause and play ([71c58e1](https://github.com/mtayabnoor/lumiov/commit/71c58e13d5cf5e3109a0080aee37ccc15c6dbcb7))
+
 ## [2.3.0](https://github.com/mtayabnoor/lumiov/compare/v2.2.0...v2.3.0) (2026-02-05)
 
 
