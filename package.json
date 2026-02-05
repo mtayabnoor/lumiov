@@ -9,7 +9,7 @@
     "dev:frontend": "cd frontend && npm start",
     "dev:backend": "cd backend && npm run dev",
     "dev:electron": "wait-on http://localhost:3000 && tsc -p tsconfig.json && electron .",
-    "electron": "npm run build &&tsc -p tsconfig.json && electron .",
+    "electron": "npm run build && tsc -p tsconfig.json && electron .",
     "clean": "rimraf dist release",
     "build": "npm run build:frontend && npm run build:backend && tsc -p tsconfig.json",
     "package": "npm run build && electron-builder",
@@ -41,7 +41,7 @@
       "target": [
         "nsis"
       ],
-      "icon": "public/lumiov.ico",
+      "icon": "frontend/public/icon.ico",
       "cscLink": "lumiov_dev.pfx"
     },
     "nsis": {
@@ -61,8 +61,8 @@
         "to": "backend"
       },
       {
-        "from": "backend/node_modules",
-        "to": "backend/node_modules"
+        "from": "frontend/public/lumiov.ico",
+        "to": "lumiov.ico"
       }
     ],
     "directories": {

@@ -45,9 +45,17 @@ if (!hasLock) {
 }
 
 function createWindow() {
+  let iconPath;
+  if (isDev) {
+    iconPath = path.join(__dirname, "../../../frontend/public/lumiov.ico");
+  } else {
+    iconPath = path.join(process.resourcesPath, "lumiov.ico");
+  }
+
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
+    icon: iconPath,
     backgroundColor: "#1a1a1a",
     webPreferences: {
       nodeIntegration: false,

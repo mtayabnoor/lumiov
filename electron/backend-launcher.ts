@@ -2,7 +2,7 @@ import { spawn, ChildProcess } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
 import http from "http";
-import fs from "fs"; // ✅ Added to check file existence
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,47 +23,48 @@ export async function launchBackend(isDev: boolean): Promise<ChildProcess> {
   let binPath: string;
   let args: string[];
   let cwd: string;
+  let env: NodeJS.ProcessEnv = { ...process.env };
 
   if (isDev) {
     // --- DEVELOPMENT MODE ---
-    // Development Mode
-    // process.cwd() is usually "T:\Projects\lumiov\electron"
-    // So we just go up one level to the root, then into backend.
     cwd = path.resolve(process.cwd(), "../backend");
 
-    // Double check it exists to be safe
     if (!fs.existsSync(cwd)) {
       console.warn("⚠️ standard path failed, trying fallback...");
-      // Fallback: If running from inside 'dist' for some reason
       cwd = path.resolve(__dirname, "../../../backend");
     }
+
+    // In dev, we can assume the developer has 'node' in their PATH
     binPath = "node";
-    args = ["dist/server.js"];
+    args = ["dist/index.js"];
   } else {
     // --- PRODUCTION MODE ---
     const resourceRoot = path.join(process.resourcesPath, "backend");
+    const distPath = path.join(resourceRoot, "dist", "index.js");
+    const flatPath = path.join(resourceRoot, "index.js");
 
-    // 1. Define possible paths for server.js
-    const distPath = path.join(resourceRoot, "dist", "server.js"); // User's preference
-    const flatPath = path.join(resourceRoot, "server.js"); // Builder default
-
-    // 2. Auto-detect which one exists
     let entryPoint: string;
     if (fs.existsSync(distPath)) {
       console.log(`Backend found at: ${distPath}`);
-      cwd = resourceRoot; // Keep CWD at root so it finds node_modules
-      entryPoint = path.join("dist", "server.js");
+      cwd = resourceRoot;
+      entryPoint = path.join("dist", "index.js");
     } else if (fs.existsSync(flatPath)) {
       console.log(`Backend found at: ${flatPath}`);
       cwd = resourceRoot;
-      entryPoint = "server.js";
+      entryPoint = "index.js";
     } else {
       throw new Error(
-        `Could not find server.js in ${resourceRoot} or ${resourceRoot}/dist`,
+        `Could not find index.js in ${resourceRoot} or ${resourceRoot}/dist`,
       );
     }
 
-    binPath = "node";
+    // 🔴 CRITICAL FIX FOR PRODUCTION 🔴
+    // Users don't have "node" installed. We must use the Electron binary itself.
+    binPath = process.execPath;
+
+    // Tell Electron to run as a Node process, not as a windowed app
+    env.ELECTRON_RUN_AS_NODE = "1";
+
     args = [entryPoint];
   }
 
@@ -72,13 +73,18 @@ export async function launchBackend(isDev: boolean): Promise<ChildProcess> {
   const proc = spawn(binPath, args, {
     cwd,
     env: {
-      ...process.env,
+      ...env, // Includes ELECTRON_RUN_AS_NODE if in prod
       PORT: BACKEND_PORT.toString(),
       NODE_ENV: isDev ? "development" : "production",
     },
     // inherit allows you to see logs in the terminal; 'pipe' allows programmatic handling
     stdio: isDev ? "inherit" : "pipe",
   });
+
+  // Basic crash detection on start
+  if (proc.pid === undefined) {
+    throw new Error("Failed to spawn backend process");
+  }
 
   // In production, log errors to console so you can debug via terminal if needed
   if (!isDev && proc.stderr) {
@@ -93,13 +99,16 @@ export async function launchBackend(isDev: boolean): Promise<ChildProcess> {
     await new Promise((r) => setTimeout(r, 500));
   }
 
+  // If we get here, it failed. Kill it so we don't leave a zombie.
+  stopBackend(proc);
   throw new Error("Backend timed out - Health check failed");
 }
 
 export async function stopBackend(proc: ChildProcess) {
-  if (proc) {
+  if (proc && !proc.killed) {
     console.log("Stopping backend process...");
     proc.kill("SIGTERM");
+
     // Give it 2 seconds to close gracefully, then force kill
     const closed = await new Promise((resolve) => {
       const timeout = setTimeout(() => resolve(false), 2000);

@@ -39,7 +39,7 @@ function Sidebar() {
         [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
       }}
     >
-      <Box sx={{ height: "25px" }} />
+      <Toolbar />
       <Box sx={{ overflow: "auto", py: 2 }}>
         <List component="nav">
           {sidebarItems.map((group) => {

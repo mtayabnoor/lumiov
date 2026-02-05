@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "builddddd": "tsc",
+    "build": "ncc build src/server.ts -o dist",
     "start": "node dist/server.js",
     "lint": "eslint .",
     "type-check": "tsc --noEmit"
