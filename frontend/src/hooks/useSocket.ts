@@ -7,19 +7,16 @@ import {
 } from "../interfaces/socket";
 
 export const useSocket = () => {
-  const [socket, setSocket] = useState<Socket<
+  // Lazy initialization to avoid effect
+  const [socket] = useState<Socket<
     ServerToClientEvents,
     ClientToServerEvents
-  > | null>(null);
+  > | null>(() => getSocket());
 
-  useEffect(() => {
-    // Get the singleton instance
-    const socketInstance = getSocket();
-    setSocket(socketInstance);
-
-    // Cleanup not needed here as we want the socket to persist,
-    // but individual components should unsubscribe from their specific events.
-  }, []);
+  // Effect removed as socket is static singleton
+  /*
+  useEffect(() => { ... }, []);
+  */
 
   return socket;
 };

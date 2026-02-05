@@ -23,12 +23,12 @@ function ContainerReadinessChart({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  const colors = {
-    ready: isDark ? "#4ade80" : "#22c55e",
-    notReady: isDark ? "#f87171" : "#ef4444",
-  };
-
   const chartData = useMemo(() => {
+    const colors = {
+      ready: isDark ? "#4ade80" : "#22c55e",
+      notReady: isDark ? "#f87171" : "#ef4444",
+    };
+
     let ready = 0;
     let notReady = 0;
 
@@ -50,7 +50,7 @@ function ContainerReadinessChart({
       { name: "Ready", value: ready, color: colors.ready },
       { name: "Not Ready", value: notReady, color: colors.notReady },
     ].filter((d) => d.value > 0);
-  }, [pods, colors]);
+  }, [pods, isDark]);
 
   const totalContainers = chartData.reduce((sum, d) => sum + d.value, 0);
 

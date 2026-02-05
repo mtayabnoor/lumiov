@@ -56,25 +56,33 @@ export const registerLogHandlers = (socket: Socket) => {
 
     // 4. PARALLEL EXECUTION: Start all streams at once
     const streamPromises = containersToStream.map(async (container) => {
+      let lineBuffer = '';
+
       try {
         const stopStream = await k8sService.streamPodLogs(
           namespace,
           podName,
           container,
           (logChunk) => {
-            // Multi-container tagging
-            if (containersToStream.length > 1) {
-              const prefix = `[${container}] `;
-              // micro-optimization: don't split if not needed
-              const tagged = logChunk.includes('\n')
-                ? logChunk
-                    .split('\n')
-                    .map((l) => (l ? prefix + l : l))
-                    .join('\n')
-                : prefix + logChunk;
-              socket.emit('logs:data', tagged);
-            } else {
-              socket.emit('logs:data', logChunk);
+            // Buffer incoming chunk
+            lineBuffer += logChunk;
+
+            // Only process if we have complete lines
+            if (lineBuffer.includes('\n')) {
+              const lines = lineBuffer.split('\n');
+              // The last element is the potential partial line (or empty if chunk ended with \n)
+              lineBuffer = lines.pop() || '';
+
+              if (lines.length === 0) return;
+
+              // Multi-container tagging
+              if (containersToStream.length > 1) {
+                const prefix = `[${container}] `;
+                const tagged = lines.map((l) => prefix + l).join('\n');
+                socket.emit('logs:data', tagged);
+              } else {
+                socket.emit('logs:data', lines.join('\n'));
+              }
             }
           },
           (err) => {
@@ -101,14 +109,15 @@ export const registerLogHandlers = (socket: Socket) => {
           // Edge case: User disconnected *while* we were connecting
           stopStream();
         }
-      } catch (error: any) {
+      } catch (error) {
+        const err = error as Error;
         console.error(
           `❌ [Logs] Failed to stream container ${container}:`,
-          error,
+          err,
         );
         socket.emit(
           'logs:error',
-          `Failed to stream ${container}: ${error.message}`,
+          `Failed to stream ${container}: ${err.message}`,
         );
       }
     });

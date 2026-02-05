@@ -747,6 +747,8 @@ export default function PodLogsDrawer({
   const [searchQuery, setSearchQuery] = useState("");
   const [isRegex, setIsRegex] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  // New state to track buffered count for render (fixes refs-in-render error)
+  const [bufferedCount, setBufferedCount] = useState(0);
 
   // Advanced settings
   const [filterMode, setFilterMode] = useState<TimeFilterMode>("lines");
@@ -825,18 +827,8 @@ export default function PodLogsDrawer({
   }, [logs, searchQuery, isRegex, levelFilters]);
 
   // Reset on open
-  useEffect(() => {
-    if (open) {
-      setSelectedContainer(defaultContainer || containers[0]?.name || "");
-      setError(null);
-      setIsConnected(false);
-      setLogs([]);
-      setIsPaused(false);
-      setSearchQuery("");
-      lineIdRef.current = 0;
-      pausedLogsRef.current = [];
-    }
-  }, [open, defaultContainer, containers]);
+  // Reset on open effect removed to fix set-state-in-effect.
+  // Cleanup is handled in handleClose.
 
   // Subscribe to logs
   useEffect(() => {
@@ -846,8 +838,8 @@ export default function PodLogsDrawer({
       `📜 [Logs] Subscribing: ${podName}/${selectedContainer} (tail: ${tailLines}, previous: ${showPrevious})`,
     );
 
-    // Clear error before new subscription
-    setError(null);
+    // Clear error before new subscription - handled by onChange or Close
+    // setError(null);
 
     const handleLogData = (data: string) => {
       const newLines = data
@@ -857,6 +849,7 @@ export default function PodLogsDrawer({
 
       if (isPausedRef.current) {
         pausedLogsRef.current = [...pausedLogsRef.current, ...newLines];
+        setBufferedCount(pausedLogsRef.current.length);
         return;
       }
 
@@ -912,6 +905,7 @@ export default function PodLogsDrawer({
     sinceSeconds,
     showPrevious,
     isLive,
+    containers, // Added to deps
   ]);
 
   // Auto-scroll
@@ -927,12 +921,14 @@ export default function PodLogsDrawer({
   const handleResume = useCallback(() => {
     setLogs((prev) => [...prev, ...pausedLogsRef.current].slice(-tailLines));
     pausedLogsRef.current = [];
+    setBufferedCount(0);
     setIsPaused(false);
   }, [tailLines]);
 
   const handleClear = useCallback(() => {
     setLogs([]);
     pausedLogsRef.current = [];
+    setBufferedCount(0);
     lineIdRef.current = 0;
   }, []);
 
@@ -958,11 +954,21 @@ export default function PodLogsDrawer({
     if (socket) {
       socket.emit("logs:unsubscribe");
     }
+
     setLogs([]);
     lineIdRef.current = 0;
     pausedLogsRef.current = [];
+    setBufferedCount(0); // Clear buffer state
+    setError(null);
+    setIsConnected(false);
+    setIsPaused(false);
+    setSearchQuery("");
+    // Reset container to default if needed, or leave it.
+    // Setting it here might cause "set state after unmount" if onClose unmounts parent, but onClose is prop.
+    if (defaultContainer) setSelectedContainer(defaultContainer);
+
     onClose();
-  }, [onClose, socket]);
+  }, [onClose, socket, defaultContainer]);
 
   const toggleLevelFilter = (level: LogLevel) => {
     setLevelFilters((prev) =>
@@ -1030,7 +1036,10 @@ export default function PodLogsDrawer({
                 <FormControl size="small" sx={{ minWidth: 140 }}>
                   <Select
                     value={selectedContainer}
-                    onChange={(e) => setSelectedContainer(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedContainer(e.target.value);
+                      setError(null); // Clear error on change
+                    }}
                     displayEmpty
                     variant="outlined"
                     sx={getSelectSx(theme.palette.primary.main)}
@@ -1229,10 +1238,10 @@ export default function PodLogsDrawer({
           />
 
           {/* Paused indicator */}
-          {isPaused && pausedLogsRef.current.length > 0 && (
+          {isPaused && bufferedCount > 0 && (
             <Chip
               size="small"
-              label={`+${pausedLogsRef.current.length} buffered`}
+              label={`+${bufferedCount} buffered`}
               sx={{
                 bgcolor: DRAWER_STYLES.status.warning.bg,
                 color: DRAWER_STYLES.status.warning.text,

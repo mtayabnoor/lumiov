@@ -20,29 +20,27 @@ const getPodReadyStatus = (pod: Pod) => {
   }
   const total = pod?.spec?.containers?.length ?? 0;
   const ready =
-    pod.status?.containerStatuses?.filter((c: { ready: boolean }) => c.ready)
-      .length ?? 0;
+    pod.status?.containerStatuses?.filter((c) => c.ready).length ?? 0;
   return `${ready}/${total}`;
 };
 
 const getPodStatus = (pod: Pod) => {
-  const status = pod?.status?.phase?.toLowerCase();
+  const status = pod?.status?.phase;
   const total = pod?.spec?.containers?.length ?? 0;
   const ready =
-    pod.status?.containerStatuses?.filter((c: { ready: boolean }) => c.ready)
-      .length ?? 0;
+    pod.status?.containerStatuses?.filter((c) => c.ready).length ?? 0;
 
   // 1. Terminating check
   if (pod.metadata?.deletionTimestamp) {
     return {
       kind: "status",
       label: "Terminating",
-      cssClass: "border-red2", // Ensure you have css for this or use style object
+      cssClass: "border-red2",
     };
   }
 
   // 2. Running but not fully ready
-  if (ready !== total && status === "running") {
+  if (ready !== total && status === "Running") {
     return {
       kind: "status",
       label: "Running",
@@ -52,29 +50,28 @@ const getPodStatus = (pod: Pod) => {
 
   // 3. Standard statuses
   switch (status) {
-    case "running":
+    case "Running":
       return { kind: "status", label: "Running", cssClass: "success" };
-    case "failed":
+    case "Failed":
       return { kind: "status", label: "Failed", cssClass: "error" };
-    case "pending":
+    case "Pending":
       return { kind: "status", label: "Pending", cssClass: "warning" };
-    default:
+    case "Succeeded":
       return { kind: "status", label: "Completed", cssClass: "info" };
+    default:
+      return { kind: "status", label: "Unknown", cssClass: "info" };
   }
 };
 
 const getPodRestarts = (pod: Pod) => {
   const containers = pod?.status?.containerStatuses ?? [];
-  return containers.reduce(
-    (sum: number, c: any) => sum + (c.restartCount || 0),
-    0,
-  );
+  return containers.reduce((sum, c) => sum + (c.restartCount || 0), 0);
 };
 
 const getPodCpuReq = (pod: Pod) => {
   const containers = pod.spec?.containers ?? [];
   const totalCpu = containers
-    .map((c: any) => c.resources?.requests?.cpu || "ns")
+    .map((c) => c.resources?.requests?.cpu || "ns")
     .join(", ");
   return totalCpu || "-";
 };
@@ -82,7 +79,7 @@ const getPodCpuReq = (pod: Pod) => {
 const getPodMemReq = (pod: Pod) => {
   const containers = pod.spec?.containers ?? [];
   const totalMem = containers
-    .map((c: any) => c.resources?.requests?.memory || "ns")
+    .map((c) => c.resources?.requests?.memory || "ns")
     .join(", ");
   return totalMem || "-";
 };
@@ -159,13 +156,20 @@ function Pods() {
     const namespace = pod.metadata.namespace;
     const podName = pod.metadata.name;
     const containers =
-      pod.spec.containers?.map((c: any) => ({
+      pod.spec.containers?.map((c) => ({
         name: c.name,
       })) || [];
     const defaultContainer = containers[0]?.name;
 
-    if (actionId === "edit") console.log("Edit", pod);
-    if (actionId === "delete") console.log("Delete", pod);
+    if (actionId === "edit") {
+      alert(`Edit functionality for ${podName} is not yet implemented.`);
+    }
+    if (actionId === "delete") {
+      // Ideally verify with user before deleting
+      if (window.confirm(`Are you sure you want to delete pod ${podName}?`)) {
+        alert(`Delete functionality for ${podName} is not yet implemented.`);
+      }
+    }
     if (actionId === "logs") {
       setSelectedLogPod({ namespace, podName, containers, defaultContainer });
       setLogsDialogOpen(true);

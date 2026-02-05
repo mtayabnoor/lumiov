@@ -73,13 +73,10 @@ export default function PodExecDrawer({
   const observerRef = useRef<ResizeObserver | null>(null);
 
   // Reset UI state when drawer opens
-  useEffect(() => {
-    if (open) {
-      setSelectedContainer(defaultContainer || containers[0]?.name || "");
-      setError(null);
-      setIsConnected(false);
-    }
-  }, [open, defaultContainer, containers]);
+  // Reset UI state when drawer opens - handled by key or unmount/remount usually,
+  // but if needed we should not set state synchronously in effect to prevent loops.
+  // Since this component is conditionally rendered in Pods.tsx, it unmounts on close.
+  // So initial state is sufficient.
 
   // Cleanup Logic
   const cleanupSession = useCallback(() => {

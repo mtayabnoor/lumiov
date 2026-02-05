@@ -27,6 +27,14 @@ export interface Pod {
   [key: string]: any;
 }
 
+export enum PodPhase {
+  Running = "Running",
+  Pending = "Pending",
+  Failed = "Failed",
+  Succeeded = "Succeeded",
+  Unknown = "Unknown",
+}
+
 export interface Container {
   name: string;
   image: string;
