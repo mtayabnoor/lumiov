@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/mtayabnoor/lumiov/compare/v2.2.0...v2.3.0) (2026-02-05)
+
+
+### Features
+
+* Add log streaming feature ([c93e4fa](https://github.com/mtayabnoor/lumiov/commit/c93e4faea2a50834180b618e8daaae4b4b49aa5d))
+
 ## [2.2.0](https://github.com/mtayabnoor/lumiov/compare/v2.1.0...v2.2.0) (2026-02-04)
 
 
