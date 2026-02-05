@@ -7,36 +7,45 @@ export const darkTheme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#60a5fa", // softer blue for dark bg
+      main: "#007fd4", // VS Code Blue
+      contrastText: "#ffffff",
     },
     secondary: {
-      main: "#f472b6",
+      main: "#007fd4", // Keep consistent
     },
     background: {
-      default: "#38393bff", // app background
-      paper: "#4a4b4dff", // cards / drawers
+      default: "#1f1f1f", // VS Code Editor Bg
+      paper: "#252526", // VS Code Sidebar/Widget Bg
     },
+    text: {
+      primary: "#cccccc", // VS Code Default Text
+      secondary: "#969696", // VS Code Description Text
+    },
+    divider: "#2b2b2b", // VS Code borders
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          scrollbarColor: "#475569 #020617",
+          scrollbarColor: "#424242 transparent",
           "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
-            backgroundColor: "#020617",
+            width: 10,
+            height: 10,
+            backgroundColor: "transparent",
           },
           "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
-            borderRadius: 8,
-            backgroundColor: "#475569",
-            minHeight: 24,
-            border: "3px solid #020617",
+            borderRadius: 0, // VS Code scrollbars are square
+            backgroundColor: "#424242",
+            minHeight: 20,
+            border: "2px solid transparent",
+            backgroundClip: "content-box",
           },
           "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover":
             {
-              backgroundColor: "#64748b",
+              backgroundColor: "#4f4f4f",
             },
           "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
-            backgroundColor: "#020617",
+            backgroundColor: "transparent",
           },
         },
       },

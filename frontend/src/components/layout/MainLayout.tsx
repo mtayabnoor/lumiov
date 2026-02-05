@@ -1,9 +1,13 @@
 import { Box, CssBaseline, Toolbar, AppBar, Typography } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import CodeIcon from "@mui/icons-material/Code";
 
-// Define height once to keep everything synced
+// OPTION A: Import from assets (Best if file is in src/assets/logo.png)
+// import logoImg from "../assets/logo.png";
+
+// OPTION B: Reference public folder directly
+const LOGO_SRC = "/lumiov.ico"; // Or "/icon.png"
+
 const HEADER_HEIGHT = "50px";
 
 function MainLayout() {
@@ -18,6 +22,8 @@ function MainLayout() {
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
           height: HEADER_HEIGHT,
+          /*backgroundColor: "#1e1e1e",
+          borderBottom: "1px solid #333",*/
         }}
       >
         <Toolbar
@@ -25,47 +31,50 @@ function MainLayout() {
           sx={{
             minHeight: `${HEADER_HEIGHT} !important`,
             display: "flex",
-            alignItems: "center", // Vertically centers items
-            px: 2, // Horizontal padding (16px)
+            alignItems: "center",
+            px: 2,
           }}
         >
-          {/* TITLE ON THE LEFT */}
+          {/* TITLE + CUSTOM LOGO */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <CodeIcon sx={{ fontSize: 25, color: "#4e78d1ff", mr: 1 }} />
+            {/* 👇 YOUR CUSTOM ICON HERE 👇 */}
+            <Box
+              component="img"
+              src={LOGO_SRC}
+              alt="Lumiov Logo"
+              sx={{
+                height: 24, // Adjust size (20px - 30px is good for this bar)
+                width: 24, // Keep aspect ratio
+                marginRight: 1.5, // Space between logo and text
+                objectFit: "contain", // Ensures image doesn't stretch
+              }}
+            />
+
             <Typography
               variant="subtitle2"
               noWrap
               component="div"
               sx={{
-                fontSize: "17px",
-                fontWeight: 700,
+                /*fontFamily: '"Consolas", "Monaco", "Courier New", monospace',*/
+                fontSize: "18px",
+                fontWeight: 600,
                 color: "#ffffffff",
                 letterSpacing: "0.5px",
               }}
             >
               Lumiov
             </Typography>
-            <CodeIcon sx={{ fontSize: 25, color: "#4e78d1ff", ml: 1 }} />
-            {/* Removed the second icon to make it cleaner on the left, but you can add it back if you like */}
           </Box>
 
-          {/* Spacer to push right-side items (if any) to the end */}
+          {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />
-
-          {/* 3. RIGHT SIDE ITEMS (Optional) */}
-          {/* <Avatar sx={{ width: 24, height: 24 }} /> */}
         </Toolbar>
       </AppBar>
 
-      {/* Sidebar */}
-      {/* Ensure your Sidebar component has a top margin or spacer internally if needed */}
       <Sidebar />
 
-      {/* Main Content Area */}
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        {/* THE FIX: Pushes content down so it's not hidden behind the header */}
         <Box sx={{ height: HEADER_HEIGHT }} />
-
         <Outlet />
       </Box>
     </Box>

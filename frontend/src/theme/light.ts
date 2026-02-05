@@ -6,15 +6,21 @@ export const lightTheme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#1976d2",
+      main: "#007acc", // VS Code Light Blue
+      contrastText: "#ffffff",
     },
     secondary: {
-      main: "#dc004e",
+      main: "#007acc",
     },
     background: {
-      default: "#f5f5f5",
-      paper: "#ffffff",
+      default: "#ffffff", // VS Code Editor Bg
+      paper: "#f3f3f3", // VS Code Sidebar/Widget Bg
     },
+    text: {
+      primary: "#3b3b3b", // VS Code Light Text
+      secondary: "#8a8a8a", // VS Code Description Text
+    },
+    divider: "#e5e5e5",
   },
   typography: {
     fontFamily: [
@@ -31,30 +37,25 @@ export const lightTheme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          scrollbarColor: "#6b6b6b #2b2b2b",
+          scrollbarColor: "#bfbfbf transparent",
           "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
-            backgroundColor: "#2b2b2b",
+            width: 10,
+            height: 10,
+            backgroundColor: "transparent",
           },
           "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
-            borderRadius: 8,
-            backgroundColor: "#6b6b6b",
-            minHeight: 24,
-            border: "3px solid #2b2b2b",
+            borderRadius: 0,
+            backgroundColor: "#bfbfbf",
+            minHeight: 20,
+            border: "2px solid transparent",
+            backgroundClip: "content-box",
           },
-          "&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus":
-            {
-              backgroundColor: "#959595",
-            },
-          "&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active":
-            {
-              backgroundColor: "#959595",
-            },
           "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover":
             {
-              backgroundColor: "#959595",
+              backgroundColor: "#a6a6a6",
             },
           "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
-            backgroundColor: "#2b2b2b",
+            backgroundColor: "transparent",
           },
         },
       },
