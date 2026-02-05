@@ -205,6 +205,7 @@ export default function PodLogsDrawer({
   // --- Refs ---
   const lineIdRef = useRef(0);
   const pausedLogsRef = useRef<LogLine[]>([]);
+  const isPausedRef = useRef(false); // Ref to avoid stale closure in socket handler
 
   // Filtered logs
   const filteredLogs = useMemo(() => {
@@ -231,7 +232,12 @@ export default function PodLogsDrawer({
     }
   }, [open, defaultContainer, containers]);
 
-  // Subscribe to logs
+  // Sync isPausedRef with state
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+
+  // Subscribe to logs - NOTE: isPaused is NOT in deps to avoid re-subscribing
   useEffect(() => {
     if (!open || !socket || !selectedContainer) return;
 
@@ -243,7 +249,8 @@ export default function PodLogsDrawer({
         .filter((line) => line.trim())
         .map((line) => parseLogLine(line, lineIdRef.current++));
 
-      if (isPaused) {
+      // Use ref to get current paused state (avoids stale closure)
+      if (isPausedRef.current) {
         pausedLogsRef.current = [...pausedLogsRef.current, ...newLines];
         return;
       }
@@ -271,11 +278,12 @@ export default function PodLogsDrawer({
     });
 
     return () => {
+      console.log(`📜 [Logs] Unsubscribing: ${podName}/${selectedContainer}`);
       socket.emit("logs:unsubscribe");
       socket.off("logs:data", handleLogData);
       socket.off("logs:error", handleLogError);
     };
-  }, [open, socket, namespace, podName, selectedContainer, isPaused]);
+  }, [open, socket, namespace, podName, selectedContainer]); // isPaused NOT in deps
 
   // Auto-scroll
   useEffect(() => {
@@ -309,9 +317,15 @@ export default function PodLogsDrawer({
   }, [filteredLogs.length]);
 
   const handleClose = useCallback(() => {
+    // Emit unsubscribe before closing to ensure cleanup
+    if (socket) {
+      socket.emit("logs:unsubscribe");
+    }
     setLogs([]);
+    lineIdRef.current = 0;
+    pausedLogsRef.current = [];
     onClose();
-  }, [onClose]);
+  }, [onClose, socket]);
 
   const toggleHeight = () => setHeight((h) => (h === "50vh" ? "85vh" : "50vh"));
 
