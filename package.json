@@ -41,6 +41,7 @@
       "target": [
         "nsis"
       ],
+      "icon": "public/lumiov.ico",
       "cscLink": "lumiov_dev.pfx"
     },
     "nsis": {
