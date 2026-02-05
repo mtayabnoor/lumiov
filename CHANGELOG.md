@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.1](https://github.com/mtayabnoor/lumiov/compare/v2.6.0...v2.6.1) (2026-02-05)
+
+
+### Bug Fixes
+
+* Icon name fix in package.json ([dc96635](https://github.com/mtayabnoor/lumiov/commit/dc966356f24ee1163087a13df2f6faa536d15ebf))
+* Table size fixed and icon path ([55fef2b](https://github.com/mtayabnoor/lumiov/commit/55fef2b425c667cf7febe6e16d26e88e513298ee))
+
 ## [2.6.0](https://github.com/mtayabnoor/lumiov/compare/v2.4.2...v2.6.0) (2026-02-05)
 
 
