@@ -12,6 +12,7 @@ import {
   Select,
   MenuItem,
   Divider,
+  Chip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -188,6 +189,8 @@ export default function PodExecDrawer({
             display: "flex",
             flexDirection: "column",
             transition: "height 0.3s ease-in-out",
+            borderTopLeftRadius: 8,
+            borderTopRightRadius: 8,
           },
         },
       }}
@@ -306,17 +309,32 @@ export default function PodExecDrawer({
         {/* Right: Controls */}
         <Box display="flex" alignItems="center" gap={1}>
           {isConnected && (
-            <Typography
-              variant="caption"
+            <Chip
+              size="small"
+              label="Connected"
               sx={{
-                color: "#4caf50",
-                border: "1px solid #4caf50",
-                px: 1,
-                borderRadius: 1,
+                bgcolor: "rgba(46, 160, 67, 0.2)",
+                color: "#3fb950",
+                fontSize: "0.75rem",
+                height: 24,
               }}
-            >
-              Connected
-            </Typography>
+              icon={
+                <Box
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    bgcolor: "#3fb950",
+                    ml: 1,
+                    animation: "pulse 2s infinite",
+                    "@keyframes pulse": {
+                      "0%, 100%": { opacity: 1 },
+                      "50%": { opacity: 0.5 },
+                    },
+                  }}
+                />
+              }
+            />
           )}
           <IconButton
             onClick={toggleHeight}

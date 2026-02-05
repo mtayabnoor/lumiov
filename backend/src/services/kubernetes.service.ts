@@ -5,6 +5,7 @@ import {
   CoreV1Api,
   AppsV1Api,
   V1Status,
+  Log,
 } from '@kubernetes/client-node';
 import { loadKubeConfig } from '../config/k8s.js';
 import { Writable, PassThrough } from 'stream';
@@ -15,6 +16,7 @@ export class K8sService {
   private kc: KubeConfig | null = null;
   private watch: Watch | null = null;
   private exec: Exec | null = null;
+  private log: Log | null = null;
 
   // REST Clients for fetching initial lists
   private coreApi: CoreV1Api | null = null;
@@ -23,10 +25,13 @@ export class K8sService {
   private isInitialized = false;
 
   public async initialize(): Promise<void> {
+    if (this.isInitialized) return; // Prevent duplicate initialization
+
     try {
       this.kc = loadKubeConfig();
       this.watch = new Watch(this.kc);
       this.exec = new Exec(this.kc);
+      this.log = new Log(this.kc);
 
       // Initialize APIs for Listing
       this.coreApi = this.kc.makeApiClient(CoreV1Api);
@@ -36,14 +41,17 @@ export class K8sService {
       console.log('✅ K8s Service Initialized');
     } catch (err) {
       console.error('❌ K8s Init Failed:', err);
-      // In Electron, don't exit process, just log error so UI can show it
     }
   }
 
-  // NEW: Get the full list once (Snapshot)
-  // NEW: Get the full list from ALL namespaces
-  public async listResource(resource: ResourceType): Promise<any[]> {
+  // Helper check
+  private checkInit() {
     if (!this.isInitialized) throw new Error('K8s Service not ready');
+  }
+
+  // Get full list once (Snapshot)
+  public async listResource(resource: ResourceType): Promise<any[]> {
+    this.checkInit();
 
     try {
       switch (resource) {
@@ -99,7 +107,9 @@ export class K8sService {
             if (isActive) onData(type, obj);
           },
           (err) => {
-            if (!isActive) return;
+            // Ignore abort errors (user stopped watching)
+            if (!isActive || (err && err.message === 'aborted')) return;
+
             console.warn(`⚠️ Watch interrupted (${resource}), reconnecting...`);
             setTimeout(startStream, 3000);
           },
@@ -111,15 +121,15 @@ export class K8sService {
 
     startStream();
 
-    // Return a function to KILL this specific watcher
+    // Return kill function
     return () => {
       isActive = false;
-      if (req) req.abort();
+      if (req && req.abort) req.abort();
       console.log(`🛑 Stopped watching: ${resource}`);
     };
   }
 
-  // ... (Keep your existing execPod method here exactly as it was) ...
+  // EXEC SHELL
   public execPod(
     namespace: string,
     pod: string,
@@ -127,6 +137,8 @@ export class K8sService {
     onData: (data: string) => void,
     onError: (data: string) => void,
   ): ShellSession {
+    this.checkInit();
+
     const inputStream = new PassThrough();
 
     // Combine stdout/stderr logic
@@ -184,6 +196,55 @@ export class K8sService {
           }
         }
       },
+    };
+  }
+
+  // ✅ FIXED LOGS FUNCTION
+  public async streamPodLogs(
+    namespace: string,
+    pod: string,
+    container: string,
+    onData: (data: string) => void,
+    onError: (err: any) => void,
+  ): Promise<() => void> {
+    if (!this.isInitialized || !this.log) {
+      const e = new Error('Service not initialized');
+      onError(e.message);
+      return () => {};
+    }
+
+    const logStream = new PassThrough();
+    let req: any = null;
+
+    // 1. Handle Stream Data
+    logStream.on('data', (chunk) => {
+      onData(chunk.toString());
+    });
+
+    logStream.on('error', (err) => {
+      onError(err.message);
+    });
+
+    try {
+      // 2. Start K8s Log Request
+      req = await this.log.log(namespace, pod, container, logStream, {
+        follow: true, // Keep streaming
+        tailLines: 100, // Get history
+        pretty: false,
+        timestamps: true,
+      });
+    } catch (err: any) {
+      console.error(`❌ Failed to start log stream for ${pod}:`, err);
+      onError(err.message || 'Log stream failed');
+    }
+
+    // 3. Return Cleanup Function
+    return () => {
+      console.log(`🛑 Stopped logs for ${pod}`);
+      if (req && req.abort) {
+        req.abort();
+      }
+      logStream.destroy();
     };
   }
 }

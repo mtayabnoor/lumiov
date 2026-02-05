@@ -10,6 +10,7 @@ import { Box, CircularProgress, Alert, Typography } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
 import { useState } from "react";
 import PodExecDrawer from "../../components/drawer/PodExecDrawer";
+import PodLogsDrawer from "../../components/drawer/PodLogsDrawer";
 
 // --- Helper Functions (Defined outside the component) ---
 
@@ -99,6 +100,15 @@ function Pods() {
     defaultContainer?: string;
   } | null>(null);
 
+  // Logs drawer state
+  const [logsDialogOpen, setLogsDialogOpen] = useState(false);
+  const [selectedLogPod, setSelectedLogPod] = useState<{
+    namespace: string;
+    podName: string;
+    containers: { name: string }[];
+    defaultContainer?: string;
+  } | null>(null);
+
   const podConfig: ResourceTableConfig = {
     columns: [
       { key: "metadata.namespace", header: "NAMESPACE" },
@@ -146,18 +156,21 @@ function Pods() {
   };
 
   const handleAction = (actionId: string, pod: Pod) => {
+    const namespace = pod.metadata.namespace;
+    const podName = pod.metadata.name;
+    const containers =
+      pod.spec.containers?.map((c: any) => ({
+        name: c.name,
+      })) || [];
+    const defaultContainer = containers[0]?.name;
+
     if (actionId === "edit") console.log("Edit", pod);
     if (actionId === "delete") console.log("Delete", pod);
-    if (actionId === "logs") console.log("Logs", pod);
+    if (actionId === "logs") {
+      setSelectedLogPod({ namespace, podName, containers, defaultContainer });
+      setLogsDialogOpen(true);
+    }
     if (actionId === "exec") {
-      const namespace = pod.metadata.namespace;
-      const podName = pod.metadata.name;
-      const containers =
-        pod.spec.containers?.map((c: any) => ({
-          name: c.name,
-        })) || [];
-      const defaultContainer = containers[0]?.name;
-
       setSelectedPod({ namespace, podName, containers, defaultContainer });
       setExecDialogOpen(true);
     }
@@ -166,6 +179,11 @@ function Pods() {
   const handleCloseExecDialog = () => {
     setExecDialogOpen(false);
     setSelectedPod(null);
+  };
+
+  const handleCloseLogsDialog = () => {
+    setLogsDialogOpen(false);
+    setSelectedLogPod(null);
   };
 
   if (loading)
@@ -204,6 +222,17 @@ function Pods() {
           podName={selectedPod.podName}
           containers={selectedPod.containers}
           defaultContainer={selectedPod.defaultContainer}
+          socket={socket}
+        />
+      )}
+      {selectedLogPod && (
+        <PodLogsDrawer
+          open={logsDialogOpen}
+          onClose={handleCloseLogsDialog}
+          namespace={selectedLogPod.namespace}
+          podName={selectedLogPod.podName}
+          containers={selectedLogPod.containers}
+          defaultContainer={selectedLogPod.defaultContainer}
           socket={socket}
         />
       )}

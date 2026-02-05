@@ -3,8 +3,9 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { k8sService } from './services/kubernetes.service.js';
-import { registerWatchResourceHandlers } from './handlers/watch-resource.js';
-import { registerExecHandlers } from './handlers/exec-pod.js';
+import { registerWatchResourceHandlers } from './handlers/watch.handler.js';
+import { registerExecHandlers } from './handlers/exec.handler.js';
+import { registerLogHandlers } from './handlers/logs.handler.js';
 
 const PORT = 3030;
 
@@ -31,6 +32,7 @@ console.log('K8s connected.');
 io.on('connection', (socket) => {
   registerWatchResourceHandlers(socket);
   registerExecHandlers(socket);
+  registerLogHandlers(socket);
 });
 
 // 5. Basic Health Check Route
