@@ -199,13 +199,20 @@ export class K8sService {
     };
   }
 
-  // ✅ FIXED LOGS FUNCTION
+  // ✅ ENHANCED LOGS FUNCTION WITH DYNAMIC OPTIONS
   public async streamPodLogs(
     namespace: string,
     pod: string,
     container: string,
     onData: (data: string) => void,
     onError: (err: any) => void,
+    options?: {
+      tailLines?: number;
+      sinceSeconds?: number;
+      previous?: boolean;
+      timestamps?: boolean;
+      follow?: boolean; // true = live streaming, false = snapshot (fetch once)
+    },
   ): Promise<() => void> {
     if (!this.isInitialized || !this.log) {
       const e = new Error('Service not initialized');
@@ -225,14 +232,43 @@ export class K8sService {
       onError(err.message);
     });
 
+    // Build log options dynamically
+    const logOptions: any = {
+      follow: options?.follow ?? true, // Default to live streaming
+      pretty: false,
+      timestamps: options?.timestamps ?? true,
+    };
+
+    // Add tailLines if specified
+    if (options?.sinceSeconds) {
+      // Time-based: get logs since X seconds ago
+      logOptions.sinceSeconds = options.sinceSeconds;
+    } else if (options?.tailLines && options.tailLines > 0) {
+      // Line-based: get last N lines
+      logOptions.tailLines = options.tailLines;
+    } else if (options?.tailLines === -1) {
+      // Fetch ALL logs (no tail limit)
+      delete logOptions.tailLines;
+    } else {
+      logOptions.tailLines = 100; // Default fallback
+    }
+
+    // Previous container logs (for crashed/restarted containers)
+    if (options?.previous) {
+      logOptions.previous = true;
+    }
+
+    console.log(`📜 [K8S] Streaming logs: ${pod}/${container}`, logOptions);
+
     try {
       // 2. Start K8s Log Request
-      req = await this.log.log(namespace, pod, container, logStream, {
-        follow: true, // Keep streaming
-        tailLines: 100, // Get history
-        pretty: false,
-        timestamps: true,
-      });
+      req = await this.log.log(
+        namespace,
+        pod,
+        container,
+        logStream,
+        logOptions,
+      );
     } catch (err: any) {
       console.error(`❌ Failed to start log stream for ${pod}:`, err);
       onError(err.message || 'Log stream failed');

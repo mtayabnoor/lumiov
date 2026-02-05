@@ -1,58 +1,145 @@
 import { Socket } from 'socket.io';
 import { k8sService } from '../services/kubernetes.service.js';
 
-// Track active log streams for this specific module
-// Key: socket.id, Value: cleanup function
-const activeLogStreams = new Map<string, () => void>();
+interface LogSubscribeOptions {
+  namespace: string;
+  podName: string;
+  containerName?: string;
+  containers?: string[];
+  tailLines?: number;
+  sinceSeconds?: number;
+  previous?: boolean;
+  timestamps?: boolean;
+  follow?: boolean;
+}
+
+// Key: socket.id, Value: array of cleanup functions
+const activeLogStreams = new Map<string, (() => void)[]>();
 
 export const registerLogHandlers = (socket: Socket) => {
-  // 1. SUBSCRIBE: Start streaming logs
-  socket.on('logs:subscribe', async ({ namespace, podName, containerName }) => {
-    console.log(`📜 [Logs] Start request: ${podName} (ns: ${namespace})`);
+  socket.on('logs:subscribe', async (options: LogSubscribeOptions) => {
+    const {
+      namespace,
+      podName,
+      containerName,
+      containers,
+      tailLines,
+      sinceSeconds,
+      previous,
+      timestamps,
+      follow,
+    } = options;
 
-    // Clean up previous stream if exists for this user
+    // 1. VALIDATION: Fail fast if data is missing
+    if (!namespace || !podName) {
+      socket.emit('logs:error', 'Missing namespace or pod name');
+      return;
+    }
+
+    console.log(
+      `📜 [Logs] Subscribe: ${podName} (${containerName || 'single'})`,
+    );
+
+    // 2. CLEANUP: Stop any existing streams for this user immediately
     cleanupLogStream(socket.id);
 
-    try {
-      const stopStream = await k8sService.streamPodLogs(
-        namespace,
-        podName,
-        containerName || '',
-        (logChunk) => {
-          // Send data ONLY to this client
-          socket.emit('logs:data', logChunk);
-        },
-        (err) => {
-          socket.emit('logs:error', err);
-        },
-      );
+    // 3. INITIALIZE: Create the entry in the map immediately
+    // This ensures that even if the first stream succeeds and the second fails,
+    // we still have a place to store the first one's cleanup function.
+    activeLogStreams.set(socket.id, []);
 
-      // Save cleanup function
-      activeLogStreams.set(socket.id, stopStream);
-    } catch (error: any) {
-      console.error('❌ [Logs] Start failed:', error);
-      socket.emit('logs:error', error.message || 'Failed to start logs');
-    }
+    // Determine containers
+    const containersToStream =
+      containerName === 'all' && containers?.length
+        ? containers
+        : [containerName || ''];
+
+    // 4. PARALLEL EXECUTION: Start all streams at once
+    const streamPromises = containersToStream.map(async (container) => {
+      try {
+        const stopStream = await k8sService.streamPodLogs(
+          namespace,
+          podName,
+          container,
+          (logChunk) => {
+            // Multi-container tagging
+            if (containersToStream.length > 1) {
+              const prefix = `[${container}] `;
+              // micro-optimization: don't split if not needed
+              const tagged = logChunk.includes('\n')
+                ? logChunk
+                    .split('\n')
+                    .map((l) => (l ? prefix + l : l))
+                    .join('\n')
+                : prefix + logChunk;
+              socket.emit('logs:data', tagged);
+            } else {
+              socket.emit('logs:data', logChunk);
+            }
+          },
+          (err) => {
+            const errString = String(err);
+            if (errString.includes('400') && previous) {
+              socket.emit(
+                'logs:error',
+                `Container "${container}" has no previous logs.`,
+              );
+            } else {
+              socket.emit('logs:error', errString);
+            }
+          },
+          { tailLines, sinceSeconds, previous, timestamps, follow },
+        );
+
+        // ✅ CRITICAL FIX: Add to map ONLY if connection succeeded
+        // We check if the socket is still active just in case
+        if (activeLogStreams.has(socket.id)) {
+          const currentStreams = activeLogStreams.get(socket.id) || [];
+          currentStreams.push(stopStream);
+          activeLogStreams.set(socket.id, currentStreams);
+        } else {
+          // Edge case: User disconnected *while* we were connecting
+          stopStream();
+        }
+      } catch (error: any) {
+        console.error(
+          `❌ [Logs] Failed to stream container ${container}:`,
+          error,
+        );
+        socket.emit(
+          'logs:error',
+          `Failed to stream ${container}: ${error.message}`,
+        );
+      }
+    });
+
+    // We don't await this blocking the UI, but we catch unhandled promise rejections
+    await Promise.all(streamPromises);
   });
 
-  // 2. UNSUBSCRIBE: User closed the drawer
   socket.on('logs:unsubscribe', () => {
     cleanupLogStream(socket.id);
     console.log(`🛑 [Logs] Unsubscribed: ${socket.id}`);
   });
 
-  // 3. DISCONNECT: User left the app
-  // Socket.IO allows multiple disconnect listeners, so this is safe
   socket.on('disconnect', () => {
     cleanupLogStream(socket.id);
   });
 };
 
-// Helper to kill streams safely
+// Robust Cleanup Helper
 const cleanupLogStream = (socketId: string) => {
   if (activeLogStreams.has(socketId)) {
-    const stopStream = activeLogStreams.get(socketId);
-    if (stopStream) stopStream();
+    const cleanupFns = activeLogStreams.get(socketId) || [];
+
+    cleanupFns.forEach((fn) => {
+      try {
+        fn(); // Run cleanup
+      } catch (err) {
+        console.error('Error closing stream:', err);
+      }
+    });
+
     activeLogStreams.delete(socketId);
   }
 };
