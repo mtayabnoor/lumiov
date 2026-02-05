@@ -8,9 +8,9 @@ function PageHeader({
   description: string;
 }) {
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box sx={{ mb: 2 }}>
       <Typography
-        variant="h4"
+        variant="h3"
         sx={{ fontWeight: 700, color: "text.primary", mb: 1 }}
       >
         {title}

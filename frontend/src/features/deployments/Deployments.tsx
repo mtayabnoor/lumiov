@@ -63,7 +63,7 @@ function Deployments() {
     );
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 2 }}>
       <PageHeader
         title="Deployments"
         description="Real-time monitoring dashboard for deployments"
