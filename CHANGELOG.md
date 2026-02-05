@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.1](https://github.com/mtayabnoor/lumiov/compare/v2.4.0...v2.4.1) (2026-02-05)
+
+
+### Code Refactoring
+
+* Updated build pipelines ([7c9f81f](https://github.com/mtayabnoor/lumiov/commit/7c9f81f259cf8a92df8745bced90971df8b98413))
+
 ## [2.4.0](https://github.com/mtayabnoor/lumiov/compare/v2.3.0...v2.4.0) (2026-02-05)
 
 
