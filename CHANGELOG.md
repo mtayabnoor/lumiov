@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/mtayabnoor/lumiov/compare/v2.4.2...v2.5.0) (2026-02-05)
+
+
+### Features
+
+* Added new theme and updated text fonts and styles ([2e5fd9e](https://github.com/mtayabnoor/lumiov/commit/2e5fd9ea2193de1b9aa1411fbfe41b1c1013a4db))
+
+
+### Bug Fixes
+
+* Updated backend node use and added icons for app ([f9cc0d0](https://github.com/mtayabnoor/lumiov/commit/f9cc0d0555938259eef11c63c6919a1ebb4597f1))
+* Updated main layout and imrpoved gaps between appbar and sidebar ([c54a518](https://github.com/mtayabnoor/lumiov/commit/c54a518deed8680d9c8b8e0706280fb3fc60f243))
+* Updated main layout styles ([618ebee](https://github.com/mtayabnoor/lumiov/commit/618ebeed610dd0e3b15050dea39ef4b76ccf8fe2))
+
+
+### Maintenance
+
+* **release:** 2.4.3 ([c30432b](https://github.com/mtayabnoor/lumiov/commit/c30432b012dc603c1b9978771b5d9f3c9c3396d9))
+* **release:** 2.4.4 ([c16433f](https://github.com/mtayabnoor/lumiov/commit/c16433ff1f4b0e502ef7698706364f37320436b4))
+
 ### [2.4.4](https://github.com/mtayabnoor/lumiov/compare/v2.4.2...v2.4.4) (2026-02-05)
 
 
