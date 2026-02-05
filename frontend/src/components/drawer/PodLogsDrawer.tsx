@@ -1246,7 +1246,7 @@ export default function PodLogsDrawer({
           {isConnected && (
             <Chip
               size="small"
-              label="Live"
+              label="Connected"
               sx={CONNECTED_CHIP_SX}
               icon={<Box sx={PULSE_DOT_SX} />}
             />
