@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.2](https://github.com/mtayabnoor/lumiov/compare/v2.6.1...v2.6.2) (2026-02-05)
+
+
+### Bug Fixes
+
+* Update components styling ([0ace189](https://github.com/mtayabnoor/lumiov/commit/0ace18925ef313803596283d2922f0072287b584))
+
 ### [2.6.1](https://github.com/mtayabnoor/lumiov/compare/v2.6.0...v2.6.1) (2026-02-05)
 
 
