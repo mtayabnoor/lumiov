@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.8.2](https://github.com/mtayabnoor/lumiov/compare/v2.8.1...v2.8.2) (2026-02-06)
+
+
+### Bug Fixes
+
+* Fixed graph box scrolling issue ([652b239](https://github.com/mtayabnoor/lumiov/commit/652b239ff8063aa380116208ccd9594af2427331))
+* Fixed pagelayout css for content box ([5ec8d91](https://github.com/mtayabnoor/lumiov/commit/5ec8d918012a4a64c2ecf8c036f94ece4d060d74))
+
 ### [2.8.1](https://github.com/mtayabnoor/lumiov/compare/v2.8.0...v2.8.1) (2026-02-06)
 
 
