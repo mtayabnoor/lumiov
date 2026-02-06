@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/mtayabnoor/lumiov/compare/v2.8.2...v2.9.0) (2026-02-06)
+
+
+### Features
+
+* Cluster Agent Added ([9c1bfc6](https://github.com/mtayabnoor/lumiov/commit/9c1bfc6dd2606db6ee187000145afc364fa5de71))
+
 ### [2.8.2](https://github.com/mtayabnoor/lumiov/compare/v2.8.1...v2.8.2) (2026-02-06)
 
 
