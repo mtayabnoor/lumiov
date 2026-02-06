@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/mtayabnoor/lumiov/compare/v2.6.2...v2.7.0) (2026-02-06)
+
+
+### Features
+
+* Added editor for deployment ([08a999c](https://github.com/mtayabnoor/lumiov/commit/08a999c512f46bf9bbb66a83fa5114acbae73c7b))
+* Edit yaml feature added ([9bd5b2c](https://github.com/mtayabnoor/lumiov/commit/9bd5b2c584d1648858ebcbcc6d8a30383d815edf))
+
+
+### Bug Fixes
+
+* Removed gap between appbar and sidebar ([8af7fa2](https://github.com/mtayabnoor/lumiov/commit/8af7fa20edf21aa5c5ef46d3dc8a6089915e4275))
+* Updated Editor component  style and added more features to it ([751d731](https://github.com/mtayabnoor/lumiov/commit/751d731c090d63e60aa91bd7a41c3d13a224e942))
+* Updated editor component styling using themes file and editor code ([92950d6](https://github.com/mtayabnoor/lumiov/commit/92950d66f2e6417767a32ba7cda7efd445b7805f))
+
 ### [2.6.2](https://github.com/mtayabnoor/lumiov/compare/v2.6.1...v2.6.2) (2026-02-05)
 
 
