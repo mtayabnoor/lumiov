@@ -1,4 +1,6 @@
 export interface Pod {
+  apiVersion: "v1";
+  kind: "Pod";
   metadata: {
     name: string;
     namespace: string;

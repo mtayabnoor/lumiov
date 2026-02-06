@@ -7,6 +7,8 @@ import { Deployment } from "../../interfaces/deployment";
 import { Box, CircularProgress, Alert, Typography } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
 import PageLayout from "../../components/common/PageLayout/PageLayout";
+import ResourceEditor from "../../components/common/Editor/ResourceEditor";
+import { useState } from "react";
 
 const getDeploymentReadyStatus = (event: Deployment) => {
   const desired = event?.status?.replicas ?? 0;
@@ -16,6 +18,12 @@ const getDeploymentReadyStatus = (event: Deployment) => {
 
 function Deployments() {
   const { deployments, error, loading } = useDeployments();
+
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [editingDeployment, setEditingDeployment] = useState<{
+    namespace: string;
+    deploymentName: string;
+  } | null>(null);
 
   const deploymentConfig: ResourceTableConfig = {
     columns: [
@@ -44,9 +52,14 @@ function Deployments() {
     ],
   };
 
-  const handleAction = (actionId: string, row: any) => {
-    console.log("Action triggered:", actionId, row);
-    // Add logic: e.g., navigate to logs, open delete dialog, etc.
+  const handleAction = (actionId: string, deployment: Deployment) => {
+    const namespace = deployment.metadata.namespace;
+    const deploymentName = deployment.metadata.name;
+
+    if (actionId === "edit") {
+      setEditingDeployment({ namespace, deploymentName });
+      setEditDrawerOpen(true);
+    }
   };
 
   if (loading)
@@ -72,6 +85,19 @@ function Deployments() {
         data={deployments}
         onAction={handleAction}
       />
+      {editingDeployment && (
+        <ResourceEditor
+          open={editDrawerOpen}
+          onClose={() => {
+            setEditDrawerOpen(false);
+            setEditingDeployment(null);
+          }}
+          apiVersion="apps/v1"
+          kind="Deployment"
+          namespace={editingDeployment.namespace}
+          name={editingDeployment.deploymentName}
+        />
+      )}
     </PageLayout>
   );
 }
