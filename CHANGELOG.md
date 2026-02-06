@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.8.0](https://github.com/mtayabnoor/lumiov/compare/v2.7.0...v2.8.0) (2026-02-06)
+
+
+### Features
+
+* Added theme change button ([3a37186](https://github.com/mtayabnoor/lumiov/commit/3a37186120b0ade4adbd1392dd379d4ef64e5e4e))
+
+
+### Bug Fixes
+
+* Updated themes to make them consistent ([7ee905a](https://github.com/mtayabnoor/lumiov/commit/7ee905a5a088876a1960e70885948f1440c665ec))
+
 ## [2.7.0](https://github.com/mtayabnoor/lumiov/compare/v2.6.2...v2.7.0) (2026-02-06)
 
 
