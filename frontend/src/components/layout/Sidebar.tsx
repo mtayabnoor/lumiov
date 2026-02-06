@@ -39,8 +39,8 @@ function Sidebar() {
         [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
       }}
     >
-      <Box sx={{ height: 50 }} /> {/* Matches MainLayout HEADER_HEIGHT */}
-      <Box sx={{ overflow: "auto", py: 2 }}>
+      <Toolbar variant="dense" sx={{ minHeight: "45px !important" }} />
+      <Box sx={{ overflow: "auto" }}>
         <List component="nav">
           {sidebarItems.map((group) => {
             const isChildActive = group.items.some(

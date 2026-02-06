@@ -22,8 +22,10 @@ function MainLayout() {
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
           height: HEADER_HEIGHT,
-          /*backgroundColor: "#1e1e1e",
-          borderBottom: "1px solid #333",*/
+          // borderBottom: "1px solid", // Add a subtle border to define the edge
+          // borderColor: "divider",
+          // bgcolor: "background.paper", // Or your specific hex code
+          // color: "text.primary",
         }}
       >
         <Toolbar
