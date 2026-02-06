@@ -6,18 +6,24 @@ import {
   Typography,
   IconButton,
   Tooltip,
+  Badge,
 } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import Sidebar from "./Sidebar";
 import { useThemeMode } from "../../context/ThemeContext";
+import { useAgent } from "../../context/AgentContext";
+import AgentChatPanel from "../agent/AgentChatPanel";
+import AgentConfigModal from "../agent/AgentConfigModal";
+import PsychologyIcon from "@mui/icons-material/Psychology";
 
 const LOGO_SRC = "lumiov.ico";
 const HEADER_HEIGHT = "50px";
 
 function MainLayout() {
   const { mode, toggleTheme } = useThemeMode();
+  const { isConfigured, toggleChat } = useAgent();
 
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
@@ -66,6 +72,38 @@ function MainLayout() {
           {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />
 
+          {/* AI Agent Button */}
+          <Tooltip title="Talk to your cluster">
+            <IconButton
+              onClick={toggleChat}
+              size="small"
+              sx={{
+                mr: 1,
+                color: "#fff",
+                position: "relative",
+
+                borderRadius: "8px",
+                p: 0.75,
+                //"&:hover": {
+                //  bgcolor: isConfigured
+                //    ? "primary.dark"
+                //    : "rgba(255,255,255,0.1)",
+                //},
+              }}
+            >
+              <PsychologyIcon
+                fontSize="medium"
+                sx={{
+                  color: isConfigured ? "#e02222ff" : "#fff",
+                  filter: isConfigured
+                    ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                    : "none",
+                  transition: "all 0.3s ease",
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+
           {/* Theme Toggle */}
           <Tooltip
             title={
@@ -97,6 +135,10 @@ function MainLayout() {
         <Box sx={{ height: HEADER_HEIGHT }} />
         <Outlet />
       </Box>
+
+      {/* Agent Components */}
+      <AgentChatPanel />
+      <AgentConfigModal />
     </Box>
   );
 }

@@ -11,6 +11,11 @@ export const SocketEvent = {
   K8S_EVENT: "k8s-event",
   SUBSCRIBE: "subscribe",
   UNSUBSCRIBE: "unsubscribe",
+  // Agent events
+  AGENT_STATUS: "agent:status",
+  AGENT_CONFIGURE: "agent:configure",
+  AGENT_CHAT: "agent:chat",
+  AGENT_CLEAR: "agent:clear",
 } as const;
 
 export type ResourceType = "pods" | "deployments" | "namespaces";
@@ -41,6 +46,21 @@ export interface ExecResizeParams {
   cols: number;
 }
 
+// Agent response types
+export interface AgentStatusResponse {
+  configured: boolean;
+}
+
+export interface AgentConfigureResponse {
+  success: boolean;
+  error?: string;
+}
+
+export interface AgentChatResponse {
+  response?: string;
+  error?: string;
+}
+
 // Map events to their payloads
 export interface ServerToClientEvents {
   [SocketEvent.K8S_EVENT]: (payload: K8sEventPayload) => void;
@@ -56,4 +76,17 @@ export interface ClientToServerEvents {
   [SocketEvent.EXEC_INPUT]: (data: string) => void;
   [SocketEvent.EXEC_RESIZE]: (params: ExecResizeParams) => void;
   [SocketEvent.UNSUBSCRIBE]: (resource: ResourceType) => void;
+  // Agent events with callbacks
+  [SocketEvent.AGENT_STATUS]: (
+    callback: (response: AgentStatusResponse) => void,
+  ) => void;
+  [SocketEvent.AGENT_CONFIGURE]: (
+    apiKey: string,
+    callback: (response: AgentConfigureResponse) => void,
+  ) => void;
+  [SocketEvent.AGENT_CHAT]: (
+    message: string,
+    callback: (response: AgentChatResponse) => void,
+  ) => void;
+  [SocketEvent.AGENT_CLEAR]: (callback: () => void) => void;
 }

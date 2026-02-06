@@ -9,6 +9,7 @@ import { k8sService } from './services/kubernetes.service.js';
 import { registerWatchResourceHandlers } from './handlers/watch.handler.js';
 import { registerExecHandlers } from './handlers/exec.handler.js';
 import { registerLogHandlers } from './handlers/logs.handler.js';
+import { registerAgentHandlers } from './handlers/agent.handler.js';
 import { resourceRouter } from './routes/resource.route.js';
 
 dotenv.config();
@@ -84,6 +85,7 @@ io.on('connection', (socket) => {
   registerWatchResourceHandlers(socket);
   registerExecHandlers(socket);
   registerLogHandlers(socket);
+  registerAgentHandlers(socket);
 
   socket.on('disconnect', () => {
     console.log(`❌ Client disconnected: ${socket.id}`);
