@@ -11,7 +11,9 @@ import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiv
 import { useState } from "react";
 import PodExecDrawer from "../../components/drawer/PodExecDrawer";
 import PodLogsDrawer from "../../components/drawer/PodLogsDrawer";
+
 import PageLayout from "../../components/common/PageLayout/PageLayout";
+import ResourceEditor from "../../components/common/Editor/ResourceEditor";
 
 // --- Helper Functions (Defined outside the component) ---
 
@@ -107,6 +109,13 @@ function Pods() {
     defaultContainer?: string;
   } | null>(null);
 
+  // Edit drawer state
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [editingPod, setEditingPod] = useState<{
+    namespace: string;
+    podName: string;
+  } | null>(null);
+
   const podConfig: ResourceTableConfig = {
     columns: [
       { key: "metadata.namespace", header: "NAMESPACE" },
@@ -163,7 +172,8 @@ function Pods() {
     const defaultContainer = containers[0]?.name;
 
     if (actionId === "edit") {
-      alert(`Edit functionality for ${podName} is not yet implemented.`);
+      setEditingPod({ namespace, podName });
+      setEditDrawerOpen(true);
     }
     if (actionId === "delete") {
       // Ideally verify with user before deleting
@@ -230,6 +240,20 @@ function Pods() {
           containers={selectedLogPod.containers}
           defaultContainer={selectedLogPod.defaultContainer}
           socket={socket}
+        />
+      )}
+
+      {editingPod && (
+        <ResourceEditor
+          open={editDrawerOpen}
+          onClose={() => {
+            setEditDrawerOpen(false);
+            setEditingPod(null);
+          }}
+          apiVersion="v1"
+          kind="Pod"
+          namespace={editingPod.namespace}
+          name={editingPod.podName}
         />
       )}
     </PageLayout>

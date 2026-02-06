@@ -1,3 +1,4 @@
+import * as k8s from '@kubernetes/client-node';
 import {
   KubeConfig,
   Exec,
@@ -6,11 +7,16 @@ import {
   AppsV1Api,
   V1Status,
   Log,
+  KubernetesObjectApi,
 } from '@kubernetes/client-node';
 import { loadKubeConfig } from '../config/k8s.js';
 import { Writable, PassThrough } from 'stream';
 import WebSocket from 'ws';
 import { ResourceType, ShellSession } from '../types/common.js';
+import * as yaml from 'js-yaml';
+import equal from 'fast-deep-equal';
+
+const JSON_PATCH_HEADER = 'application/json-patch+json';
 
 export class K8sService {
   private kc: KubeConfig | null = null;
@@ -21,26 +27,30 @@ export class K8sService {
   // REST Clients for fetching initial lists
   private coreApi: CoreV1Api | null = null;
   private appsApi: AppsV1Api | null = null;
+  private objectApi: KubernetesObjectApi | null = null;
 
-  private isInitialized = false;
+  public isInitialized = false;
 
   public async initialize(): Promise<void> {
-    if (this.isInitialized) return; // Prevent duplicate initialization
+    if (this.isInitialized) return;
 
     try {
-      this.kc = loadKubeConfig();
+      this.kc = loadKubeConfig(); // Ensure this returns a KubeConfig instance
       this.watch = new Watch(this.kc);
       this.exec = new Exec(this.kc);
       this.log = new Log(this.kc);
 
-      // Initialize APIs for Listing
       this.coreApi = this.kc.makeApiClient(CoreV1Api);
       this.appsApi = this.kc.makeApiClient(AppsV1Api);
+
+      // ⚠️ THE FIX: Use the static factory method for the generic object API
+      this.objectApi = KubernetesObjectApi.makeApiClient(this.kc);
 
       this.isInitialized = true;
       console.log('✅ K8s Service Initialized');
     } catch (err) {
       console.error('❌ K8s Init Failed:', err);
+      throw err; // Re-throw so the server knows it failed
     }
   }
 
@@ -282,6 +292,139 @@ export class K8sService {
       }
       logStream.destroy();
     };
+  }
+  // GET SINGLE RESOURCE (YAML/JSON)
+  public async getResourceGeneric(
+    apiVersion: string,
+    kind: string,
+    namespace: string,
+    name: string,
+  ): Promise<string> {
+    this.checkInit();
+    try {
+      // Use the pre-initialized objectApi
+      const response = await this.objectApi!.read({
+        apiVersion,
+        kind,
+        metadata: { name, namespace },
+      });
+
+      //const body = response as any;
+      //if (body.metadata?.managedFields) delete body.metadata.managedFields;
+
+      return yaml.dump(response, { indent: 2 });
+    } catch (err: any) {
+      throw new Error(err.response?.body?.message || err.message);
+    }
+  }
+
+  // ✅ FIXED: UPDATE RESOURCE (GENERIC)
+  public async updateResourceGeneric(yamlString: string): Promise<any> {
+    this.checkInit();
+
+    // Safety: Auto-repair client
+    if (!this.objectApi && this.kc) {
+      this.objectApi = k8s.KubernetesObjectApi.makeApiClient(this.kc);
+    }
+
+    try {
+      // 1. Parse Your YAML (Plain Object)
+      let newSpec: any = yaml.load(yamlString);
+      if (typeof newSpec === 'string') newSpec = yaml.load(newSpec);
+      if (newSpec.yaml && !newSpec.kind) newSpec = yaml.load(newSpec.yaml);
+
+      if (!newSpec || !newSpec.kind || !newSpec.metadata?.name) {
+        throw new Error(
+          'Invalid YAML: Missing kind, apiVersion, or metadata.name',
+        );
+      }
+
+      // 2. Fetch the LIVE version
+      const response = await this.objectApi!.read({
+        apiVersion: newSpec.apiVersion,
+        kind: newSpec.kind,
+        metadata: {
+          name: newSpec.metadata.name,
+          namespace: newSpec.metadata.namespace,
+        },
+      });
+
+      // ⚠️ CRITICAL FIX: Normalize the Live Object
+      // This converts 'V1Container' classes into plain objects matching 'newSpec'
+      const liveSpec = JSON.parse(JSON.stringify(response));
+
+      // 3. Prepare Objects for Comparison
+      // We clean up fields that differ but don't matter (like managedFields)
+      const cleanForCompare = (obj: any) => {
+        const clone = JSON.parse(JSON.stringify(obj));
+        delete clone.status; // Ignore status changes
+        if (clone.metadata) {
+          // Remove system fields that the user cannot edit
+          delete clone.metadata.managedFields;
+          delete clone.metadata.creationTimestamp;
+          delete clone.metadata.uid;
+          delete clone.metadata.resourceVersion;
+          delete clone.metadata.generation;
+          delete clone.metadata.selfLink;
+        }
+        return clone;
+      };
+
+      const cleanLive = cleanForCompare(liveSpec);
+      const cleanNew = cleanForCompare(newSpec);
+
+      // 4. SMART CHECK: Did anything actually change?
+      // If they are equal, return immediately. No API call = No Errors.
+      if (equal(cleanLive, cleanNew)) {
+        console.log(
+          `✅ No changes detected for ${newSpec.metadata.name}. Skipping update.`,
+        );
+        return liveSpec;
+      }
+
+      console.log(
+        `📝 Detected changes. Replacing resource ${newSpec.metadata.name}...`,
+      );
+
+      // 5. Prepare for REPLACE (PUT)
+      // We need the valid resourceVersion from the LIVE object to allow the update
+      newSpec.metadata.resourceVersion = liveSpec.metadata.resourceVersion;
+
+      // Optional: Copy UID to be safe, though not strictly required for PUT
+      if (liveSpec.metadata.uid) {
+        newSpec.metadata.uid = liveSpec.metadata.uid;
+      }
+
+      // Remove status from the update payload (it's read-only)
+      delete newSpec.status;
+
+      // 6. EXECUTE REPLACE (PUT)
+      const updateResponse = await this.objectApi!.replace(
+        newSpec, // The full object
+        undefined, // pretty
+        undefined, // dryRun
+        undefined, // fieldManager
+        undefined, // options (headers)
+      );
+
+      return updateResponse.body;
+    } catch (err: any) {
+      const errorMessage = err.response?.body?.message || err.message;
+      console.error(`❌ Update Error: ${errorMessage}`);
+
+      if (errorMessage.includes('Conflict')) {
+        throw new Error(
+          `Update Conflict: Someone else edited this resource. Please refresh.`,
+        );
+      }
+      if (errorMessage.includes('Forbidden')) {
+        throw new Error(
+          `Forbidden: You are trying to change an immutable field (like Ports or Image) on a running Pod. Delete and recreate it instead.`,
+        );
+      }
+
+      throw new Error(errorMessage);
+    }
   }
 }
 
