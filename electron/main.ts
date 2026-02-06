@@ -71,8 +71,11 @@ function createWindow() {
     );
     mainWindow.webContents.openDevTools();
   } else {
+    // In production, files are packaged in the asar archive
+    // __dirname is inside app.asar/electron/dist/electron/
+    // frontend/dist is at app.asar/frontend/dist/
     mainWindow.loadFile(
-      path.resolve(__dirname, "../../../frontend/dist/index.html"),
+      path.join(__dirname, "..", "..", "..", "frontend", "dist", "index.html"),
     );
   }
 }

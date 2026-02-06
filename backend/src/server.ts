@@ -2,8 +2,6 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors, { CorsOptions } from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
 // Service & Handler Imports
@@ -13,7 +11,6 @@ import { registerExecHandlers } from './handlers/exec.handler.js';
 import { registerLogHandlers } from './handlers/logs.handler.js';
 import { resourceRouter } from './routes/resource.route.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config();
 
 const PORT = process.env.PORT || 3030;
@@ -37,9 +34,12 @@ const corsOptions: CorsOptions = {
     origin: string | undefined,
     callback: (err: Error | null, allow?: boolean) => void,
   ) => {
-    // allow requests with no origin (like mobile apps or curl)
+    // Allow requests with no origin (like mobile apps, curl, or file:// in Electron)
+    // In packaged Electron apps, origin is 'null' or 'file://' when loading from filesystem
     if (
       !origin ||
+      origin === 'null' ||
+      origin.startsWith('file://') ||
       allowedOrigins.includes(origin) ||
       process.env.NODE_ENV === 'development'
     ) {
