@@ -45,11 +45,12 @@ const PageLayout = ({
       <Box
         sx={{
           flexGrow: 1, // Take all remaining space
-          overflow: "hidden", // 2. DO NOT SCROLL HERE
           display: "flex", // 3. Make this a flex container
           flexDirection: "column",
+          overflowY: "auto",
           px: 3,
           pb: 3,
+          minHeight: 0,
         }}
       >
         {/* This forces the child (your Table Wrapper) to fill the exact space */}
