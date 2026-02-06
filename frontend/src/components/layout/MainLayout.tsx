@@ -1,31 +1,34 @@
-import { Box, CssBaseline, Toolbar, AppBar, Typography } from "@mui/material";
+import {
+  Box,
+  CssBaseline,
+  Toolbar,
+  AppBar,
+  Typography,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 import { Outlet } from "react-router-dom";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import Sidebar from "./Sidebar";
+import { useThemeMode } from "../../context/ThemeContext";
 
-// OPTION A: Import from assets (Best if file is in src/assets/logo.png)
-// import logoImg from "../assets/logo.png";
-
-// OPTION B: Reference public folder directly
-const LOGO_SRC = "lumiov.ico"; // Or "/icon.png"
-
+const LOGO_SRC = "lumiov.ico";
 const HEADER_HEIGHT = "50px";
 
 function MainLayout() {
+  const { mode, toggleTheme } = useThemeMode();
+
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <CssBaseline />
 
-      {/* Header */}
       <AppBar
         position="fixed"
         elevation={0}
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
           height: HEADER_HEIGHT,
-          // borderBottom: "1px solid", // Add a subtle border to define the edge
-          // borderColor: "divider",
-          // bgcolor: "background.paper", // Or your specific hex code
-          // color: "text.primary",
         }}
       >
         <Toolbar
@@ -37,30 +40,22 @@ function MainLayout() {
             px: 2,
           }}
         >
-          {/* TITLE + CUSTOM LOGO */}
+          {/* Logo + Title */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            {/* 👇 YOUR CUSTOM ICON HERE 👇 */}
             <Box
               component="img"
               src={LOGO_SRC}
               alt="Lumiov Logo"
-              sx={{
-                height: 24, // Adjust size (20px - 30px is good for this bar)
-                width: 24, // Keep aspect ratio
-                marginRight: 1.5, // Space between logo and text
-                objectFit: "contain", // Ensures image doesn't stretch
-              }}
+              sx={{ height: 24, width: 24, mr: 1.5, objectFit: "contain" }}
             />
-
             <Typography
               variant="subtitle2"
               noWrap
               component="div"
               sx={{
-                /*fontFamily: '"Consolas", "Monaco", "Courier New", monospace',*/
                 fontSize: "18px",
                 fontWeight: 600,
-                color: "#ffffffff",
+                color: "#fff",
                 letterSpacing: "0.5px",
               }}
             >
@@ -70,6 +65,21 @@ function MainLayout() {
 
           {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />
+
+          {/* Theme Toggle */}
+          <Tooltip
+            title={
+              mode === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"
+            }
+          >
+            <IconButton
+              onClick={toggleTheme}
+              size="small"
+              sx={{ color: "#fff" }}
+            >
+              {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
 
