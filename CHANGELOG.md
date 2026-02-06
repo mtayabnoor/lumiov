@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.8.1](https://github.com/mtayabnoor/lumiov/compare/v2.8.0...v2.8.1) (2026-02-06)
+
+
+### Bug Fixes
+
+* Index.js path fixed and cors config updated ([88e9d34](https://github.com/mtayabnoor/lumiov/commit/88e9d349a15c90138f37c4c9335148801a5e7879))
+
 ## [2.8.0](https://github.com/mtayabnoor/lumiov/compare/v2.7.0...v2.8.0) (2026-02-06)
 
 
