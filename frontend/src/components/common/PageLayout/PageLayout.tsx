@@ -21,7 +21,8 @@ const PageLayout = ({
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        overflow: "hidden", // 1. LOCK THE PARENT (Stop full page scroll)
+        minHeight: 0, // Critical for Electron flex scrolling
+        overflow: "hidden",
         p: 0,
       }}
     >
@@ -41,19 +42,18 @@ const PageLayout = ({
         {actions && <Box>{actions}</Box>}
       </Box>
 
-      {/* CONTENT AREA */}
+      {/* CONTENT AREA - no scroll here, children handle their own scrolling */}
       <Box
         sx={{
-          flexGrow: 1, // Take all remaining space
-          display: "flex", // 3. Make this a flex container
+          flexGrow: 1,
+          minHeight: 0, // Critical for Electron flex scrolling
+          display: "flex",
           flexDirection: "column",
-          overflowY: "auto",
+          overflow: "hidden", // Don't scroll here - let children scroll
           px: 3,
           pb: 3,
-          minHeight: 0,
         }}
       >
-        {/* This forces the child (your Table Wrapper) to fill the exact space */}
         {children}
       </Box>
     </Box>
