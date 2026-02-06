@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Drawer,
   Box,
@@ -10,6 +10,7 @@ import {
   Tooltip,
   Chip,
   useTheme,
+  alpha,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
@@ -31,45 +32,72 @@ interface ResourceEditorProps {
   name: string;
 }
 
-// VS Code Dark Theme Colors
-const VSCODE_COLORS = {
-  background: "#1e1e1e",
-  sidebarBg: "#252526",
-  headerBg: "#323233",
-  border: "#3c3c3c",
-  accent: "#0078d4",
-  accentHover: "#1c8cd6",
-  text: "#cccccc",
-  textMuted: "#858585",
-  textBright: "#ffffff",
-  success: "#4ec9b0",
-  warning: "#dcdcaa",
-  error: "#f48771",
-  info: "#9cdcfe",
-};
-
 const HEADER_HEIGHT = 50; // Match AppBar height
 
-// Fields to hide when "Show Managed Fields" is OFF
-const SYSTEM_FIELDS = [
-  "managedFields",
-  "creationTimestamp",
-  "uid",
-  "resourceVersion",
-  "generation",
-  "selfLink",
+// 1. Metadata Fields (System Managed) - Hide these from metadata
+// 1. Metadata Fields (System Managed) - Hide these from metadata
+const SYSTEM_METADATA_FIELDS = [
+  "managedFields", // Noise
+  "resourceVersion", // Optimistic locking
+  "generation", // Update ID
+  "uid", // Immutable ID
+  "creationTimestamp", // Immutable
+  "deletionTimestamp", // Lifecycle
+  "deletionGracePeriodSeconds",
+  "selfLink", // Deprecated
+  "generateName", // Lifecycle
+  "ownerReferences", // Relationship
+  "finalizers", // Lifecycle (Moved here from Spec list as it lives in metadata)
 ];
 
-// Helper to strip system fields from object
+// 2. Spec Fields (System Assigned / Defaults) - Hide these from Spec
+const SYSTEM_SPEC_FIELDS = [
+  "nodeName", // Assigned by Scheduler
+  "clusterIP", // Assigned by K8s
+  "clusterIPs", // Assigned by K8s
+  "serviceAccount", // Deprecated (serviceAccountName is used instead)
+  "priority", // Calculated from priorityClassName
+];
+
 const stripSystemFields = (obj: any): any => {
   if (!obj || typeof obj !== "object") return obj;
 
+  // 1. Deep clone to avoid mutating the original data
   const clone = JSON.parse(JSON.stringify(obj));
+
+  // ---------------------------------------------------------
+  // A. REMOVE ROOT-LEVEL STATE
+  // ---------------------------------------------------------
+  delete clone.status;
+
+  // ---------------------------------------------------------
+  // B. REMOVE METADATA NOISE (Dynamic Loop)
+  // ---------------------------------------------------------
   if (clone.metadata) {
-    SYSTEM_FIELDS.forEach((field) => {
-      delete clone.metadata[field];
-    });
+    // Loop through the list and delete each field
+    SYSTEM_METADATA_FIELDS.forEach((field) => delete clone.metadata[field]);
+
+    // Handle the specific "Last Applied" annotation separately
+    if (clone.metadata.annotations) {
+      delete clone.metadata.annotations[
+        "kubectl.kubernetes.io/last-applied-configuration"
+      ];
+
+      // Cleanup empty annotations object
+      if (Object.keys(clone.metadata.annotations).length === 0) {
+        delete clone.metadata.annotations;
+      }
+    }
   }
+
+  // ---------------------------------------------------------
+  // C. REMOVE SPEC NOISE (Dynamic Loop)
+  // ---------------------------------------------------------
+  if (clone.spec) {
+    // Loop through the list and delete each field
+    SYSTEM_SPEC_FIELDS.forEach((field) => delete clone.spec[field]);
+  }
+
   return clone;
 };
 
@@ -84,7 +112,7 @@ function ResourceEditor({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  // Store full resource (including managed fields)
+  // State
   const [fullResource, setFullResource] = useState<any>(null);
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -92,17 +120,16 @@ function ResourceEditor({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Editor options state
+  // Editor options
   const [wordWrap, setWordWrap] = useState<"on" | "off">("off");
   const [minimap, setMinimap] = useState(false);
-  const [showManagedFields, setShowManagedFields] = useState(false); // OFF by default
+  const [showManagedFields, setShowManagedFields] = useState(false);
 
-  // Fetch resource when drawer opens
+  // Reset state when closed
   useEffect(() => {
     if (open && namespace && name) {
       fetchResource();
     }
-    // Reset state when closed
     if (!open) {
       setError(null);
       setSuccess(null);
@@ -111,7 +138,7 @@ function ResourceEditor({
     }
   }, [open, namespace, name]);
 
-  // When toggle changes, regenerate content from fullResource
+  // Regenerate content when toggle or fullResource changes
   useEffect(() => {
     if (fullResource) {
       const objToShow = showManagedFields
@@ -136,27 +163,14 @@ function ResourceEditor({
       const responseText = await res.text();
       let rawData: any;
 
-      // 1. Parse Response safely
       try {
         rawData = JSON.parse(responseText);
       } catch {
         rawData = responseText;
       }
 
-      // 2. Ensure we have a valid JS Object for fullResource
-      let objectToStore: any;
-
-      if (typeof rawData === "string") {
-        // Backend sent raw YAML string -> Parse it to Object
-        objectToStore = yaml.load(rawData);
-      } else {
-        // Backend sent JSON object -> Use as is
-        objectToStore = rawData;
-      }
-
-      // 3. Update State (ONLY ONCE)
-      // We do NOT setContent here. We set fullResource, and let the
-      // existing useEffect([showManagedFields, fullResource]) update the editor.
+      const objectToStore =
+        typeof rawData === "string" ? yaml.load(rawData) : rawData;
       setFullResource(objectToStore);
     } catch (err: any) {
       setError(err.message);
@@ -170,9 +184,8 @@ function ResourceEditor({
     setError(null);
     setSuccess(null);
     try {
-      let parsed: any;
       try {
-        parsed = yaml.load(content);
+        yaml.load(content); // Validate YAML
       } catch (e: any) {
         throw new Error(`Invalid YAML: ${e.message}`);
       }
@@ -203,12 +216,11 @@ function ResourceEditor({
     setTimeout(() => setSuccess(null), 2000);
   };
 
-  // Dynamic styles based on theme
-  const headerBg = isDark ? VSCODE_COLORS.headerBg : "#f3f3f3";
-  const sidebarBg = isDark ? VSCODE_COLORS.sidebarBg : "#ffffff";
-  const borderColor = isDark ? VSCODE_COLORS.border : "#e0e0e0";
-  const textColor = isDark ? VSCODE_COLORS.text : "#333333";
-  const textMuted = isDark ? VSCODE_COLORS.textMuted : "#666666";
+  // Toolbar icon button style helper
+  const iconButtonSx = (active: boolean = false) => ({
+    color: active ? theme.palette.primary.main : theme.palette.text.secondary,
+    "&:hover": { bgcolor: alpha(theme.palette.text.primary, 0.08) },
+  });
 
   return (
     <Drawer
@@ -222,76 +234,59 @@ function ResourceEditor({
           maxWidth: "1000px",
           display: "flex",
           flexDirection: "column",
-          bgcolor: sidebarBg,
+          bgcolor: "background.paper",
           marginTop: `${HEADER_HEIGHT}px`,
           height: `calc(100vh - ${HEADER_HEIGHT}px)`,
-          borderLeft: `1px solid ${borderColor}`,
+          borderLeft: 1,
+          borderColor: "divider",
         },
       }}
       slotProps={{
-        backdrop: {
-          sx: {
-            marginTop: `${HEADER_HEIGHT}px`,
-          },
-        },
+        backdrop: { sx: { marginTop: `${HEADER_HEIGHT}px` } },
       }}
     >
-      {/* VS Code-like Header */}
+      {/* Header */}
       <Box
         sx={{
           px: 2,
           py: 1.5,
-          borderBottom: `1px solid ${borderColor}`,
+          borderBottom: 1,
+          borderColor: "divider",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          bgcolor: headerBg,
-          minHeight: 56,
+          bgcolor: isDark ? alpha("#000", 0.2) : alpha("#000", 0.03),
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontFamily: '"Consolas", "Monaco", "Courier New", monospace',
-                  fontWeight: 600,
-                  color: textColor,
-                  fontSize: "14px",
-                }}
-              >
-                {name}
-              </Typography>
-              <Chip
-                label={kind}
-                size="small"
-                sx={{
-                  height: 20,
-                  fontSize: "11px",
-                  fontWeight: 500,
-                  bgcolor: isDark
-                    ? "rgba(0, 120, 212, 0.2)"
-                    : "rgba(0, 120, 212, 0.1)",
-                  color: VSCODE_COLORS.accent,
-                  border: `1px solid ${VSCODE_COLORS.accent}`,
-                }}
-              />
-            </Box>
+        <Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Typography
-              variant="caption"
+              variant="subtitle1"
               sx={{
-                color: textMuted,
-                fontFamily: '"Consolas", "Monaco", "Courier New", monospace',
-                fontSize: "11px",
+                fontFamily: "monospace",
+                fontWeight: 600,
+                color: "text.primary",
               }}
             >
-              {namespace} · {apiVersion}
+              {name}
             </Typography>
+            <Chip
+              label={kind}
+              size="small"
+              color="primary"
+              variant="outlined"
+              sx={{ height: 20, fontSize: "11px" }}
+            />
           </Box>
+          <Typography
+            variant="caption"
+            sx={{ color: "text.secondary", fontFamily: "monospace" }}
+          >
+            {namespace} · {apiVersion}
+          </Typography>
         </Box>
 
-        {/* Toolbar Actions */}
+        {/* Toolbar */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <Tooltip
             title={
@@ -300,17 +295,8 @@ function ResourceEditor({
           >
             <IconButton
               size="small"
-              onClick={() => {
-                setShowManagedFields((v) => !v);
-              }}
-              sx={{
-                color: showManagedFields ? VSCODE_COLORS.warning : textMuted,
-                "&:hover": {
-                  bgcolor: isDark
-                    ? "rgba(255,255,255,0.1)"
-                    : "rgba(0,0,0,0.05)",
-                },
-              }}
+              onClick={() => setShowManagedFields((v) => !v)}
+              sx={iconButtonSx(showManagedFields)}
             >
               {showManagedFields ? (
                 <VisibilityIcon fontSize="small" />
@@ -324,14 +310,7 @@ function ResourceEditor({
             <IconButton
               size="small"
               onClick={() => setWordWrap((w) => (w === "on" ? "off" : "on"))}
-              sx={{
-                color: wordWrap === "on" ? VSCODE_COLORS.accent : textMuted,
-                "&:hover": {
-                  bgcolor: isDark
-                    ? "rgba(255,255,255,0.1)"
-                    : "rgba(0,0,0,0.05)",
-                },
-              }}
+              sx={iconButtonSx(wordWrap === "on")}
             >
               <WrapTextIcon fontSize="small" />
             </IconButton>
@@ -341,32 +320,14 @@ function ResourceEditor({
             <IconButton
               size="small"
               onClick={() => setMinimap((m) => !m)}
-              sx={{
-                color: minimap ? VSCODE_COLORS.accent : textMuted,
-                "&:hover": {
-                  bgcolor: isDark
-                    ? "rgba(255,255,255,0.1)"
-                    : "rgba(0,0,0,0.05)",
-                },
-              }}
+              sx={iconButtonSx(minimap)}
             >
               <MapIcon fontSize="small" />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Copy YAML">
-            <IconButton
-              size="small"
-              onClick={handleCopy}
-              sx={{
-                color: textMuted,
-                "&:hover": {
-                  bgcolor: isDark
-                    ? "rgba(255,255,255,0.1)"
-                    : "rgba(0,0,0,0.05)",
-                },
-              }}
-            >
+            <IconButton size="small" onClick={handleCopy} sx={iconButtonSx()}>
               <ContentCopyIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -376,14 +337,7 @@ function ResourceEditor({
               size="small"
               onClick={fetchResource}
               disabled={loading}
-              sx={{
-                color: textMuted,
-                "&:hover": {
-                  bgcolor: isDark
-                    ? "rgba(255,255,255,0.1)"
-                    : "rgba(0,0,0,0.05)",
-                },
-              }}
+              sx={iconButtonSx()}
             >
               <RefreshIcon fontSize="small" />
             </IconButton>
@@ -394,7 +348,8 @@ function ResourceEditor({
               width: 1,
               height: 24,
               mx: 1,
-              borderLeft: `1px solid ${borderColor}`,
+              borderLeft: 1,
+              borderColor: "divider",
             }}
           />
 
@@ -404,14 +359,7 @@ function ResourceEditor({
             size="small"
             disabled={loading || saving}
             onClick={handleSave}
-            sx={{
-              bgcolor: VSCODE_COLORS.accent,
-              textTransform: "none",
-              fontWeight: 500,
-              px: 2,
-              "&:hover": { bgcolor: VSCODE_COLORS.accentHover },
-              "&:disabled": { bgcolor: isDark ? "#3a3a3a" : "#e0e0e0" },
-            }}
+            sx={{ textTransform: "none", fontWeight: 500, px: 2 }}
           >
             {saving ? "Saving..." : "Apply"}
           </Button>
@@ -421,11 +369,8 @@ function ResourceEditor({
             size="small"
             sx={{
               ml: 1,
-              color: textMuted,
-              "&:hover": {
-                bgcolor: "rgba(232, 17, 35, 0.2)",
-                color: "#e81123",
-              },
+              color: "text.secondary",
+              "&:hover": { bgcolor: alpha("#e81123", 0.2), color: "#e81123" },
             }}
           >
             <CloseIcon fontSize="small" />
@@ -433,19 +378,14 @@ function ResourceEditor({
         </Box>
       </Box>
 
-      {/* Success/Error Messages */}
+      {/* Alerts */}
       {(error || success) && (
-        <Box sx={{ px: 2, py: 1, bgcolor: headerBg }}>
+        <Box sx={{ px: 2, py: 1 }}>
           {error && (
             <Alert
               severity="error"
               onClose={() => setError(null)}
-              sx={{
-                py: 0,
-                fontSize: "12px",
-                bgcolor: isDark ? "rgba(244, 135, 113, 0.1)" : undefined,
-                "& .MuiAlert-icon": { fontSize: 18 },
-              }}
+              sx={{ py: 0 }}
             >
               {error}
             </Alert>
@@ -454,12 +394,7 @@ function ResourceEditor({
             <Alert
               severity="success"
               onClose={() => setSuccess(null)}
-              sx={{
-                py: 0,
-                fontSize: "12px",
-                bgcolor: isDark ? "rgba(78, 201, 176, 0.1)" : undefined,
-                "& .MuiAlert-icon": { fontSize: 18 },
-              }}
+              sx={{ py: 0 }}
             >
               {success}
             </Alert>
@@ -467,30 +402,27 @@ function ResourceEditor({
         </Box>
       )}
 
-      {/* Editor Content */}
+      {/* Editor */}
       <Box
         sx={{
           flex: 1,
           position: "relative",
           overflow: "hidden",
-          bgcolor: isDark ? VSCODE_COLORS.background : "#ffffff",
+          bgcolor: "background.default",
         }}
       >
-        {loading && (
+        {loading ? (
           <Box
             sx={{
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               height: "100%",
-              bgcolor: isDark ? VSCODE_COLORS.background : "#ffffff",
             }}
           >
-            <CircularProgress size={32} sx={{ color: VSCODE_COLORS.accent }} />
+            <CircularProgress size={32} />
           </Box>
-        )}
-
-        {!loading && (
+        ) : (
           <Editor
             height="100%"
             defaultLanguage="yaml"
@@ -501,9 +433,9 @@ function ResourceEditor({
               minimap: { enabled: minimap },
               scrollBeyondLastLine: false,
               fontSize: 13,
-              fontFamily: '"Consolas", "Monaco", "Courier New", monospace',
+              fontFamily: '"Consolas", "Monaco", monospace',
               lineNumbers: "on",
-              wordWrap: wordWrap,
+              wordWrap,
               renderWhitespace: "selection",
               tabSize: 2,
               automaticLayout: true,
@@ -512,13 +444,9 @@ function ResourceEditor({
               cursorBlinking: "smooth",
               cursorSmoothCaretAnimation: "on",
               folding: true,
-              foldingHighlight: true,
               showFoldingControls: "mouseover",
               bracketPairColorization: { enabled: true },
-              guides: {
-                indentation: true,
-                bracketPairs: true,
-              },
+              guides: { indentation: true, bracketPairs: true },
             }}
           />
         )}
@@ -529,8 +457,9 @@ function ResourceEditor({
         sx={{
           px: 2,
           py: 0.5,
-          borderTop: `1px solid ${borderColor}`,
-          bgcolor: isDark ? "#007acc" : "#0078d4",
+          borderTop: 1,
+          borderColor: "divider",
+          bgcolor: "primary.main",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -540,22 +469,14 @@ function ResourceEditor({
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Typography
             variant="caption"
-            sx={{
-              color: "#ffffff",
-              fontSize: "11px",
-              fontFamily: '"Segoe UI", sans-serif',
-            }}
+            sx={{ color: "primary.contrastText", fontSize: "11px" }}
           >
             YAML
           </Typography>
           {!showManagedFields && (
             <Typography
               variant="caption"
-              sx={{
-                color: "rgba(255,255,255,0.7)",
-                fontSize: "11px",
-                fontFamily: '"Segoe UI", sans-serif',
-              }}
+              sx={{ color: alpha("#fff", 0.7), fontSize: "11px" }}
             >
               (Managed fields hidden)
             </Typography>
@@ -563,11 +484,7 @@ function ResourceEditor({
         </Box>
         <Typography
           variant="caption"
-          sx={{
-            color: "#ffffff",
-            fontSize: "11px",
-            fontFamily: '"Segoe UI", sans-serif',
-          }}
+          sx={{ color: "primary.contrastText", fontSize: "11px" }}
         >
           {content.split("\n").length} lines · UTF-8
         </Typography>
