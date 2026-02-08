@@ -18,7 +18,7 @@ import AgentChatPanel from "../agent/AgentChatPanel";
 import AgentConfigModal from "../agent/AgentConfigModal";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 
-const LOGO_SRC = "lumiov.ico";
+const LOGO_SRC = "lumiov.png";
 const HEADER_HEIGHT = "50px";
 
 function MainLayout() {
@@ -52,7 +52,7 @@ function MainLayout() {
               component="img"
               src={LOGO_SRC}
               alt="Lumiov Logo"
-              sx={{ height: 24, width: 24, mr: 1.5, objectFit: "contain" }}
+              sx={{ height: 40, width: 40, mr: 0.5, objectFit: "contain" }}
             />
             <Typography
               variant="subtitle2"
