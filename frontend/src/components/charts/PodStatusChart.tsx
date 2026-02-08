@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import {
   PieChart,
   Pie,
@@ -33,20 +32,20 @@ function PodStatusChart({
   const isDark = theme.palette.mode === "dark";
   const COLORS = getPhaseColors(isDark);
 
-  const chartData = useMemo(() => {
-    const statusCounts: Record<string, number> = {};
+  const statusCounts: Record<string, number> = {};
 
-    pods.forEach((pod) => {
-      const phase = pod.status?.phase || "Unknown";
-      statusCounts[phase] = (statusCounts[phase] || 0) + 1;
-    });
+  // 1. Count the frequency of each pod phase
+  pods.forEach((pod) => {
+    const phase = pod.status?.phase || "Unknown";
+    statusCounts[phase] = (statusCounts[phase] || 0) + 1;
+  });
 
-    return Object.entries(statusCounts).map(([name, value]) => ({
-      name,
-      value,
-      color: COLORS[name as keyof typeof COLORS] || COLORS.Unknown,
-    }));
-  }, [pods, COLORS]);
+  // 2. Transform the map into a chart-ready array
+  const chartData = Object.entries(statusCounts).map(([name, value]) => ({
+    name,
+    value,
+    color: COLORS[name as keyof typeof COLORS] || COLORS.Unknown,
+  }));
 
   if (pods.length === 0) {
     return (

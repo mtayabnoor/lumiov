@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useMemo, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { darkTheme } from "../theme/dark";
@@ -40,10 +40,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     });
   };
 
-  const theme = useMemo(
-    () => (mode === "dark" ? darkTheme : lightTheme),
-    [mode],
-  );
+  const theme = mode === "dark" ? darkTheme : lightTheme;
 
   return (
     <ThemeContext.Provider value={{ mode, toggleTheme }}>

@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -44,42 +43,43 @@ function NamespaceDistributionChart({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  const chartData = useMemo(() => {
-    const namespaceMap: Record<string, { pods: number; deployments: number }> =
-      {};
+  const namespaceMap: Record<string, { pods: number; deployments: number }> =
+    {};
 
-    if (resourceType === "pods" || resourceType === "both") {
-      pods.forEach((pod) => {
-        const ns = pod.metadata.namespace || "default";
-        if (!namespaceMap[ns]) {
-          namespaceMap[ns] = { pods: 0, deployments: 0 };
-        }
-        namespaceMap[ns].pods++;
-      });
-    }
+  // 1. Logic for Pods
+  if (resourceType === "pods" || resourceType === "both") {
+    pods.forEach((pod) => {
+      const ns = pod.metadata.namespace || "default";
+      if (!namespaceMap[ns]) {
+        namespaceMap[ns] = { pods: 0, deployments: 0 };
+      }
+      namespaceMap[ns].pods++;
+    });
+  }
 
-    if (resourceType === "deployments" || resourceType === "both") {
-      deployments.forEach((dep) => {
-        const ns = dep.metadata.namespace || "default";
-        if (!namespaceMap[ns]) {
-          namespaceMap[ns] = { pods: 0, deployments: 0 };
-        }
-        namespaceMap[ns].deployments++;
-      });
-    }
+  // 2. Logic for Deployments
+  if (resourceType === "deployments" || resourceType === "both") {
+    deployments.forEach((dep) => {
+      const ns = dep.metadata.namespace || "default";
+      if (!namespaceMap[ns]) {
+        namespaceMap[ns] = { pods: 0, deployments: 0 };
+      }
+      namespaceMap[ns].deployments++;
+    });
+  }
 
-    return Object.entries(namespaceMap)
-      .map(([name, counts], index) => ({
-        name: name.length > 12 ? `${name.slice(0, 12)}...` : name,
-        fullName: name,
-        pods: counts.pods,
-        deployments: counts.deployments,
-        total: counts.pods + counts.deployments,
-        color: NAMESPACE_COLORS[index % NAMESPACE_COLORS.length],
-      }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 8);
-  }, [pods, deployments, resourceType]);
+  // 3. Final Transformation & Sorting
+  const chartData = Object.entries(namespaceMap)
+    .map(([name, counts], index) => ({
+      name: name.length > 12 ? `${name.slice(0, 12)}...` : name,
+      fullName: name,
+      pods: counts.pods,
+      deployments: counts.deployments,
+      total: counts.pods + counts.deployments,
+      color: NAMESPACE_COLORS[index % NAMESPACE_COLORS.length],
+    }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 8);
 
   if (chartData.length === 0) {
     return (

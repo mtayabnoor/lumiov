@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import {
   PieChart,
   Pie,
@@ -23,34 +22,31 @@ function ContainerReadinessChart({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  const chartData = useMemo(() => {
-    const colors = {
-      ready: isDark ? "#4ade80" : "#22c55e",
-      notReady: isDark ? "#f87171" : "#ef4444",
-    };
+  const colors = {
+    ready: isDark ? "#4ade80" : "#22c55e",
+    notReady: isDark ? "#f87171" : "#ef4444",
+  };
 
-    let ready = 0;
-    let notReady = 0;
+  let ready = 0;
+  let notReady = 0;
 
-    pods.forEach((pod) => {
-      pod.status?.containerStatuses?.forEach((cs) => {
-        if (cs.ready) {
-          ready++;
-        } else {
-          notReady++;
-        }
-      });
+  pods.forEach((pod) => {
+    pod.status?.containerStatuses?.forEach((cs) => {
+      if (cs.ready) {
+        ready++;
+      } else {
+        notReady++;
+      }
     });
+  });
 
-    if (ready === 0 && notReady === 0) {
-      return [];
-    }
-
-    return [
-      { name: "Ready", value: ready, color: colors.ready },
-      { name: "Not Ready", value: notReady, color: colors.notReady },
-    ].filter((d) => d.value > 0);
-  }, [pods, isDark]);
+  const chartData =
+    ready === 0 && notReady === 0
+      ? []
+      : [
+          { name: "Ready", value: ready, color: colors.ready },
+          { name: "Not Ready", value: notReady, color: colors.notReady },
+        ].filter((d) => d.value > 0);
 
   const totalContainers = chartData.reduce((sum, d) => sum + d.value, 0);
 

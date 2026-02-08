@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -32,26 +31,27 @@ function DeploymentHealthChart({
     updating: isDark ? "#fbbf24" : "#f59e0b",
   };
 
-  const chartData = useMemo(() => {
-    return deployments.slice(0, 8).map((deployment) => {
-      const desired = deployment.spec?.replicas ?? 0;
-      const ready = deployment.status?.readyReplicas ?? 0;
-      const unavailable = deployment.status?.unavailableReplicas ?? 0;
-      const updating = desired - ready - unavailable;
+  const chartData = deployments.slice(0, 8).map((deployment) => {
+    const desired = deployment.spec?.replicas ?? 0;
+    const ready = deployment.status?.readyReplicas ?? 0;
+    const unavailable = deployment.status?.unavailableReplicas ?? 0;
+    const updating = desired - ready - unavailable;
 
-      return {
-        name:
-          deployment.metadata.name.length > 12
-            ? `${deployment.metadata.name.slice(0, 12)}...`
-            : deployment.metadata.name,
-        fullName: deployment.metadata.name,
-        ready,
-        unavailable,
-        updating: updating > 0 ? updating : 0,
-        desired,
-      };
-    });
-  }, [deployments]);
+    // We perform the name truncation right here inside the map
+    const name =
+      deployment.metadata.name.length > 12
+        ? `${deployment.metadata.name.slice(0, 12)}...`
+        : deployment.metadata.name;
+
+    return {
+      name,
+      fullName: deployment.metadata.name,
+      ready,
+      unavailable,
+      updating: updating > 0 ? updating : 0,
+      desired,
+    };
+  });
 
   if (deployments.length === 0) {
     return (

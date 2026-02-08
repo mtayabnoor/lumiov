@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Socket } from "socket.io-client";
 import {
   List,
@@ -781,24 +781,24 @@ export default function PodLogsDrawer({
   }, [isPaused]);
 
   // Log statistics
-  const logStats = useMemo(() => {
-    const stats = { error: 0, warn: 0, info: 0, debug: 0, unknown: 0 };
-    logs.forEach((l) => stats[l.level]++);
-    return stats;
-  }, [logs]);
+  const stats = { error: 0, warn: 0, info: 0, debug: 0, unknown: 0 };
+
+  // The compiler sees this loop and knows 'stats' depends entirely on 'logs'
+  logs.forEach((l) => {
+    // Defensive check: handle levels that might not exist in your stats object
+    const level = l.level in stats ? l.level : "unknown";
+    stats[level]++;
+  });
+
+  const logStats = stats;
 
   // Highlight terms from search
-  const highlightTerms = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    return [searchQuery];
-  }, [searchQuery]);
+  const highlightTerms = searchQuery.trim() ? [searchQuery] : [];
 
   // Filtered logs
-  const filteredLogs = useMemo(() => {
-    let filtered = logs.filter((log) => levelFilters.includes(log.level));
+  let filtered = logs.filter((log) => levelFilters.includes(log.level));
 
-    if (!searchQuery.trim()) return filtered;
-
+  if (searchQuery.trim()) {
     if (isRegex) {
       try {
         const regex = new RegExp(searchQuery, "i");
@@ -822,9 +822,9 @@ export default function PodLogsDrawer({
           log.timestamp.toLowerCase().includes(query),
       );
     }
+  }
 
-    return filtered;
-  }, [logs, searchQuery, isRegex, levelFilters]);
+  const filteredLogs = filtered;
 
   // Reset on open
   // Reset on open effect removed to fix set-state-in-effect.
@@ -918,39 +918,39 @@ export default function PodLogsDrawer({
     }
   }, [filteredLogs.length, isPaused]);
 
-  const handleResume = useCallback(() => {
+  const handleResume = () => {
     setLogs((prev) => [...prev, ...pausedLogsRef.current].slice(-tailLines));
     pausedLogsRef.current = [];
     setBufferedCount(0);
     setIsPaused(false);
-  }, [tailLines]);
+  };
 
-  const handleClear = useCallback(() => {
+  const handleClear = () => {
     setLogs([]);
     pausedLogsRef.current = [];
     setBufferedCount(0);
     lineIdRef.current = 0;
-  }, []);
+  };
 
-  const handleScrollToBottom = useCallback(() => {
+  const handleScrollToBottom = () => {
     if (listRef.current && filteredLogs.length > 0) {
       listRef.current.scrollToRow({
         index: filteredLogs.length - 1,
         align: "end",
       });
     }
-  }, [filteredLogs.length]);
+  };
 
-  const handleCopy = useCallback(async () => {
+  const handleCopy = async () => {
     const text = filteredLogs.map((l) => l.raw).join("\n");
     const success = await copyToClipboard(text);
     setCopySuccess(success);
     if (success) {
       setTimeout(() => setCopySuccess(false), 2000);
     }
-  }, [filteredLogs]);
+  };
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     if (socket) {
       socket.emit("logs:unsubscribe");
     }
@@ -968,7 +968,7 @@ export default function PodLogsDrawer({
     if (defaultContainer) setSelectedContainer(defaultContainer);
 
     onClose();
-  }, [onClose, socket, defaultContainer]);
+  };
 
   const toggleLevelFilter = (level: LogLevel) => {
     setLevelFilters((prev) =>

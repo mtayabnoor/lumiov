@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -27,31 +26,33 @@ function PodRestartChart({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  const chartData = useMemo(() => {
-    const podsWithRestarts = pods
-      .map((pod) => {
-        const totalRestarts =
-          pod.status?.containerStatuses?.reduce(
-            (sum, cs) => sum + (cs.restartCount || 0),
-            0,
-          ) || 0;
+  const podsWithRestarts = pods
+    .map((pod) => {
+      // 1. We calculate total restarts across all containers in the pod
+      const totalRestarts =
+        pod.status?.containerStatuses?.reduce(
+          (sum, cs) => sum + (cs.restartCount || 0),
+          0,
+        ) || 0;
 
-        return {
-          name:
-            pod.metadata.name.length > 15
-              ? `${pod.metadata.name.slice(0, 15)}...`
-              : pod.metadata.name,
-          fullName: pod.metadata.name,
-          restarts: totalRestarts,
-          namespace: pod.metadata.namespace,
-        };
-      })
-      .filter((p) => p.restarts > 0)
-      .sort((a, b) => b.restarts - a.restarts)
-      .slice(0, maxPods);
+      return {
+        name:
+          pod.metadata.name.length > 15
+            ? `${pod.metadata.name.slice(0, 15)}...`
+            : pod.metadata.name,
+        fullName: pod.metadata.name,
+        restarts: totalRestarts,
+        namespace: pod.metadata.namespace,
+      };
+    })
+    // 2. Only show pods that have actually restarted (CrashLoopBackOff etc.)
+    .filter((p) => p.restarts > 0)
+    // 3. Sort by most restarts first
+    .sort((a, b) => b.restarts - a.restarts)
+    // 4. Limit the result
+    .slice(0, maxPods);
 
-    return podsWithRestarts;
-  }, [pods, maxPods]);
+  const chartData = podsWithRestarts;
 
   // Color based on severity
   const getBarColor = (restarts: number) => {

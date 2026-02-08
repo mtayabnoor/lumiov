@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Drawer,
   Box,
@@ -148,7 +148,7 @@ function ResourceEditor({
     }
   }, [showManagedFields, fullResource]);
 
-  const fetchResource = useCallback(async () => {
+  const fetchResource = async () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
@@ -177,7 +177,7 @@ function ResourceEditor({
     } finally {
       setLoading(false);
     }
-  }, [apiVersion, kind, namespace, name]);
+  };
 
   const handleSave = async () => {
     setSaving(true);

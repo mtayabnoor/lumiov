@@ -30,6 +30,7 @@ const DRAWER_WIDTH = 420;
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
   const isError = message.role === "error";
+  const { isConfigured } = useAgent();
 
   return (
     <Box
@@ -62,7 +63,16 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         ) : isError ? (
           <ErrorOutlineIcon sx={{ fontSize: 18, color: "#fff" }} />
         ) : (
-          <PsychologyIcon sx={{ fontSize: 18, color: "#fff" }} />
+          <PsychologyIcon
+            fontSize="medium"
+            sx={{
+              color: isConfigured ? "#e02222ff" : "#fff",
+              filter: isConfigured
+                ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                : "none",
+              transition: "all 0.3s ease",
+            }}
+          />
         )}
       </Box>
 
@@ -192,6 +202,7 @@ function FormattedText({ text }: { text: string }) {
 }
 
 function TypingIndicator() {
+  const { isConfigured } = useAgent();
   return (
     <Box sx={{ display: "flex", gap: 1.5, mb: 2 }}>
       <Box
@@ -205,7 +216,16 @@ function TypingIndicator() {
           background: "primary.main",
         }}
       >
-        <PsychologyIcon sx={{ fontSize: 18, color: "#fff" }} />
+        <PsychologyIcon
+          fontSize="medium"
+          sx={{
+            color: isConfigured ? "#e02222ff" : "#fff",
+            filter: isConfigured
+              ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+              : "none",
+            transition: "all 0.3s ease",
+          }}
+        />
       </Box>
       <Paper
         elevation={0}
@@ -243,6 +263,7 @@ export default function AgentChatPanel() {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { isConfigured } = useAgent();
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -309,9 +330,10 @@ export default function AgentChatPanel() {
             <PsychologyIcon
               fontSize="medium"
               sx={{
-                color: "#e02222ff",
-                filter:
-                  "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)",
+                color: isConfigured ? "#e02222ff" : "#fff",
+                filter: isConfigured
+                  ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                  : "none",
                 transition: "all 0.3s ease",
               }}
             />
@@ -383,7 +405,16 @@ export default function AgentChatPanel() {
               px: 3,
             }}
           >
-            <PsychologyIcon sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
+            <PsychologyIcon
+              fontSize="medium"
+              sx={{
+                color: isConfigured ? "#e02222ff" : "#fff",
+                filter: isConfigured
+                  ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                  : "none",
+                transition: "all 0.3s ease",
+              }}
+            />
             <Typography variant="body1" fontWeight={500} gutterBottom>
               Talk to your cluster
             </Typography>

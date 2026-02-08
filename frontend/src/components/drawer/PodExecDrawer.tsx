@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useState, useRef } from "react";
 import { Socket } from "socket.io-client";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
@@ -79,7 +79,7 @@ export default function PodExecDrawer({
   // So initial state is sufficient.
 
   // Cleanup Logic
-  const cleanupSession = useCallback(() => {
+  const cleanupSession = () => {
     if (socket) {
       socket.emit("exec:stop");
       socket.off("exec:data");
@@ -92,91 +92,90 @@ export default function PodExecDrawer({
     }
 
     if (termRef.current) {
+      // Crucial for Electron: disposing the xterm instance prevents memory leaks
       termRef.current.dispose();
       termRef.current = null;
     }
 
     setIsConnected(false);
-  }, [socket]);
+  };
 
-  // Initialize Terminal
-  const initTerminal = useCallback(
-    (containerDiv: HTMLDivElement | null) => {
-      if (!containerDiv) {
-        cleanupSession();
-        return;
+  const initTerminal = (containerDiv: HTMLDivElement | null) => {
+    if (!containerDiv) {
+      cleanupSession();
+      return;
+    }
+
+    // Prevents double-initialization (very important for Xterm.js)
+    if (termRef.current || !socket) return;
+
+    console.log("🚀 Terminal DOM Ready. Initializing...");
+
+    const term = new Terminal({
+      cursorBlink: true,
+      theme: {
+        background: DRAWER_STYLES.paper.bodyBg,
+        foreground: "#e6e6e6",
+        cursor: theme.palette.primary.main,
+      },
+      fontFamily: '"JetBrains Mono", "Fira Code", Consolas, monospace',
+      fontSize: 13,
+      cols: 80,
+      rows: 24,
+    });
+
+    const fitAddon = new FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(containerDiv);
+    termRef.current = term;
+
+    // Socket Listeners
+    socket.on("exec:data", (data) => {
+      term.write(data);
+      setIsConnected(true);
+    });
+
+    socket.on("exec:error", (err) => {
+      const msg = typeof err === "string" ? err : "Unknown Error";
+      term.writeln(`\r\n\x1b[31mError: ${msg}\x1b[0m`);
+      setError(msg);
+    });
+
+    term.onData((data) => socket.emit("exec:input", data));
+
+    // Start Backend Session (Kubernetes Exec)
+    socket.emit("exec:start", {
+      namespace,
+      podName,
+      container: selectedContainer,
+    });
+
+    socket.emit("exec:resize", { cols: 80, rows: 24 });
+
+    // Auto-Resize Observer: Vital for Electron window resizing
+    const observer = new ResizeObserver(() => {
+      try {
+        fitAddon.fit();
+        if (term.cols > 0 && term.rows > 0) {
+          socket.emit("exec:resize", { cols: term.cols, rows: term.rows });
+        }
+      } catch (e) {
+        /* ignore */
       }
+    });
 
-      if (termRef.current || !socket) return;
+    observer.observe(containerDiv);
+    observerRef.current = observer;
 
-      console.log("🚀 Terminal DOM Ready. Initializing...");
-
-      const term = new Terminal({
-        cursorBlink: true,
-        theme: {
-          background: DRAWER_STYLES.paper.bodyBg,
-          foreground: "#e6e6e6",
-          cursor: theme.palette.primary.main,
-        },
-        fontFamily: '"JetBrains Mono", "Fira Code", Consolas, monospace',
-        fontSize: 13,
-        cols: 80,
-        rows: 24,
-      });
-
-      const fitAddon = new FitAddon();
-      term.loadAddon(fitAddon);
-      term.open(containerDiv);
-      termRef.current = term;
-
-      // Socket Listeners
-      socket.on("exec:data", (data) => {
-        term.write(data);
-        setIsConnected(true);
-      });
-
-      socket.on("exec:error", (err) => {
-        const msg = typeof err === "string" ? err : "Unknown Error";
-        term.writeln(`\r\n\x1b[31mError: ${msg}\x1b[0m`);
-        setError(msg);
-      });
-
-      term.onData((data) => socket.emit("exec:input", data));
-
-      // Start Backend Session
-      socket.emit("exec:start", {
-        namespace,
-        podName,
-        container: selectedContainer,
-      });
-
-      socket.emit("exec:resize", { cols: 80, rows: 24 });
-
-      // Auto-Resize Observer
-      const observer = new ResizeObserver(() => {
-        try {
-          fitAddon.fit();
-          if (term.cols > 0 && term.rows > 0) {
-            socket.emit("exec:resize", { cols: term.cols, rows: term.rows });
-          }
-        } catch (e) {
-          /* ignore */
-        }
-      });
-
-      observer.observe(containerDiv);
-      observerRef.current = observer;
-
-      setTimeout(() => {
-        try {
-          fitAddon.fit();
-        } catch (e) {
-          /* ignore */
-        }
-      }, 50);
-    },
-    [socket, namespace, podName, selectedContainer, cleanupSession, theme],
-  );
+    // Small delay to ensure the DOM has settled for the 'fit' calculation
+    setTimeout(() => {
+      try {
+        fitAddon.fit();
+      } catch (e) {
+        /* ignore */
+      }
+    }, 50);
+  };
 
   const handleClose = () => {
     cleanupSession();

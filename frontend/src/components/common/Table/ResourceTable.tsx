@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -65,32 +65,26 @@ function ResourceTable({
   const [activeRow, setActiveRow] = useState<any | null>(null);
 
   // 1. Computed: Namespace List
-  const namespaceList = useMemo(() => {
-    // We assume standard K8s structure if we want generic filtering, or we need a prop for "how to get filter key"
-    // For now keeping specific logic but safely typed-ish via 'any' escape for properties we assume exist
-    const namespaces = data.map((p: any) => p?.metadata?.namespace || "");
-    return Array.from(new Set(namespaces)).filter(Boolean).sort() as string[];
-  }, [data]);
+  const namespaces = data.map((p: any) => p?.metadata?.namespace || "");
+  const namespaceList = Array.from(new Set(namespaces))
+    .filter(Boolean)
+    .sort() as string[];
 
   // 2. Computed: Filtered & Sorted
-  const filteredData = useMemo(() => {
-    const sorted = [...data].sort((a: any, b: any) => {
-      const nsA = a?.metadata?.namespace ?? "";
-      const nsB = b?.metadata?.namespace ?? "";
-      const nameA = a?.metadata?.name ?? "";
-      const nameB = b?.metadata?.name ?? "";
+  const sorted = [...data].sort((a: any, b: any) => {
+    const nsA = a?.metadata?.namespace ?? "";
+    const nsB = b?.metadata?.namespace ?? "";
+    const nsCompare = nsA.localeCompare(nsB);
+    if (nsCompare !== 0) return nsCompare;
+    return (a?.metadata?.name ?? "").localeCompare(b?.metadata?.name ?? "");
+  });
 
-      const nsCompare = nsA.localeCompare(nsB);
-      if (nsCompare !== 0) return nsCompare;
-      return nameA.localeCompare(nameB);
-    });
-
-    if (selectedNamespaces.length === 0) return sorted;
-
-    return sorted.filter((item: any) =>
-      selectedNamespaces.includes(item?.metadata?.namespace),
-    );
-  }, [data, selectedNamespaces]);
+  const filteredData =
+    selectedNamespaces.length === 0
+      ? sorted
+      : sorted.filter((item: any) =>
+          selectedNamespaces.includes(item?.metadata?.namespace),
+        );
 
   // Handlers
   const handleNamespaceChange = (event: SelectChangeEvent<string[]>) => {

@@ -9,7 +9,6 @@ import {
   createContext,
   useContext,
   useState,
-  useCallback,
   ReactNode,
   useEffect,
 } from "react";
@@ -110,125 +109,123 @@ export function AgentProvider({ children }: AgentProviderProps) {
   }, [socket]);
 
   // Configure the agent with an API key
-  const configureAgent = useCallback(
-    async (apiKey: string): Promise<{ success: boolean; error?: string }> => {
-      if (!socket) {
-        return { success: false, error: "Not connected to server" };
-      }
+  const configureAgent = async (
+    apiKey: string,
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!socket) {
+      return { success: false, error: "Not connected to server" };
+    }
 
-      setIsConfiguring(true);
-      setConfigError(null);
+    setIsConfiguring(true);
+    setConfigError(null);
 
-      return new Promise((resolve) => {
-        socket.emit(
-          "agent:configure",
-          apiKey,
-          (result: { success: boolean; error?: string }) => {
-            setIsConfiguring(false);
+    // We wrap the socket callback in a Promise so the UI can 'await' the result.
+    return new Promise((resolve) => {
+      socket.emit(
+        "agent:configure",
+        apiKey,
+        (result: { success: boolean; error?: string }) => {
+          setIsConfiguring(false);
 
-            if (result.success) {
-              setIsConfigured(true);
-              localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
-              setIsConfigModalOpen(false);
-              setIsChatOpen(true); // Open chat panel automatically
-              resolve({ success: true });
-            } else {
-              setConfigError(result.error || "Configuration failed");
-              resolve({ success: false, error: result.error });
-            }
-          },
-        );
-      });
-    },
-    [socket],
-  );
+          if (result.success) {
+            setIsConfigured(true);
+            localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
+            setIsConfigModalOpen(false);
+            setIsChatOpen(true); // Open chat panel automatically
+            resolve({ success: true });
+          } else {
+            const errorMsg = result.error || "Configuration failed";
+            setConfigError(errorMsg);
+            resolve({ success: false, error: errorMsg });
+          }
+        },
+      );
+    });
+  };
 
   // Reset configuration
-  const resetConfiguration = useCallback(() => {
+  const resetConfiguration = () => {
     localStorage.removeItem(API_KEY_STORAGE_KEY);
     setIsConfigured(false);
     setMessages([]);
     setConfigError(null);
     setIsChatOpen(false); // Close chat panel
     setIsConfigModalOpen(false); // Close config modal
-  }, []);
+  };
 
   // Send a chat message
-  const sendMessage = useCallback(
-    async (content: string) => {
-      if (!socket || !isConfigured || !content.trim()) return;
+  const sendMessage = async (content: string) => {
+    if (!socket || !isConfigured || !content.trim()) return;
 
-      const userMessage: ChatMessage = {
-        id: generateId(),
-        role: "user",
-        content: content.trim(),
-        timestamp: new Date(),
-      };
+    const userMessage: ChatMessage = {
+      id: generateId(),
+      role: "user",
+      content: content.trim(),
+      timestamp: new Date(),
+    };
 
-      setMessages((prev) => [...prev, userMessage]);
-      setIsLoading(true);
+    setMessages((prev) => [...prev, userMessage]);
+    setIsLoading(true);
 
-      socket.emit(
-        "agent:chat",
-        content.trim(),
-        (result: { response?: string; error?: string }) => {
-          setIsLoading(false);
+    socket.emit(
+      "agent:chat",
+      content.trim(),
+      (result: { response?: string; error?: string }) => {
+        setIsLoading(false);
 
-          if (result.error) {
-            const errorMessage: ChatMessage = {
-              id: generateId(),
-              role: "error",
-              content: result.error,
-              timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, errorMessage]);
-          } else if (result.response) {
-            const assistantMessage: ChatMessage = {
-              id: generateId(),
-              role: "assistant",
-              content: result.response,
-              timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, assistantMessage]);
-          }
-        },
-      );
-    },
-    [socket, isConfigured],
-  );
+        if (result.error) {
+          const errorMessage: ChatMessage = {
+            id: generateId(),
+            role: "error",
+            content: result.error,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, errorMessage]);
+        } else if (result.response) {
+          const assistantMessage: ChatMessage = {
+            id: generateId(),
+            role: "assistant",
+            content: result.response,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+        }
+      },
+    );
+  };
 
   // Clear chat history
-  const clearHistory = useCallback(() => {
+  const clearHistory = () => {
     if (!socket) return;
 
     socket.emit("agent:clear", () => {
       setMessages([]);
     });
-  }, [socket]);
+  };
 
   // Panel controls
-  const openChat = useCallback(() => {
+  const openChat = () => {
     if (isConfigured) {
       setIsChatOpen(true);
     } else {
       setIsConfigModalOpen(true);
     }
-  }, [isConfigured]);
+  };
 
-  const closeChat = useCallback(() => setIsChatOpen(false), []);
-  const toggleChat = useCallback(() => {
+  const closeChat = () => setIsChatOpen(false);
+  const toggleChat = () => {
     if (isConfigured) {
       setIsChatOpen((prev) => !prev);
     } else {
       setIsConfigModalOpen(true);
     }
-  }, [isConfigured]);
+  };
 
-  const openConfigModal = useCallback(() => setIsConfigModalOpen(true), []);
-  const closeConfigModal = useCallback(() => {
+  const openConfigModal = () => setIsConfigModalOpen(true);
+  const closeConfigModal = () => {
     setIsConfigModalOpen(false);
     setConfigError(null);
-  }, []);
+  };
 
   return (
     <AgentContext.Provider
