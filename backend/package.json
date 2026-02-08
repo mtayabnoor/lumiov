@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "2.9.2",
+  "version": "2.9.3",
   "description": "Kubernetes management backend for kVision",
   "main": "dist/server.js",
   "type": "module",
