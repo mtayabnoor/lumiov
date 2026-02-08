@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.2](https://github.com/mtayabnoor/lumiov/compare/v2.9.1...v2.9.2) (2026-02-08)
+
+
+### Bug Fixes
+
+* Updated app icon and logo ([2d12462](https://github.com/mtayabnoor/lumiov/commit/2d12462e09186e84a08e2c97f24208cf7526d451))
+
 ### [2.9.1](https://github.com/mtayabnoor/lumiov/compare/v2.9.0...v2.9.1) (2026-02-08)
 
 
