@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.1](https://github.com/mtayabnoor/lumiov/compare/v2.9.0...v2.9.1) (2026-02-08)
+
+
+### Bug Fixes
+
+* Optimized code by using react-compiler ([fca0e1a](https://github.com/mtayabnoor/lumiov/commit/fca0e1a87d320ef29d36101c3b913c78e7890458))
+
 ## [2.9.0](https://github.com/mtayabnoor/lumiov/compare/v2.8.2...v2.9.0) (2026-02-06)
 
 
