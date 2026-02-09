@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0](https://github.com/mtayabnoor/lumiov/compare/v2.9.3...v2.10.0) (2026-02-09)
+
+
+### Features
+
+* Pod delete func added. Delete pod and scale deployment tools added for agent ([15036ad](https://github.com/mtayabnoor/lumiov/commit/15036ad07fc65781c0235608e5594b13be248421))
+
+
+### Bug Fixes
+
+* Updated tsconfig and fix files accrdinf to tsconfig. Fix pod exec code and improved ui ([afc490d](https://github.com/mtayabnoor/lumiov/commit/afc490d4c319bb85da2bc51f917489a9f68e2448))
+
 ### [2.9.3](https://github.com/mtayabnoor/lumiov/compare/v2.9.2...v2.9.3) (2026-02-08)
 
 
