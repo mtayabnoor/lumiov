@@ -83,11 +83,11 @@ export class K8sService {
   }
 
   // WATCH: Stream updates
-  public watchResource(
+  public async watchResource(
     resource: ResourceType,
     onData: (action: string, obj: any) => void,
     onError: (err: any) => void,
-  ): () => void {
+  ): Promise<() => void> {
     if (!this.isInitialized || !this.watch) {
       onError(new Error('Service not initialized'));
       return () => {};
@@ -104,34 +104,60 @@ export class K8sService {
     const path = endpoints[resource];
     let req: any = null;
     let isActive = true;
+    let retryTimeout: NodeJS.Timeout | null = null;
 
     const startStream = async () => {
       if (!isActive) return;
+
       try {
-        req = await this.watch!.watch(
+        console.log(`🔌 Watching: ${path}`);
+
+        // 2. Await the connection
+        const newReq = await this.watch!.watch(
           path,
           { allowWatchBookmarks: true },
           (type, obj) => {
             if (isActive) onData(type, obj);
           },
           (err) => {
-            // Ignore abort errors (user stopped watching)
-            if (!isActive || (err && err.message === 'aborted')) return;
-
-            console.warn(`⚠️ Watch interrupted (${resource}), reconnecting...`);
-            setTimeout(startStream, 3000);
+            if (!isActive) return;
+            // 3. Prevent Infinite Loops on Fatal Errors
+            if (err) {
+              console.warn(`⚠️ Watch error (${resource}):`, err);
+              // If 401/403/404, do NOT retry
+              const msg = String(err);
+              if (
+                msg.includes('401') ||
+                msg.includes('403') ||
+                msg.includes('404')
+              ) {
+                onError(new Error(`Fatal Watch Error: ${msg}`));
+                isActive = false;
+                return;
+              }
+            }
+            // Retry
+            retryTimeout = setTimeout(startStream, 3000);
           },
         );
+
+        if (!isActive) {
+          if (newReq && newReq.abort) newReq.abort();
+          return;
+        }
+
+        req = newReq;
       } catch (e) {
-        if (isActive) setTimeout(startStream, 3000);
+        console.error(`❌ Watch connection failed:`, e);
+        if (isActive) retryTimeout = setTimeout(startStream, 3000);
       }
     };
 
     startStream();
 
-    // Return kill function
     return () => {
       isActive = false;
+      if (retryTimeout) clearTimeout(retryTimeout);
       if (req && req.abort) req.abort();
       console.log(`🛑 Stopped watching: ${resource}`);
     };
@@ -421,6 +447,79 @@ export class K8sService {
         );
       }
 
+      throw new Error(errorMessage);
+    }
+  }
+
+  // DELETE POD
+  public async deleteResourceGeneric(
+    apiVersion: string,
+    kind: string,
+    name: string,
+    namespace: string,
+  ): Promise<string> {
+    this.checkInit();
+
+    try {
+      console.log(
+        `🗑️ [K8S] Deleting Resource: kind: ${kind} name: ${name} in ns ${namespace}`,
+      );
+      const pod = {
+        apiVersion: apiVersion,
+        kind: kind,
+        metadata: {
+          name: name,
+          namespace: namespace,
+        },
+      };
+
+      // Use the CoreV1Api to delete the pod
+      await this.objectApi!.delete(pod);
+
+      return `Resource Kind: ${kind} Name: ${name} deleted successfully.`;
+    } catch (err: any) {
+      const errorMessage = err.response?.body?.message || err.message;
+      console.error(`❌ Delete Error: ${errorMessage}`);
+      throw new Error(errorMessage);
+    }
+  }
+
+  public async scaleDeployment(
+    name: string,
+    namespace: string,
+    replicas: number,
+  ): Promise<string> {
+    this.checkInit();
+
+    try {
+      console.log(
+        `🔄 [K8S] Scaling Deployment: name: ${name} in ns ${namespace} to ${replicas} replicas`,
+      );
+
+      const deployment = await this.appsApi!.readNamespacedDeployment({
+        name,
+        namespace,
+      });
+
+      const newDeployment = {
+        ...deployment,
+        spec: {
+          ...deployment.spec,
+          replicas,
+        },
+      };
+
+      // Use the AppsV1Api to scale the deployment
+      await this.appsApi!.replaceNamespacedDeployment({
+        name,
+        namespace,
+        body: newDeployment as any,
+      });
+
+      return `Deployment ${name} scaled to ${replicas} replicas successfully.`;
+    } catch (err: any) {
+      const errorMessage = err.response?.body?.message || err.message;
+      console.error(`❌ Scale Error: ${errorMessage}`);
       throw new Error(errorMessage);
     }
   }

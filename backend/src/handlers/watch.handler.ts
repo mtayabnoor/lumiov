@@ -29,7 +29,7 @@ export const registerWatchResourceHandlers = (socket: Socket) => {
     console.log(`Starting stream for: ${resource}`);
 
     // C. Step 2: Start the Long-Running Watcher
-    const stopWatcher = k8sService.watchResource(
+    const stopWatcher = await k8sService.watchResource(
       resource,
       (type, object) => {
         // Emit event specifically for this resource

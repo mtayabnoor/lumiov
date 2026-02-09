@@ -162,6 +162,20 @@ function Pods() {
     ],
   };
 
+  const deleteResource = async (namespace: string, podName: string) => {
+    try {
+      const res = await fetch(
+        `http://localhost:3030/api/resource?apiVersion=${encodeURIComponent("v1")}&kind=${encodeURIComponent("Pod")}&namespace=${encodeURIComponent(namespace)}&name=${encodeURIComponent(podName)}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      console.log(await res.text());
+    } catch (err) {
+      console.error("Error deleting resource:", err);
+    }
+  };
   const handleAction = (actionId: string, pod: Pod) => {
     const namespace = pod.metadata.namespace;
     const podName = pod.metadata.name;
@@ -178,7 +192,7 @@ function Pods() {
     if (actionId === "delete") {
       // Ideally verify with user before deleting
       if (window.confirm(`Are you sure you want to delete pod ${podName}?`)) {
-        alert(`Delete functionality for ${podName} is not yet implemented.`);
+        deleteResource(namespace, podName);
       }
     }
     if (actionId === "logs") {

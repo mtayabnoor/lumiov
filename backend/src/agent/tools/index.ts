@@ -13,6 +13,8 @@ import { createGetPodsTool } from './get-pods.tool';
 import { createGetDeploymentsTool } from './get-deployments.tool';
 import { createGetNamespacesTool } from './get-namespaces.tool';
 import { createDescribePodTool } from './describe-pod.tool';
+import { createDeletePodTool } from './delete-pod.tool';
+import { createScaleDeploymentTool } from './scale-deployment';
 
 // Re-export for individual use
 export {
@@ -20,6 +22,8 @@ export {
   createGetDeploymentsTool,
   createGetNamespacesTool,
   createDescribePodTool,
+  createDeletePodTool,
+  createScaleDeploymentTool,
 };
 
 /**
@@ -32,5 +36,7 @@ export function createAllTools(): DynamicStructuredTool[] {
     createGetDeploymentsTool(),
     createGetNamespacesTool(),
     createDescribePodTool(),
+    createDeletePodTool(),
+    createScaleDeploymentTool(),
   ];
 }

@@ -155,7 +155,7 @@ function ResourceEditor({
 
     try {
       const res = await fetch(
-        `http://localhost:3030/api/resources/yaml?apiVersion=${encodeURIComponent(apiVersion)}&kind=${encodeURIComponent(kind)}&namespace=${encodeURIComponent(namespace)}&name=${encodeURIComponent(name)}`,
+        `http://localhost:3030/api/resource/yaml?apiVersion=${encodeURIComponent(apiVersion)}&kind=${encodeURIComponent(kind)}&namespace=${encodeURIComponent(namespace)}&name=${encodeURIComponent(name)}`,
       );
 
       if (!res.ok) throw new Error("Failed to fetch resource");
@@ -190,7 +190,7 @@ function ResourceEditor({
         throw new Error(`Invalid YAML: ${e.message}`);
       }
 
-      const res = await fetch(`http://localhost:3030/api/resources/yaml`, {
+      const res = await fetch(`http://localhost:3030/api/resource/yaml`, {
         method: "PUT",
         headers: { "Content-Type": "text/yaml" },
         body: content,
