@@ -9,14 +9,12 @@ import {
   Log,
   KubernetesObjectApi,
 } from '@kubernetes/client-node';
-import { loadKubeConfig } from '../config/k8s.js';
+import { loadKubeConfig } from '../config/k8s';
 import { Writable, PassThrough } from 'stream';
 import WebSocket from 'ws';
-import { ResourceType, ShellSession } from '../types/common.js';
+import type { ResourceType, ShellSession } from '../types/common';
 import * as yaml from 'js-yaml';
 import equal from 'fast-deep-equal';
-
-const JSON_PATCH_HEADER = 'application/json-patch+json';
 
 export class K8sService {
   private kc: KubeConfig | null = null;
@@ -153,7 +151,7 @@ export class K8sService {
 
     // Combine stdout/stderr logic
     const outputStream = new Writable({
-      write(chunk, encoding, callback) {
+      write(chunk, _encoding, callback) {
         onData(chunk.toString());
         callback();
       },

@@ -8,7 +8,7 @@ function PageHeader({
   description: string;
 }) {
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box>
       <Typography
         variant="h3"
         sx={{ fontWeight: 700, color: "text.primary", mb: 1 }}

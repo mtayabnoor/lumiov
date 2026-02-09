@@ -1,6 +1,5 @@
 import express from 'express';
-import { k8sService } from '../services/kubernetes.service.js';
-import { ResourceType } from '../types/common.js';
+import { k8sService } from '../services/kubernetes.service';
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Socket } from "socket.io-client";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
@@ -34,7 +34,6 @@ import {
   DIVIDER_SX,
 } from "./drawerStyles";
 
-// --- Types ---
 interface Container {
   name: string;
 }
@@ -69,17 +68,14 @@ export default function PodExecDrawer({
   const [height, setHeight] = useState("50vh");
 
   // --- Refs ---
+  // We keep track of the instance to be able to dispose of it later
   const termRef = useRef<Terminal | null>(null);
   const observerRef = useRef<ResizeObserver | null>(null);
+  const fitAddonRef = useRef<FitAddon | null>(null);
 
-  // Reset UI state when drawer opens
-  // Reset UI state when drawer opens - handled by key or unmount/remount usually,
-  // but if needed we should not set state synchronously in effect to prevent loops.
-  // Since this component is conditionally rendered in Pods.tsx, it unmounts on close.
-  // So initial state is sufficient.
-
-  // Cleanup Logic
-  const cleanupSession = () => {
+  // --- Cleanup Logic ---
+  // This function destroys the current terminal session
+  const cleanupSession = useCallback(() => {
     if (socket) {
       socket.emit("exec:stop");
       socket.off("exec:data");
@@ -92,90 +88,112 @@ export default function PodExecDrawer({
     }
 
     if (termRef.current) {
-      // Crucial for Electron: disposing the xterm instance prevents memory leaks
       termRef.current.dispose();
       termRef.current = null;
     }
 
+    fitAddonRef.current = null;
     setIsConnected(false);
-  };
+  }, [socket]);
 
-  const initTerminal = (containerDiv: HTMLDivElement | null) => {
-    if (!containerDiv) {
-      cleanupSession();
-      return;
-    }
+  // --- The Core Logic (Callback Ref) ---
+  // We use useCallback so this function stays stable.
+  // If we didn't use useCallback, React would think it's a new function every render,
+  // detach the ref, and re-run this endlessly (The Infinite Loop issue you had).
+  const initTerminal = useCallback(
+    (containerDiv: HTMLDivElement | null) => {
+      // 1. If containerDiv is null, the component is unmounting (or switching containers).
+      //    We should cleanup.
+      if (!containerDiv) {
+        cleanupSession();
+        return;
+      }
 
-    // Prevents double-initialization (very important for Xterm.js)
-    if (termRef.current || !socket) return;
+      // 2. Guard: If socket is missing, we can't do anything.
+      if (!socket) return;
 
-    console.log("🚀 Terminal DOM Ready. Initializing...");
+      console.log("🚀 Initializing Terminal for:", selectedContainer);
+      setError(null);
 
-    const term = new Terminal({
-      cursorBlink: true,
-      theme: {
-        background: DRAWER_STYLES.paper.bodyBg,
-        foreground: "#e6e6e6",
-        cursor: theme.palette.primary.main,
-      },
-      fontFamily: '"JetBrains Mono", "Fira Code", Consolas, monospace',
-      fontSize: 13,
-      cols: 80,
-      rows: 24,
-    });
+      // 3. Instantiate Xterm
+      const term = new Terminal({
+        cursorBlink: true,
+        theme: {
+          background: DRAWER_STYLES.paper.bodyBg,
+          foreground: "#e6e6e6",
+          cursor: theme.palette.primary.main,
+        },
+        fontFamily: '"JetBrains Mono", "Fira Code", Consolas, monospace',
+        fontSize: 13,
+        cols: 80, // Default fallback
+        rows: 24, // Default fallback
+      });
 
-    const fitAddon = new FitAddon();
-    term.loadAddon(fitAddon);
-    term.open(containerDiv);
-    termRef.current = term;
+      const fitAddon = new FitAddon();
+      term.loadAddon(fitAddon);
 
-    // Socket Listeners
-    socket.on("exec:data", (data) => {
-      term.write(data);
-      setIsConnected(true);
-    });
+      // Open terminal in the DOM element
+      term.open(containerDiv);
 
-    socket.on("exec:error", (err) => {
-      const msg = typeof err === "string" ? err : "Unknown Error";
-      term.writeln(`\r\n\x1b[31mError: ${msg}\x1b[0m`);
-      setError(msg);
-    });
+      // Save refs
+      termRef.current = term;
+      fitAddonRef.current = fitAddon;
 
-    term.onData((data) => socket.emit("exec:input", data));
+      // 4. Socket Listeners
+      socket.on("exec:data", (data) => {
+        term.write(data);
+        setIsConnected(true);
+      });
 
-    // Start Backend Session (Kubernetes Exec)
-    socket.emit("exec:start", {
-      namespace,
-      podName,
-      container: selectedContainer,
-    });
+      socket.on("exec:error", (err) => {
+        const msg = typeof err === "string" ? err : "Unknown Error";
+        term.writeln(`\r\n\x1b[31mError: ${msg}\x1b[0m`);
+        setError(msg);
+      });
 
-    socket.emit("exec:resize", { cols: 80, rows: 24 });
+      // Handle user typing
+      term.onData((data) => socket.emit("exec:input", data));
 
-    // Auto-Resize Observer: Vital for Electron window resizing
-    const observer = new ResizeObserver(() => {
-      try {
-        fitAddon.fit();
-        if (term.cols > 0 && term.rows > 0) {
-          socket.emit("exec:resize", { cols: term.cols, rows: term.rows });
+      // 5. Start Session
+      socket.emit("exec:start", {
+        namespace,
+        podName,
+        container: selectedContainer,
+      });
+
+      // --- CRITICAL FIX: The Delay ---
+      // We wait 300ms for the Drawer animation to finish before fitting.
+      // Without this, fit() calculates 0x0 size and the terminal breaks.
+      setTimeout(() => {
+        try {
+          fitAddon.fit();
+          if (term.cols > 0 && term.rows > 0) {
+            socket.emit("exec:resize", { cols: term.cols, rows: term.rows });
+          }
+        } catch (e) {
+          console.warn("Fit failed", e);
         }
-      } catch (e) {
-        /* ignore */
-      }
-    });
+      }, 300); // 300ms covers most standard MUI transitions
 
-    observer.observe(containerDiv);
-    observerRef.current = observer;
+      // 6. Resize Observer (Handles window resizing)
+      const observer = new ResizeObserver(() => {
+        try {
+          fitAddon.fit();
+          if (term.cols > 0 && term.rows > 0) {
+            socket.emit("exec:resize", { cols: term.cols, rows: term.rows });
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      });
 
-    // Small delay to ensure the DOM has settled for the 'fit' calculation
-    setTimeout(() => {
-      try {
-        fitAddon.fit();
-      } catch (e) {
-        /* ignore */
-      }
-    }, 50);
-  };
+      observer.observe(containerDiv);
+      observerRef.current = observer;
+    },
+    // Dependencies: If any of these change, React will call cleanup() (node=null)
+    // and then call initTerminal() (node=div) again.
+    [socket, namespace, podName, selectedContainer, theme.palette.primary.main],
+  );
 
   const handleClose = () => {
     cleanupSession();
@@ -184,22 +202,29 @@ export default function PodExecDrawer({
 
   const toggleHeight = () => setHeight((h) => (h === "50vh" ? "85vh" : "50vh"));
 
+  // Re-fit when height changes (user clicks expand)
+  useEffect(() => {
+    if (fitAddonRef.current) {
+      setTimeout(() => {
+        try {
+          fitAddonRef.current?.fit();
+        } catch (e) {}
+      }, 300);
+    }
+  }, [height]);
+
   return (
     <Drawer
       anchor="bottom"
       open={open}
       onClose={handleClose}
       slotProps={{
-        paper: {
-          sx: getDrawerPaperSx(height),
-        },
+        paper: { sx: getDrawerPaperSx(height) },
       }}
     >
-      {/* --- HEADER --- */}
+      {/* HEADER */}
       <Box sx={DRAWER_HEADER_SX}>
-        {/* Left: Pod Info */}
         <Box display="flex" alignItems="center" gap={2}>
-          {/* Icon & Title */}
           <Box display="flex" alignItems="center" gap={1}>
             <TerminalIcon
               sx={{ color: theme.palette.primary.main, fontSize: 20 }}
@@ -228,7 +253,6 @@ export default function PodExecDrawer({
             </Box>
           </Box>
 
-          {/* Container Selector */}
           {containers.length > 1 && (
             <>
               <Divider orientation="vertical" flexItem sx={DIVIDER_SX} />
@@ -260,7 +284,6 @@ export default function PodExecDrawer({
           )}
         </Box>
 
-        {/* Right: Controls */}
         <Box display="flex" alignItems="center" gap={0.5}>
           {isConnected && (
             <Chip
@@ -270,19 +293,16 @@ export default function PodExecDrawer({
               icon={<Box sx={PULSE_DOT_SX} />}
             />
           )}
-
           <Divider
             orientation="vertical"
             flexItem
             sx={{ ...DIVIDER_SX, mx: 0.5 }}
           />
-
           <Tooltip title={height === "50vh" ? "Expand" : "Collapse"}>
             <IconButton onClick={toggleHeight} size="small" sx={ICON_BUTTON_SX}>
               {height === "50vh" ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
           </Tooltip>
-
           <Tooltip title="Close">
             <IconButton onClick={handleClose} size="small" sx={ICON_BUTTON_SX}>
               <CloseIcon />
@@ -291,7 +311,7 @@ export default function PodExecDrawer({
         </Box>
       </Box>
 
-      {/* --- TERMINAL BODY --- */}
+      {/* TERMINAL BODY */}
       <Box
         sx={{
           flex: 1,
@@ -319,12 +339,15 @@ export default function PodExecDrawer({
           </Alert>
         )}
 
-        {open && (
-          <div
-            ref={initTerminal}
-            style={{ width: "100%", height: "100%", overflow: "hidden" }}
-          />
-        )}
+        {/* The `ref={initTerminal}` here is a "Callback Ref".
+            When this div is mounted, React calls `initTerminal(div)`.
+            When it updates or unmounts, React calls `initTerminal(null)`.
+            We handle the cleanup inside that function.
+        */}
+        <div
+          ref={initTerminal}
+          style={{ width: "100%", height: "100%", overflow: "hidden" }}
+        />
       </Box>
     </Drawer>
   );

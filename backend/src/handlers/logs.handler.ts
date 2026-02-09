@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { k8sService } from '../services/kubernetes.service.js';
+import { k8sService } from '../services/kubernetes.service';
 
 interface LogSubscribeOptions {
   namespace: string;

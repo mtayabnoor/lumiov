@@ -52,16 +52,16 @@ function MainLayout() {
               component="img"
               src={LOGO_SRC}
               alt="Lumiov Logo"
-              sx={{ height: 40, width: 40, mr: 0.5, objectFit: "contain" }}
+              sx={{ height: 35, width: 35, mr: 1.5, objectFit: "contain" }}
             />
             <Typography
               variant="subtitle2"
               noWrap
               component="div"
               sx={{
-                fontSize: "18px",
+                fontSize: "35px",
                 fontWeight: 600,
-                color: "#fff",
+                color: "#eeeeeeff",
                 letterSpacing: "0.5px",
               }}
             >

@@ -1,16 +1,17 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import cors, { CorsOptions } from 'cors';
+import cors from 'cors';
+import type { CorsOptions } from 'cors';
 import dotenv from 'dotenv';
 
 // Service & Handler Imports
-import { k8sService } from './services/kubernetes.service.js';
-import { registerWatchResourceHandlers } from './handlers/watch.handler.js';
-import { registerExecHandlers } from './handlers/exec.handler.js';
-import { registerLogHandlers } from './handlers/logs.handler.js';
-import { registerAgentHandlers } from './handlers/agent.handler.js';
-import { resourceRouter } from './routes/resource.route.js';
+import { k8sService } from './services/kubernetes.service';
+import { registerWatchResourceHandlers } from './handlers/watch.handler';
+import { registerExecHandlers } from './handlers/exec.handler';
+import { registerLogHandlers } from './handlers/logs.handler';
+import { registerAgentHandlers } from './handlers/agent.handler';
+import { resourceRouter } from './routes/resource.route';
 
 dotenv.config();
 
@@ -69,7 +70,7 @@ const io = new Server(serverInstance, {
 app.use('/api', resourceRouter);
 
 // Health Check (Includes K8s connectivity status)
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
     environment: NODE_ENV,

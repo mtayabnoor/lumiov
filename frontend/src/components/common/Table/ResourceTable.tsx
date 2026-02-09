@@ -133,7 +133,8 @@ function ResourceTable({
       {resourceType !== "namespaces" && (
         <Box
           sx={{
-            p: 2,
+            pt: 1,
+            pb: 2,
             display: "flex",
             justifyContent: "flex-start",
             alignItems: "center",

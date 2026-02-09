@@ -1,7 +1,7 @@
 // exec-pod.ts
 import { Socket } from 'socket.io';
-import { k8sService } from '../services/kubernetes.service.js';
-import { ShellSession } from '../types/common.js';
+import { k8sService } from '../services/kubernetes.service';
+import type { ShellSession } from '../types/common';
 
 export function registerExecHandlers(socket: Socket) {
   console.log(`🔌 Exec client connected: ${socket.id}`);

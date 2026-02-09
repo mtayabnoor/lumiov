@@ -40,7 +40,6 @@ import VerticalAlignBottomIcon from "@mui/icons-material/VerticalAlignBottom";
 import ArticleIcon from "@mui/icons-material/Article";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import SettingsIcon from "@mui/icons-material/Settings";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import WrapTextIcon from "@mui/icons-material/WrapText";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";

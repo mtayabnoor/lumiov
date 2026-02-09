@@ -8,7 +8,7 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
-import { createAllTools } from './tools/index.js';
+import { createAllTools } from './tools/index';
 
 // Store for per-user agent instances and conversation history
 interface AgentSession {

@@ -12,7 +12,7 @@ import {
   removeSession,
   getSessionStatus,
   chat,
-} from '../agent/agent.service.js';
+} from '../agent/agent.service';
 
 export const registerAgentHandlers = (socket: Socket) => {
   console.log(`🧠 Agent handlers registered for: ${socket.id}`);

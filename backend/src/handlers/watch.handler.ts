@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
-import { k8sService } from '../services/kubernetes.service.js';
-import { ResourceType } from '../types/common.js';
+import { k8sService } from '../services/kubernetes.service';
+import type { ResourceType } from '../types/common';
 
 export const registerWatchResourceHandlers = (socket: Socket) => {
   console.log('Electron UI Connected');
