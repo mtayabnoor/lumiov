@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.11.0](https://github.com/mtayabnoor/lumiov/compare/v2.10.0...v2.11.0) (2026-02-11)
+
+
+### Features
+
+* Pod diagnosis feature added ([59f958b](https://github.com/mtayabnoor/lumiov/commit/59f958bf0752ac6b804bb25dc163bd84b2e997c2))
+
+
+### Bug Fixes
+
+* Added all pod status and corresposnding colors ([cb5d919](https://github.com/mtayabnoor/lumiov/commit/cb5d919f78896ef07ec3e0ed0e6fa42337dc35ee))
+* Fix agent icon color ([b90c1b8](https://github.com/mtayabnoor/lumiov/commit/b90c1b8c01f426760c269a27c8bd14702fa7d3c3))
+* Improve code by using single hook for resource data fectching ([1a995ec](https://github.com/mtayabnoor/lumiov/commit/1a995ec0855d6052750be777ebb63bf805cf1d97))
+
 ## [2.10.0](https://github.com/mtayabnoor/lumiov/compare/v2.9.3...v2.10.0) (2026-02-09)
 
 
