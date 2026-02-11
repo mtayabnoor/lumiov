@@ -179,9 +179,9 @@ function Pods() {
       { key: "spec.nodeName", header: "NODE" },
       {
         key: "diagnose",
-        header: "DXG",
+        header: "AI Dx",
         accessor: (row: Pod) => (
-          <Tooltip title="" placement="top">
+          <Tooltip title="AI Diagnosis" placement="bottom">
             <IconButton
               size="small"
               onClick={(e) => {
@@ -200,9 +200,9 @@ function Pods() {
             >
               <BiotechIcon
                 sx={{
-                  color: isConfigured ? "primary.main" : "#fff",
+                  color: isConfigured ? "#b42323ff" : "#fff",
                   filter: isConfigured
-                    ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                    ? "drop-shadow(0 0 0.8px #ffffffff) drop-shadow(0 0 1px #ffffffff)"
                     : "none",
                   transition: "all 0.3s ease",
                 }}

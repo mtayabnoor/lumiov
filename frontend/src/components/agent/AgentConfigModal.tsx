@@ -92,7 +92,7 @@ export default function AgentConfigModal() {
           <PsychologyIcon
             fontSize="medium"
             sx={{
-              color: isConfigured ? "primary.main" : "#fff",
+              color: isConfigured ? "#b42323ff" : "#fff",
               filter: isConfigured
                 ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
                 : "none",
