@@ -1,4 +1,4 @@
-import { useDeployments } from "../../hooks/useDeployments";
+import { useResource } from "../../hooks/useResource";
 import { ResourceTableConfig } from "../../interfaces/common";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -17,7 +17,11 @@ const getDeploymentReadyStatus = (event: Deployment) => {
 };
 
 function Deployments() {
-  const { deployments, error, loading } = useDeployments();
+  const {
+    data: deployments,
+    error,
+    loading,
+  } = useResource<Deployment>("deployments");
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingDeployment, setEditingDeployment] = useState<{

@@ -1,5 +1,5 @@
 import ResourceTable from "../../components/common/Table/ResourceTable";
-import { usePods } from "../../hooks/usePods";
+import { useResource } from "../../hooks/useResource";
 import { Pod } from "../../interfaces/pod";
 import { ResourceTableConfig } from "../../interfaces/common";
 import EditIcon from "@mui/icons-material/Edit";
@@ -98,7 +98,7 @@ const getPodMemReq = (pod: Pod) => {
 // --- Main Component ---
 
 function Pods() {
-  const { pods, error, loading, socket } = usePods();
+  const { data: pods, error, loading, socket } = useResource<Pod>("pods");
   const { isConfigured } = useAgent();
 
   const [execDialogOpen, setExecDialogOpen] = useState(false);

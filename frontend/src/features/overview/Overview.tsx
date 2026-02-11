@@ -1,6 +1,4 @@
 import { Box, Grid } from "@mui/material";
-import { usePods } from "../../hooks/usePods";
-import { useDeployments } from "../../hooks/useDeployments";
 import PodStatusChart from "../../components/charts/PodStatusChart";
 import DeploymentHealthChart from "../../components/charts/DeploymentHealthChart";
 import PodRestartChart from "../../components/charts/PodRestartChart";
@@ -8,10 +6,14 @@ import NamespaceDistributionChart from "../../components/charts/NamespaceDistrib
 import ContainerReadinessChart from "../../components/charts/ContainerReadinessChart";
 import SummaryCard from "../../components/charts/SummaryCard";
 import PageLayout from "../../components/common/PageLayout/PageLayout";
+import { useResource } from "../../hooks/useResource";
+import { Deployment } from "../../interfaces/deployment";
+import { Pod } from "../../interfaces/pod";
 
 function Overview() {
-  const { pods, loading: podsLoading } = usePods();
-  const { deployments, loading: depsLoading } = useDeployments();
+  const { data: pods, loading: podsLoading } = useResource<Pod>("pods");
+  const { data: deployments, loading: depsLoading } =
+    useResource<Deployment>("deployments");
 
   // Calculate summary metrics
   const runningPods = pods.filter((p) => p.status?.phase === "Running").length;
