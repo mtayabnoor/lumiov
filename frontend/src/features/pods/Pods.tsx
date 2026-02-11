@@ -36,22 +36,68 @@ const getPodReadyStatus = (pod: Pod) => {
 };
 
 const getPodStatus = (pod: Pod) => {
-  const status = pod?.status?.phase;
-  const total = pod?.spec?.containers?.length ?? 0;
-  const ready =
-    pod.status?.containerStatuses?.filter((c) => c.ready).length ?? 0;
+  const phase = pod?.status?.phase;
 
-  // 1. Terminating check
+  // 1. Terminating check (deletionTimestamp set)
   if (pod.metadata?.deletionTimestamp) {
-    return {
-      kind: "status",
-      label: "Terminating",
-      cssClass: "border-red2",
-    };
+    return { kind: "status", label: "Terminating", cssClass: "border-red2" };
   }
 
-  // 2. Running but not fully ready
-  if (ready !== total && status === "Running") {
+  // 2. Derive real status from container states (like kubectl does)
+  const containerStatuses = pod.status?.containerStatuses ?? [];
+  const initStatuses = pod.status?.initContainerStatuses ?? [];
+
+  // Check init containers first
+  for (const init of initStatuses) {
+    if (init.state?.waiting?.reason) {
+      return {
+        kind: "status",
+        label: `Init:${init.state.waiting.reason}`,
+        cssClass: getStatusCssClass(`Init:${init.state.waiting.reason}`),
+      };
+    }
+    if (init.state?.terminated && init.state.terminated.exitCode !== 0) {
+      return {
+        kind: "status",
+        label: `Init:Error`,
+        cssClass: "error",
+      };
+    }
+  }
+
+  // Check regular containers — waiting/terminated reasons take priority
+  for (const cs of containerStatuses) {
+    // Waiting state: CrashLoopBackOff, ImagePullBackOff, ErrImagePull, etc.
+    if (cs.state?.waiting?.reason) {
+      return {
+        kind: "status",
+        label: cs.state.waiting.reason,
+        cssClass: getStatusCssClass(cs.state.waiting.reason),
+      };
+    }
+    // Terminated state: OOMKilled, Error, Completed, etc.
+    if (cs.state?.terminated?.reason) {
+      return {
+        kind: "status",
+        label: cs.state.terminated.reason,
+        cssClass: getStatusCssClass(cs.state.terminated.reason),
+      };
+    }
+    // Terminated with no reason — use exit code
+    if (cs.state?.terminated) {
+      const label = cs.state.terminated.exitCode === 0 ? "Completed" : "Error";
+      return {
+        kind: "status",
+        label,
+        cssClass: cs.state.terminated.exitCode === 0 ? "info" : "error",
+      };
+    }
+  }
+
+  // 3. Check for not-ready running containers
+  const total = pod?.spec?.containers?.length ?? 0;
+  const ready = containerStatuses.filter((c) => c.ready).length;
+  if (ready !== total && phase === "Running") {
     return {
       kind: "status",
       label: "Running",
@@ -59,8 +105,8 @@ const getPodStatus = (pod: Pod) => {
     };
   }
 
-  // 3. Standard statuses
-  switch (status) {
+  // 4. Fall back to pod phase
+  switch (phase) {
     case "Running":
       return { kind: "status", label: "Running", cssClass: "success" };
     case "Failed":
@@ -70,7 +116,35 @@ const getPodStatus = (pod: Pod) => {
     case "Succeeded":
       return { kind: "status", label: "Completed", cssClass: "info" };
     default:
-      return { kind: "status", label: "Unknown", cssClass: "info" };
+      return { kind: "status", label: phase || "Unknown", cssClass: "info" };
+  }
+};
+
+// Map container state reasons to visual styles
+const getStatusCssClass = (reason: string): string => {
+  switch (reason) {
+    case "CrashLoopBackOff":
+      return "error";
+    case "OOMKilled":
+      return "error";
+    case "Error":
+      return "error";
+    case "ImagePullBackOff":
+    case "ErrImagePull":
+    case "InvalidImageName":
+      return "error";
+    case "CreateContainerConfigError":
+    case "RunContainerError":
+      return "error";
+    case "ContainerCreating":
+    case "PodInitializing":
+      return "warning";
+    case "Completed":
+      return "info";
+    default:
+      // Init:* reasons or anything unknown
+      if (reason.startsWith("Init:")) return "warning";
+      return "warning";
   }
 };
 
