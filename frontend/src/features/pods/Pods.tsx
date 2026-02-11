@@ -6,12 +6,20 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArticleIcon from "@mui/icons-material/Article";
 import TerminalIcon from "@mui/icons-material/Terminal";
-import { Box, CircularProgress, Alert, Typography } from "@mui/material";
+import BiotechIcon from "@mui/icons-material/Biotech";
+import {
+  Box,
+  CircularProgress,
+  Alert,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
 import { useState } from "react";
 import PodExecDrawer from "../../components/drawer/PodExecDrawer";
 import PodLogsDrawer from "../../components/drawer/PodLogsDrawer";
-
+import PodDiagnosisDialog from "../../components/common/PodDiagnosisDialog/PodDiagnosisDialog";
+import { useAgent } from "../../context/AgentContext";
 import PageLayout from "../../components/common/PageLayout/PageLayout";
 import ResourceEditor from "../../components/common/Editor/ResourceEditor";
 
@@ -91,6 +99,7 @@ const getPodMemReq = (pod: Pod) => {
 
 function Pods() {
   const { pods, error, loading, socket } = usePods();
+  const { isConfigured } = useAgent();
 
   const [execDialogOpen, setExecDialogOpen] = useState(false);
   const [selectedPod, setSelectedPod] = useState<{
@@ -115,6 +124,21 @@ function Pods() {
     namespace: string;
     podName: string;
   } | null>(null);
+
+  // Diagnosis dialog state
+  const [diagnosisOpen, setDiagnosisOpen] = useState(false);
+  const [diagnosingPod, setDiagnosingPod] = useState<{
+    namespace: string;
+    podName: string;
+  } | null>(null);
+
+  const handleDiagnose = (pod: Pod) => {
+    setDiagnosingPod({
+      namespace: pod.metadata.namespace,
+      podName: pod.metadata.name,
+    });
+    setDiagnosisOpen(true);
+  };
 
   const podConfig: ResourceTableConfig = {
     columns: [
@@ -153,6 +177,40 @@ function Pods() {
         ),
       },
       { key: "spec.nodeName", header: "NODE" },
+      {
+        key: "diagnose",
+        header: "DXG",
+        accessor: (row: Pod) => (
+          <Tooltip title="" placement="top">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDiagnose(row);
+              }}
+              //sx={{
+              //  color: "primary.main",
+              //  filter:
+              //    "drop-shadow(0 0 0.5px #ffffffff) drop-shadow(0 0 1px #ffffffff)",
+              //"&:hover": {
+              //  color: "primary.main",
+              //  bgcolor: "primary.main" + "14",
+              //},
+              //}}
+            >
+              <BiotechIcon
+                sx={{
+                  color: isConfigured ? "primary.main" : "#fff",
+                  filter: isConfigured
+                    ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                    : "none",
+                  transition: "all 0.3s ease",
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+        ),
+      },
     ],
     actions: [
       { id: "edit", label: "Edit", icon: EditIcon },
@@ -176,6 +234,7 @@ function Pods() {
       console.error("Error deleting resource:", err);
     }
   };
+
   const handleAction = (actionId: string, pod: Pod) => {
     const namespace = pod.metadata.namespace;
     const podName = pod.metadata.name;
@@ -190,7 +249,6 @@ function Pods() {
       setEditDrawerOpen(true);
     }
     if (actionId === "delete") {
-      // Ideally verify with user before deleting
       if (window.confirm(`Are you sure you want to delete pod ${podName}?`)) {
         deleteResource(namespace, podName);
       }
@@ -268,6 +326,19 @@ function Pods() {
           kind="Pod"
           namespace={editingPod.namespace}
           name={editingPod.podName}
+        />
+      )}
+
+      {/* AI Diagnosis Dialog */}
+      {diagnosingPod && (
+        <PodDiagnosisDialog
+          open={diagnosisOpen}
+          onClose={() => {
+            setDiagnosisOpen(false);
+            setDiagnosingPod(null);
+          }}
+          namespace={diagnosingPod.namespace}
+          podName={diagnosingPod.podName}
         />
       )}
     </PageLayout>

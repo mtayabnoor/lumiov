@@ -66,7 +66,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           <PsychologyIcon
             fontSize="medium"
             sx={{
-              color: isConfigured ? "#e02222ff" : "#fff",
+              color: isConfigured ? "primary.main" : "#fff",
               filter: isConfigured
                 ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
                 : "none",
@@ -219,7 +219,7 @@ function TypingIndicator() {
         <PsychologyIcon
           fontSize="medium"
           sx={{
-            color: isConfigured ? "#e02222ff" : "#fff",
+            color: isConfigured ? "primary.main" : "#fff",
             filter: isConfigured
               ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
               : "none",
@@ -330,7 +330,7 @@ export default function AgentChatPanel() {
             <PsychologyIcon
               fontSize="medium"
               sx={{
-                color: isConfigured ? "#e02222ff" : "#fff",
+                color: isConfigured ? "primary.main" : "#fff",
                 filter: isConfigured
                   ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
                   : "none",
@@ -408,7 +408,7 @@ export default function AgentChatPanel() {
             <PsychologyIcon
               fontSize="medium"
               sx={{
-                color: isConfigured ? "#e02222ff" : "#fff",
+                color: isConfigured ? "primary.main" : "#fff",
                 filter: isConfigured
                   ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
                   : "none",

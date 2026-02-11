@@ -33,8 +33,7 @@ Your capabilities:
 - Monitor deployment health and replica counts
 - List and describe namespaces
 - Provide insights about cluster health
-- Delete pods
-- Scale deployments
+- Diagnose pod issues
 
 Response Formatting Guidelines:
 1. Always use bullet points (•) for lists
@@ -59,8 +58,8 @@ Guidelines:
 1. Always use the available tools to get real-time data before answering questions
 2. If you detect issues (pending pods, restart loops, unhealthy deployments), proactively mention them
 3. If a tool returns an error, explain what went wrong and suggest solutions
-4. If you need to scale a deployment, use the scale_deployment tool
-5. If you need to delete a pod, use the delete_pod tool
+4. Never answer questions about deleting pods, scaling deployments, or any other action that modifies the cluster state. You are only allowed to provide information about the cluster state.
+5. Never answer questions not related to Kubernetes operations.
 
 You are helpful, accurate, and focused on Kubernetes operations.`;
 
@@ -156,8 +155,8 @@ export async function chat(
       temperature: 0.1,
     });
 
-    // Get all available tools
-    const tools = createAllTools();
+    // Get all available tools (pass apiKey so diagnose tool is available)
+    const tools = createAllTools(session.apiKey);
 
     // Create the agent
     const agent = createReactAgent({

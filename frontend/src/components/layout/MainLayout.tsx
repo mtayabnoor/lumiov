@@ -76,25 +76,25 @@ function MainLayout() {
           <Tooltip title="Talk to your cluster">
             <IconButton
               onClick={toggleChat}
-              size="small"
-              sx={{
-                mr: 1,
-                color: "#fff",
-                position: "relative",
+              size="medium"
+              //sx={{
+              //  mr: 1,
+              //  color: "#fff",
+              //  position: "relative",
 
-                borderRadius: "8px",
-                p: 0.75,
-                //"&:hover": {
-                //  bgcolor: isConfigured
-                //    ? "primary.dark"
-                //    : "rgba(255,255,255,0.1)",
-                //},
-              }}
+              //  borderRadius: "8px",
+              //  p: 0.75,
+              //"&:hover": {
+              //  bgcolor: isConfigured
+              //    ? "primary.dark"
+              //    : "rgba(255,255,255,0.1)",
+              //},
+              //}}
             >
               <PsychologyIcon
                 fontSize="medium"
                 sx={{
-                  color: isConfigured ? "#e02222ff" : "#fff",
+                  color: isConfigured ? "primary.main" : "#fff",
                   filter: isConfigured
                     ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
                     : "none",

@@ -1,5 +1,6 @@
 import express from 'express';
 import { k8sService } from '../services/kubernetes.service';
+import { diagnosePod } from '../agent/diagnosis.service';
 
 const router = express.Router();
 
@@ -66,4 +67,29 @@ router.delete('/resource', async (req, res) => {
     res.status(500).json({ error: err.message || 'Failed to fetch resource' });
   }
 });
+
+// ─── POD DIAGNOSIS ──────────────────────────────────────────────
+
+router.post('/diagnose', async (req, res) => {
+  const { namespace, podName, apiKey } = req.body;
+
+  if (!namespace || !podName || !apiKey) {
+    res.status(400).json({ error: 'Missing namespace, podName, or apiKey' });
+    return;
+  }
+
+  try {
+    const result = await diagnosePod({ namespace, podName, apiKey });
+
+    if (result.error) {
+      res.status(422).json({ error: result.error, rawData: result.rawData });
+      return;
+    }
+
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Diagnosis failed' });
+  }
+});
+
 export const resourceRouter = router;

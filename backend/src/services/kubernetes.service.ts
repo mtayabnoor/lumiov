@@ -523,6 +523,71 @@ export class K8sService {
       throw new Error(errorMessage);
     }
   }
+
+  // ─── DIAGNOSIS HELPERS ───────────────────────────────────────
+
+  /**
+   * Get Kubernetes events related to a specific pod
+   */
+  public async getPodEvents(
+    namespace: string,
+    podName: string,
+  ): Promise<any[]> {
+    this.checkInit();
+    try {
+      const events = await this.coreApi!.listNamespacedEvent({
+        namespace,
+        fieldSelector: `involvedObject.name=${podName}`,
+      });
+      return events.items.map((e: any) => ({
+        type: e.type,
+        reason: e.reason,
+        message: e.message,
+        count: e.count,
+        firstTimestamp: e.firstTimestamp,
+        lastTimestamp: e.lastTimestamp,
+        source: e.source?.component,
+      }));
+    } catch (err: any) {
+      console.error(`❌ Error fetching events for ${podName}:`, err.message);
+      return [];
+    }
+  }
+
+  /**
+   * One-shot log fetch (non-streaming) for diagnosis.
+   * Returns the last N lines as a single string.
+   */
+  public async getPodLogsSnapshot(
+    namespace: string,
+    podName: string,
+    container: string,
+    tailLines: number = 100,
+    previous: boolean = false,
+  ): Promise<string> {
+    this.checkInit();
+    try {
+      const result = await this.coreApi!.readNamespacedPodLog({
+        namespace,
+        name: podName,
+        container,
+        tailLines,
+        previous,
+      });
+      return typeof result === 'string' ? result : String(result ?? '');
+    } catch (err: any) {
+      const msg = err.message || 'Failed to fetch logs';
+      // Previous container logs may not exist
+      if (
+        previous &&
+        (msg.includes('not found') || msg.includes('previous terminated'))
+      ) {
+        return '';
+      }
+      console.error(`❌ Error fetching logs for ${podName}/${container}:`, msg);
+      return `[Error fetching logs: ${msg}]`;
+    }
+  }
 }
 
 export const k8sService = new K8sService();

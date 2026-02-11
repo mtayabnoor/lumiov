@@ -13,8 +13,9 @@ import { createGetPodsTool } from './get-pods.tool';
 import { createGetDeploymentsTool } from './get-deployments.tool';
 import { createGetNamespacesTool } from './get-namespaces.tool';
 import { createDescribePodTool } from './describe-pod.tool';
-import { createDeletePodTool } from './delete-pod.tool';
-import { createScaleDeploymentTool } from './scale-deployment';
+//import { createDeletePodTool } from './delete-pod.tool';
+//import { createScaleDeploymentTool } from './scale-deployment';
+import { createDiagnosePodTool } from './diagnose-pod.tool';
 
 // Re-export for individual use
 export {
@@ -22,21 +23,29 @@ export {
   createGetDeploymentsTool,
   createGetNamespacesTool,
   createDescribePodTool,
-  createDeletePodTool,
-  createScaleDeploymentTool,
+  //createDeletePodTool,
+  //createScaleDeploymentTool,
+  createDiagnosePodTool,
 };
 
 /**
  * Creates all available cluster tools.
  * Add new tools to this array to make them available to the agent.
  */
-export function createAllTools(): DynamicStructuredTool[] {
-  return [
+export function createAllTools(apiKey?: string): DynamicStructuredTool[] {
+  const tools: DynamicStructuredTool[] = [
     createGetPodsTool(),
     createGetDeploymentsTool(),
     createGetNamespacesTool(),
     createDescribePodTool(),
-    createDeletePodTool(),
-    createScaleDeploymentTool(),
+    //createDeletePodTool(),
+    //createScaleDeploymentTool(),
   ];
+
+  // Add diagnosis tool when API key is available
+  if (apiKey) {
+    tools.push(createDiagnosePodTool(apiKey));
+  }
+
+  return tools;
 }
