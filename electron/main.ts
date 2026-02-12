@@ -5,6 +5,8 @@ import updater from "electron-updater";
 import { UpdateDownloadedEvent } from "electron-updater";
 import { launchBackend, stopBackend } from "./backend-launcher.js";
 
+app.disableHardwareAcceleration();
+
 const { autoUpdater } = updater;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,6 +57,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
+    show: false,
     icon: iconPath,
     backgroundColor: "#1a1a1a",
     webPreferences: {
@@ -63,6 +66,10 @@ function createWindow() {
       sandbox: true,
       preload: path.join(__dirname, "preload.cjs"),
     },
+  });
+
+  mainWindow.once("ready-to-show", () => {
+    mainWindow!.show();
   });
 
   if (isDev) {
