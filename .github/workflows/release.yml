@@ -130,7 +130,7 @@ jobs:
           # Write to file for the release action
           $entry | Out-File -FilePath release-notes.md -Encoding utf8
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release (private repo)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
@@ -140,6 +140,29 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update release notes on lumiov-releases
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          $tag = "${{ steps.version.outputs.tag }}"
+          $notes = Get-Content release-notes.md -Raw
+
+          # Wait for electron-builder's release to be created
+          Start-Sleep -Seconds 10
+
+          # Find the release by tag on the public repo
+          $releases = gh api repos/mtayabnoor/lumiov-releases/releases --jq ".[] | select(.tag_name == \"$tag\") | .id" 2>$null
+
+          if ($releases) {
+            # Update existing release with changelog
+            $body = @{ body = $notes; name = "🚀 Release $tag" } | ConvertTo-Json
+            gh api repos/mtayabnoor/lumiov-releases/releases/$releases -X PATCH --input - <<< $body
+            echo "✅ Updated release notes on lumiov-releases for $tag"
+          } else {
+            echo "⚠️ Release $tag not found on lumiov-releases yet (electron-builder may not have published)"
+          }
 
   # ─── Back-merge to development ─────────────────────────────────
   back-merge:
