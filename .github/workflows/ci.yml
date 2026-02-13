@@ -1,0 +1,165 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [development, "release/**", main]
+  push:
+    branches: [development]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  # ─── Commit Lint ───────────────────────────────────────────────
+  commitlint:
+    name: Commit Lint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Validate PR commits
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+  # ─── Lint ──────────────────────────────────────────────────────
+  lint:
+    name: Lint (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [root, frontend, backend]
+        include:
+          - package: root
+            working-directory: .
+          - package: frontend
+            working-directory: frontend
+          - package: backend
+            working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ matrix.working-directory }}
+      - name: Run ESLint
+        run: npm run lint
+        working-directory: ${{ matrix.working-directory }}
+
+  # ─── Type Check ────────────────────────────────────────────────
+  typecheck:
+    name: Type Check (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [frontend, backend]
+        include:
+          - package: frontend
+            working-directory: frontend
+            command: npm run build
+          - package: backend
+            working-directory: backend
+            command: npm run type-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ matrix.working-directory }}
+      - name: Type check
+        run: ${{ matrix.command }}
+        working-directory: ${{ matrix.working-directory }}
+
+  # ─── Build ─────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - name: Install all dependencies
+        run: |
+          npm ci
+          cd frontend && npm ci
+          cd ../backend && npm ci
+      - name: Build frontend
+        run: npm run build:frontend
+      - name: Build backend
+        run: npm run build:backend
+      - name: Build Electron
+        run: npx tsc -p tsconfig.json
+
+  # ─── Security Audit ────────────────────────────────────────────
+  security:
+    name: Security Audit (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [root, frontend, backend]
+        include:
+          - package: root
+            working-directory: .
+          - package: frontend
+            working-directory: frontend
+          - package: backend
+            working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ matrix.working-directory }}
+      - name: Security audit
+        run: npm audit --audit-level=high
+        working-directory: ${{ matrix.working-directory }}
+
+  # ─── Summary Gate ──────────────────────────────────────────────
+  ci-passed:
+    name: CI Passed
+    if: always()
+    needs: [commitlint, lint, typecheck, build, security]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all jobs
+        run: |
+          echo "Commitlint: ${{ needs.commitlint.result }}"
+          echo "Lint:       ${{ needs.lint.result }}"
+          echo "Typecheck:  ${{ needs.typecheck.result }}"
+          echo "Build:      ${{ needs.build.result }}"
+          echo "Security:   ${{ needs.security.result }}"
+
+          # commitlint is skipped on push events, that's fine
+          if [[ "${{ needs.lint.result }}" == "failure" ]] || \
+             [[ "${{ needs.typecheck.result }}" == "failure" ]] || \
+             [[ "${{ needs.build.result }}" == "failure" ]] || \
+             [[ "${{ needs.security.result }}" == "failure" ]] || \
+             [[ "${{ needs.commitlint.result }}" == "failure" ]]; then
+            echo "::error::One or more CI checks failed"
+            exit 1
+          fi
+
+          echo "✅ All CI checks passed"

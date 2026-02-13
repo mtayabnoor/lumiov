@@ -3,11 +3,23 @@ name: Release
 on:
   push:
     branches:
-      - master
+      - main
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "22"
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  install-and-build:
-    name: Install & Build
+  # ─── Build ─────────────────────────────────────────────────────
+  build:
+    name: Build
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,27 +27,25 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: "npm"
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
-      - name: Install Dependencies
+      - name: Install all dependencies
         run: |
           npm ci
           cd frontend && npm ci
           cd ../backend && npm ci
 
-      - name: Build Frontend
+      - name: Build frontend
         run: npm run build:frontend
-        env:
-          CI: false
 
-      - name: Build Backend
+      - name: Build backend
         run: npm run build:backend
 
       - name: Build Electron
         run: npx tsc -p tsconfig.json
 
-      - name: Upload Artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
@@ -44,26 +54,29 @@ jobs:
             frontend/dist
             backend/dist
 
-  release-windows:
-    name: release-windows
+  # ─── Release ───────────────────────────────────────────────────
+  release:
+    name: Release
     runs-on: windows-latest
-    needs: install-and-build
-    permissions:
-      contents: write
+    needs: build
+    outputs:
+      new_version: ${{ steps.version.outputs.new_version }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Important for git merge operations later
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22 # Ensure this matches your other job
-          cache: "npm"
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
-      - name: Install Dependencies
+      - name: Install root dependencies
         run: npm ci
 
-      - name: Download Build Artifacts
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
@@ -73,48 +86,87 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Bump Version and Generate Changelog
+      - name: Bump version and generate changelog
         id: version
-        # We verify if this push is a Merge Commit.
-        # If you strictly only want merges from 'development' to trigger a release,
-        # we can check the commit message or parents.
-        # However, it is safer to rely on Branch Protection rules (see explanation below).
+        shell: pwsh
         run: |
+          # Run standard-version to bump version and generate changelog
           npm run release
+
           $version = (Get-Content package.json | ConvertFrom-Json).version
           echo "new_version=$version" >> $env:GITHUB_OUTPUT
           echo "tag=v$version" >> $env:GITHUB_OUTPUT
+          echo "🏷️ Release version: v$version"
 
-      - name: Push Changes (Master)
-        run: git push origin master --follow-tags
+      - name: Push release commit and tag
+        run: git push origin main --follow-tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish Electron App
+      - name: Package Electron
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: npm run package -- --publish always
 
+      - name: Extract latest changelog entry
+        id: changelog
+        shell: pwsh
+        run: |
+          $content = Get-Content CHANGELOG.md -Raw
+          # Extract the first version section (latest release)
+          if ($content -match '(?s)(## \[\d+\.\d+\.\d+\].*?)(?=## \[|$)') {
+            $entry = $Matches[1].Trim()
+          } else {
+            $entry = "Release v${{ steps.version.outputs.new_version }}"
+          }
+          # Write to file for the release action
+          $entry | Out-File -FilePath release-notes.md -Encoding utf8
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: Release ${{ steps.version.outputs.tag }}
-          body_path: CHANGELOG.md
+          name: "🚀 Release ${{ steps.version.outputs.tag }}"
+          body_path: release-notes.md
           draft: false
           prerelease: false
-
-      # --- NEW SECTION: BACK-MERGE TO DEVELOPMENT ---
-      - name: Back-merge to Development
-        if: success() # Only run if the release was successful
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git fetch origin development
-          git checkout development
-          git merge master
-          git push origin development
+
+  # ─── Back-merge to development ─────────────────────────────────
+  back-merge:
+    name: Back-merge to development
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create back-merge PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: auto/back-merge-${{ needs.release.outputs.tag }}
+          base: development
+          title: "chore: Back-merge ${{ needs.release.outputs.tag }} to development"
+          body: |
+            ## 🔄 Automated Back-merge
+
+            This PR merges the release **${{ needs.release.outputs.tag }}** back into `development`.
+
+            **Changes include:**
+            - Version bump to `${{ needs.release.outputs.new_version }}`
+            - Updated `CHANGELOG.md`
+            - Any hotfixes applied to `main`
+
+            > This PR was created automatically by the release workflow.
+            > Review and merge to keep `development` in sync with `main`.
+          labels: |
+            automated
+            back-merge
+          reviewers: mtayabnoor

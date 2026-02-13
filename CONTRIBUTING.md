@@ -2,11 +2,28 @@
 
 First off, thank you for considering contributing to Lumiov! It's people like you that make Lumiov such a great tool.
 
+## Branching Model
+
+We use a structured Git Flow branching model:
+
+```
+feature/*  ──PR──▶  development  ──PR──▶  release/vX.Y.Z  ──PR──▶  main
+                         ▲                                            │
+                         └────────────── back-merge PR ◀──────────────┘
+```
+
+| Branch           | Purpose                                                      |
+| ---------------- | ------------------------------------------------------------ |
+| `main`           | Stable production releases only                              |
+| `development`    | Integration branch — all feature PRs target here             |
+| `release/vX.Y.Z` | Release candidate branch — cut from `development` when ready |
+| `feature/*`      | Short-lived feature branches for individual changes          |
+
 ## Development Workflow
 
 ### Prerequisites
 
-- Node.js 20 or higher
+- Node.js 22 or higher
 - npm
 - Git
 - A Kubernetes cluster (for testing)
@@ -102,17 +119,17 @@ git commit -m "added new feature"  # ❌ Missing type prefix
 2. **Make your changes** following the code style guidelines
 3. **Commit your changes** using conventional commits
 4. **Push to your fork**: `git push origin feature/amazing-feature`
-5. **Open a Pull Request** against the `master` branch
+5. **Open a Pull Request** against the `development` branch
 
 ### PR Checks
 
-All PRs must pass the following checks before merging:
+All PRs must pass the following CI checks before merging:
 
+- ✅ **Commit Lint**: Commit messages follow Conventional Commits
 - ✅ **Code Linting**: ESLint checks for code quality
 - ✅ **Type Checking**: TypeScript compilation without errors
-- ✅ **Security Scanning**: No high/critical vulnerabilities in dependencies
 - ✅ **Build Validation**: All components build successfully
-- ✅ **Tests**: All tests pass (when implemented)
+- ✅ **Security Scanning**: No high/critical vulnerabilities in dependencies
 
 ## Versioning
 
@@ -128,16 +145,16 @@ Versions are automatically bumped based on commit messages:
 - `fix:` commits trigger a **PATCH** version bump
 - `feat!:` or `fix!:` (with breaking changes) trigger a **MAJOR** version bump
 
-### Creating a Release
+### Release Process
 
-Releases are automated through CI/CD:
+Releases follow the release candidate workflow:
 
-1. Merge your PR to `master`
-2. The CI pipeline will automatically:
-   - Bump the version based on commit messages
-   - Generate a changelog
-   - Create a GitHub release
-   - Build and publish the Electron app
+1. When `development` is ready for release, a `release/vX.Y.Z` branch is created
+2. The RC workflow automatically creates pre-releases (`vX.Y.Z-rc.1`, `rc.2`, etc.)
+3. Testers validate the RC build
+4. Once approved, the release branch is merged to `main`
+5. The release workflow creates the stable release and publishes the Electron app
+6. A back-merge PR is automatically created to sync `main` → `development`
 
 ## Code Style
 

@@ -1,9 +1,9 @@
 version: 2
 
 updates:
-  # Root package.json (Electron app in root)
+  # Root package.json (Electron shell)
   - package-ecosystem: "npm"
-    directory: "/" # <-- root directory
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -19,6 +19,9 @@ updates:
       prefix: "chore"
       include: "scope"
     target-branch: "development"
+    groups:
+      minor-patch:
+        update-types: ["minor", "patch"]
 
   # Frontend package.json (React app)
   - package-ecosystem: "npm"
@@ -38,6 +41,9 @@ updates:
       prefix: "chore"
       include: "scope"
     target-branch: "development"
+    groups:
+      minor-patch:
+        update-types: ["minor", "patch"]
 
   # Backend package.json (Express app)
   - package-ecosystem: "npm"
@@ -56,9 +62,12 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-    target-branch: "dev"
+    target-branch: "development"
+    groups:
+      minor-patch:
+        update-types: ["minor", "patch"]
 
-  # GitHub Actions workflow updates
+  # GitHub Actions workflows
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -75,3 +84,6 @@ updates:
     commit-message:
       prefix: "ci"
     target-branch: "development"
+    groups:
+      actions:
+        patterns: ["*"]
