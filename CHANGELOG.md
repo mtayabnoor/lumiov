@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.11.4](https://github.com/mtayabnoor/lumiov/compare/v2.11.3...v2.11.4) (2026-02-13)
+
+
+### Bug Fixes
+
+* Electron types ([6dc6c32](https://github.com/mtayabnoor/lumiov/commit/6dc6c3211e4c2e41dbdf4e99346c237497adb760))
+
+
+### Maintenance
+
+* **release:** 2.11.3 ([2483c1a](https://github.com/mtayabnoor/lumiov/commit/2483c1a2d408146b41acc269c0e02c479f98c4ce))
+
+
+### Code Refactoring
+
+* Code refactor for electron ([506e6da](https://github.com/mtayabnoor/lumiov/commit/506e6daa855f4b987bca478f99fed7983a45b38d))
+* Code refactor for electron and path fixes ([1e899d5](https://github.com/mtayabnoor/lumiov/commit/1e899d5621e83ef60190e123ad7212db48878757))
+* Code refactor for electron and path fixes ([9a7514f](https://github.com/mtayabnoor/lumiov/commit/9a7514f4c5b4b5f3c709e92b7eb9c7023f29ad8a))
+
+
+### CI/CD
+
+* Added website and fixed github workflows ([8f9ce2d](https://github.com/mtayabnoor/lumiov/commit/8f9ce2d67ed1d3e914d6f55bf6ca0145364583d6))
+* Fix build job ([e7221c8](https://github.com/mtayabnoor/lumiov/commit/e7221c82b02d14ac1f73e877211fad3c50320ea0))
+* Fix workflow files ([10ee3cf](https://github.com/mtayabnoor/lumiov/commit/10ee3cf66906f7aa15d6abc1f3121f6e9e9990c3))
+
 ### [2.11.3](https://github.com/mtayabnoor/lumiov/compare/v2.11.2...v2.11.3) (2026-02-13)
 
 
