@@ -81,11 +81,6 @@ jobs:
           git commit -m "chore(release): ${{ steps.version.outputs.tag }}"
           git tag "${{ steps.version.outputs.tag }}"
 
-      - name: Push tag
-        run: git push origin ${{ github.ref_name }} --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build frontend
         run: npm run build:frontend
 
@@ -101,6 +96,11 @@ jobs:
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: npm run package -- --publish always
+
+      - name: Push tag
+        run: git push origin ${{ github.ref_name }} --follow-tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Pre-Release
         uses: softprops/action-gh-release@v2

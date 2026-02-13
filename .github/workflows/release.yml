@@ -98,17 +98,17 @@ jobs:
           echo "tag=v$version" >> $env:GITHUB_OUTPUT
           echo "🏷️ Release version: v$version"
 
-      - name: Push release commit and tag
-        run: git push origin main --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Package Electron
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: npm run package -- --publish always
+
+      - name: Push release commit and tag
+        run: git push origin main --follow-tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract latest changelog entry
         id: changelog
