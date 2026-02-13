@@ -208,7 +208,7 @@ function FixCard({ fix, index }: { fix: Fix; index: number }) {
 
 interface PodDiagnosisDialogProps {
   open: boolean;
-  onClose: () => void;
+  onClose: () => void; // Callback to close dialog
   namespace: string;
   podName: string;
 }
@@ -224,9 +224,10 @@ export default function PodDiagnosisDialog({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // 1. Reset state immediately when opening or changing pods
     if (!open) return;
 
-    // Reset state for new diagnosis
+    // eslint-disable-next-line
     setResult(null);
     setError(null);
     setLoading(true);
@@ -234,20 +235,26 @@ export default function PodDiagnosisDialog({
     const apiKey = localStorage.getItem("lumiov-agent-api-key") || "";
 
     if (!apiKey) {
-      setError(
-        "No OpenAI API key configured. Please set your API key in the Agent panel first.",
-      );
+      setError("No OpenAI API key configured.");
       setLoading(false);
       return;
     }
+
+    // 2. Create an AbortController to track this specific request
+    const controller = new AbortController();
+    const signal = controller.signal;
 
     fetch("http://localhost:3030/api/diagnose", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ namespace, podName, apiKey }),
+      signal, // <-- Attach the signal here
     })
       .then(async (res) => {
         const data = await res.json();
+        // 3. Check if the request was cancelled before updating state
+        if (signal.aborted) return;
+
         if (!res.ok) {
           setError(data.error || "Diagnosis request failed");
           if (data.rawData) setResult({ rawData: data.rawData });
@@ -256,9 +263,24 @@ export default function PodDiagnosisDialog({
         }
       })
       .catch((err) => {
-        setError(err.message || "Network error");
+        // Ignore errors caused by us cancelling the request
+        if (err.name === "AbortError") return;
+
+        if (!signal.aborted) {
+          setError(err.message || "Network error");
+        }
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!signal.aborted) {
+          setLoading(false);
+        }
+      });
+
+    // 4. Cleanup function: Cancels the fetch if component unmounts
+    //    or if 'podName' changes before the fetch finishes.
+    return () => {
+      controller.abort();
+    };
   }, [open, namespace, podName]);
 
   const report = result?.report;
@@ -584,6 +606,7 @@ export default function PodDiagnosisDialog({
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
+                    {/* Raw Data View */}
                     <Box
                       component="pre"
                       sx={{

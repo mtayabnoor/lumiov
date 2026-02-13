@@ -156,7 +156,7 @@ function FormattedMessage({ content }: { content: string }) {
 
         // Bullet point
         if (trimmed.startsWith("•") || trimmed.startsWith("-")) {
-          const bulletContent = trimmed.replace(/^[•\-]\s*/, "");
+          const bulletContent = trimmed.replace(/^[•-]\s*/, "");
           return (
             <Box key={i} sx={{ display: "flex", gap: 1, mb: 0.25 }}>
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
