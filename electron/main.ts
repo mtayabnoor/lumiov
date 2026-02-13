@@ -13,7 +13,12 @@ const __dirname = path.dirname(__filename);
 
 let mainWindow: BrowserWindow | null = null;
 let backendProcess: any = null;
+let isQuitting = false;
 const isDev = !app.isPackaged;
+
+// ─── Auto-updater Configuration ───
+autoUpdater.autoDownload = false; // Don't download automatically, ask first
+autoUpdater.autoInstallOnAppQuit = true;
 
 // Single Instance Lock
 const hasLock = app.requestSingleInstanceLock();
@@ -29,17 +34,17 @@ if (!hasLock) {
 
   app.whenReady().then(async () => {
     try {
-      // ✅ Launch Backend (The launcher now handles the 'dist' path logic)
+      // ✅ Launch Backend
       backendProcess = await launchBackend(isDev);
 
       createWindow();
 
       if (app.isPackaged) {
-        autoUpdater.checkForUpdatesAndNotify();
+        // Check for updates after a short delay so the app feels ready
+        setTimeout(() => autoUpdater.checkForUpdates(), 3000);
       }
     } catch (e: any) {
       console.error(e);
-      // Show error popup so you know exactly what failed
       dialog.showErrorBox("Startup Error", e.message);
       app.quit();
     }
@@ -47,8 +52,6 @@ if (!hasLock) {
 }
 
 function createWindow() {
-  // app.getAppPath() consistently returns the electron/ dir
-  // regardless of how Electron is launched
   const appRoot = path.resolve(app.getAppPath(), "..");
 
   let iconPath;
@@ -86,37 +89,85 @@ function createWindow() {
   }
 }
 
-// Auto-updates
+// ═══════════════ Auto-Update Flow ═══════════════
+// Step 1: Update found → ask user if they want to download
+autoUpdater.on("update-available", (info) => {
+  if (!mainWindow) return;
+
+  const version = info.version || "unknown";
+
+  dialog
+    .showMessageBox(mainWindow, {
+      type: "info",
+      title: "Update Available",
+      message: `A new version (v${version}) is available.`,
+      detail:
+        "Would you like to download it now? The download happens in the background — you can keep working.",
+      buttons: ["Download", "Skip"],
+      defaultId: 0,
+      cancelId: 1,
+    })
+    .then((result) => {
+      if (result.response === 0) {
+        autoUpdater.downloadUpdate();
+      }
+    });
+});
+
+// Step 2: Download progress → send to renderer (optional: show in title bar)
+autoUpdater.on("download-progress", (progress) => {
+  const percent = Math.round(progress.percent);
+  if (mainWindow) {
+    mainWindow.setTitle(`Lumiov — Downloading update ${percent}%`);
+    mainWindow.setProgressBar(percent / 100);
+  }
+});
+
+// Step 3: Download complete → ask to restart
 autoUpdater.on("update-downloaded", (info: UpdateDownloadedEvent) => {
-  // Ensure we have a valid string for the message
+  if (!mainWindow) return;
+
+  // Reset title bar
+  mainWindow.setTitle("Lumiov");
+  mainWindow.setProgressBar(-1); // Remove progress bar
+
   const releaseNotes =
     typeof info.releaseNotes === "string"
       ? info.releaseNotes
       : "New features and bug fixes.";
-  const messageText =
-    process.platform === "win32" ? releaseNotes : info.releaseName;
 
-  const dialogOpts = {
-    type: "info" as const,
-    buttons: ["Restart", "Later"],
-    title: "Application Update",
-    // ✅ The '||' ensures that if messageText is null/undefined, we use the backup string
-    message: messageText || "A new version is available.",
-    detail:
-      "A new version has been downloaded. Restart the application to apply the updates.",
-  };
-
-  dialog.showMessageBox(dialogOpts).then((returnValue) => {
-    if (returnValue.response === 0) {
-      autoUpdater.quitAndInstall();
-    }
-  });
+  dialog
+    .showMessageBox(mainWindow, {
+      type: "info",
+      title: "Update Ready",
+      message: `Version ${info.version} has been downloaded.`,
+      detail: releaseNotes,
+      buttons: ["Restart Now", "Later"],
+      defaultId: 0,
+      cancelId: 1,
+    })
+    .then(async (result) => {
+      if (result.response === 0) {
+        // Gracefully stop backend before restarting
+        isQuitting = true;
+        if (backendProcess) {
+          await stopBackend(backendProcess);
+          backendProcess = null;
+        }
+        autoUpdater.quitAndInstall(false, true);
+      }
+    });
 });
 
-// Cleanup
+autoUpdater.on("error", (err) => {
+  console.error("Auto-update error:", err);
+});
+
+// ─── Cleanup ───
 app.on("before-quit", async (e) => {
-  if (backendProcess) {
+  if (backendProcess && !isQuitting) {
     e.preventDefault();
+    isQuitting = true;
     await stopBackend(backendProcess);
     backendProcess = null;
     app.quit();
