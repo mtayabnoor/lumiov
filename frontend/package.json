@@ -36,7 +36,8 @@
     "start": "vite",
     "build": "tsc && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
   },
   "eslintConfig": {
     "extends": [
