@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "npm"
 
       - name: Install Dependencies
@@ -45,7 +45,7 @@ jobs:
             backend/dist
 
   release-windows:
-    name: Publish Release
+    name: release-windows
     runs-on: windows-latest
     needs: install-and-build
     permissions:
@@ -54,6 +54,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Important for git merge operations later
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22 # Ensure this matches your other job
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
 
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
