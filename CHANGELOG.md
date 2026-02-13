@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.11.3](https://github.com/mtayabnoor/lumiov/compare/v2.11.2...v2.11.3) (2026-02-13)
+
+
+### Bug Fixes
+
+* Updated package.json scripts ([0ee6192](https://github.com/mtayabnoor/lumiov/commit/0ee6192cd42f7788e907354b689244594f31566f))
+
+
+### CI/CD
+
+* Fixed bump version sequence ([b763647](https://github.com/mtayabnoor/lumiov/commit/b763647ce51bb153638a61e9c0e47657b1434dc6))
+
 ### [2.11.2](https://github.com/mtayabnoor/lumiov/compare/v2.11.0...v2.11.2) (2026-02-13)
 
 

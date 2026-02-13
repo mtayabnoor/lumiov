@@ -1,6 +1,6 @@
 {
-  "name": "lumiov-root",
-  "version": "2.11.2",
+  "name": "lumiov",
+  "version": "2.11.3",
   "description": "Lumiov Kubernetes Manager",
   "private": true,
   "type": "module",
