@@ -5,6 +5,12 @@ import {
   Watch,
   CoreV1Api,
   AppsV1Api,
+  BatchV1Api,
+  NetworkingV1Api,
+  StorageV1Api,
+  AutoscalingV1Api,
+  RbacAuthorizationV1Api,
+  ApiextensionsV1Api,
   V1Status,
   Log,
   KubernetesObjectApi,
@@ -25,6 +31,12 @@ export class K8sService {
   // REST Clients for fetching initial lists
   private coreApi: CoreV1Api | null = null;
   private appsApi: AppsV1Api | null = null;
+  private batchApi: BatchV1Api | null = null;
+  private networkingApi: NetworkingV1Api | null = null;
+  private storageApi: StorageV1Api | null = null;
+  private autoscalingApi: AutoscalingV1Api | null = null;
+  private rbacApi: RbacAuthorizationV1Api | null = null;
+  private apiExtensionsApi: ApiextensionsV1Api | null = null;
   private objectApi: KubernetesObjectApi | null = null;
 
   public isInitialized = false;
@@ -40,6 +52,12 @@ export class K8sService {
 
       this.coreApi = this.kc.makeApiClient(CoreV1Api);
       this.appsApi = this.kc.makeApiClient(AppsV1Api);
+      this.batchApi = this.kc.makeApiClient(BatchV1Api);
+      this.networkingApi = this.kc.makeApiClient(NetworkingV1Api);
+      this.storageApi = this.kc.makeApiClient(StorageV1Api);
+      this.autoscalingApi = this.kc.makeApiClient(AutoscalingV1Api);
+      this.rbacApi = this.kc.makeApiClient(RbacAuthorizationV1Api);
+      this.apiExtensionsApi = this.kc.makeApiClient(ApiextensionsV1Api);
 
       // ⚠️ THE FIX: Use the static factory method for the generic object API
       this.objectApi = KubernetesObjectApi.makeApiClient(this.kc);
@@ -63,17 +81,85 @@ export class K8sService {
 
     try {
       switch (resource) {
+        // ─── Cluster ───
         case 'namespaces':
           return (await this.coreApi!.listNamespace()).items;
+        case 'nodes':
+          return (await this.coreApi!.listNode()).items;
+
+        // ─── Workloads ───
         case 'pods':
           return (await this.coreApi!.listPodForAllNamespaces()).items;
-        case 'services':
-          return (await this.coreApi!.listServiceForAllNamespaces()).items;
         case 'deployments':
           return (await this.appsApi!.listDeploymentForAllNamespaces()).items;
         case 'statefulsets':
           return (await this.appsApi!.listStatefulSetForAllNamespaces()).items;
+        case 'daemonsets':
+          return (await this.appsApi!.listDaemonSetForAllNamespaces()).items;
+        case 'replicasets':
+          return (await this.appsApi!.listReplicaSetForAllNamespaces()).items;
+        case 'jobs':
+          return (await this.batchApi!.listJobForAllNamespaces()).items;
+        case 'cronjobs':
+          return (await this.batchApi!.listCronJobForAllNamespaces()).items;
+
+        // ─── Storage ───
+        case 'persistentvolumeclaims':
+          return (
+            await this.coreApi!.listPersistentVolumeClaimForAllNamespaces()
+          ).items;
+        case 'persistentvolumes':
+          return (await this.coreApi!.listPersistentVolume()).items;
+        case 'storageclasses':
+          return (await this.storageApi!.listStorageClass()).items;
+
+        // ─── Network ───
+        case 'services':
+          return (await this.coreApi!.listServiceForAllNamespaces()).items;
+        case 'ingresses':
+          return (await this.networkingApi!.listIngressForAllNamespaces())
+            .items;
+        case 'networkpolicies':
+          return (await this.networkingApi!.listNetworkPolicyForAllNamespaces())
+            .items;
+        case 'endpoints':
+          return (await this.coreApi!.listEndpointsForAllNamespaces()).items;
+
+        // ─── Configuration ───
+        case 'configmaps':
+          return (await this.coreApi!.listConfigMapForAllNamespaces()).items;
+        case 'secrets':
+          return (await this.coreApi!.listSecretForAllNamespaces()).items;
+        case 'resourcequotas':
+          return (await this.coreApi!.listResourceQuotaForAllNamespaces())
+            .items;
+        case 'limitranges':
+          return (await this.coreApi!.listLimitRangeForAllNamespaces()).items;
+        case 'horizontalpodautoscalers':
+          return (
+            await this.autoscalingApi!.listHorizontalPodAutoscalerForAllNamespaces()
+          ).items;
+
+        // ─── Access Control ───
+        case 'serviceaccounts':
+          return (await this.coreApi!.listServiceAccountForAllNamespaces())
+            .items;
+        case 'roles':
+          return (await this.rbacApi!.listRoleForAllNamespaces()).items;
+        case 'rolebindings':
+          return (await this.rbacApi!.listRoleBindingForAllNamespaces()).items;
+        case 'clusterroles':
+          return (await this.rbacApi!.listClusterRole()).items;
+        case 'clusterrolebindings':
+          return (await this.rbacApi!.listClusterRoleBinding()).items;
+
+        // ─── Custom Resources ───
+        case 'customresourcedefinitions':
+          return (await this.apiExtensionsApi!.listCustomResourceDefinition())
+            .items;
+
         default:
+          console.warn(`Unknown resource type: ${resource}`);
           return [];
       }
     } catch (err) {
@@ -94,11 +180,42 @@ export class K8sService {
     }
 
     const endpoints: Record<ResourceType, string> = {
+      // Cluster
       namespaces: '/api/v1/namespaces',
+      nodes: '/api/v1/nodes',
+      // Workloads
       pods: '/api/v1/pods',
       deployments: '/apis/apps/v1/deployments',
-      services: '/api/v1/services',
       statefulsets: '/apis/apps/v1/statefulsets',
+      daemonsets: '/apis/apps/v1/daemonsets',
+      replicasets: '/apis/apps/v1/replicasets',
+      jobs: '/apis/batch/v1/jobs',
+      cronjobs: '/apis/batch/v1/cronjobs',
+      // Storage
+      persistentvolumeclaims: '/api/v1/persistentvolumeclaims',
+      persistentvolumes: '/api/v1/persistentvolumes',
+      storageclasses: '/apis/storage.k8s.io/v1/storageclasses',
+      // Network
+      services: '/api/v1/services',
+      ingresses: '/apis/networking.k8s.io/v1/ingresses',
+      networkpolicies: '/apis/networking.k8s.io/v1/networkpolicies',
+      endpoints: '/api/v1/endpoints',
+      // Configuration
+      configmaps: '/api/v1/configmaps',
+      secrets: '/api/v1/secrets',
+      resourcequotas: '/api/v1/resourcequotas',
+      limitranges: '/api/v1/limitranges',
+      horizontalpodautoscalers: '/apis/autoscaling/v1/horizontalpodautoscalers',
+      // Access Control
+      serviceaccounts: '/api/v1/serviceaccounts',
+      roles: '/apis/rbac.authorization.k8s.io/v1/roles',
+      rolebindings: '/apis/rbac.authorization.k8s.io/v1/rolebindings',
+      clusterroles: '/apis/rbac.authorization.k8s.io/v1/clusterroles',
+      clusterrolebindings:
+        '/apis/rbac.authorization.k8s.io/v1/clusterrolebindings',
+      // Custom Resources
+      customresourcedefinitions:
+        '/apis/apiextensions.k8s.io/v1/customresourcedefinitions',
     };
 
     const path = endpoints[resource];

@@ -5,11 +5,40 @@ export interface ShellSession {
 }
 
 export type ResourceType =
+  // Cluster
+  | 'namespaces'
+  | 'nodes'
+  // Workloads
   | 'pods'
   | 'deployments'
-  | 'services'
   | 'statefulsets'
-  | 'namespaces';
+  | 'daemonsets'
+  | 'replicasets'
+  | 'jobs'
+  | 'cronjobs'
+  // Storage
+  | 'persistentvolumeclaims'
+  | 'persistentvolumes'
+  | 'storageclasses'
+  // Network
+  | 'services'
+  | 'ingresses'
+  | 'networkpolicies'
+  | 'endpoints'
+  // Configuration
+  | 'configmaps'
+  | 'secrets'
+  | 'resourcequotas'
+  | 'limitranges'
+  | 'horizontalpodautoscalers'
+  // Access Control
+  | 'serviceaccounts'
+  | 'roles'
+  | 'rolebindings'
+  | 'clusterroles'
+  | 'clusterrolebindings'
+  // Custom Resources
+  | 'customresourcedefinitions';
 
 export interface K8sListEvent {
   resource: ResourceType;

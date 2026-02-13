@@ -17,7 +17,7 @@ env:
 
 permissions:
   contents: write
-  pull-requests: write
+  pull-requests: write # Required for creating the Back-merge PR
 
 jobs:
   # ─── Build ─────────────────────────────────────────────────────
@@ -96,9 +96,7 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          # Run standard-version to bump version and generate changelog
           npm run release
-
           $version = (Get-Content electron/package.json | ConvertFrom-Json).version
           echo "new_version=$version" >> $env:GITHUB_OUTPUT
           echo "tag=v$version" >> $env:GITHUB_OUTPUT
@@ -121,13 +119,11 @@ jobs:
         shell: pwsh
         run: |
           $content = Get-Content CHANGELOG.md -Raw
-          # Extract the first version section (latest release)
           if ($content -match '(?s)(## \[\d+\.\d+\.\d+\].*?)(?=## \[|$)') {
             $entry = $Matches[1].Trim()
           } else {
             $entry = "Release v${{ steps.version.outputs.new_version }}"
           }
-          # Write to file for the release action
           $entry | Out-File -FilePath release-notes.md -Encoding utf8
 
       - name: Create GitHub Release (private repo)
@@ -141,6 +137,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 👇 FIXED SECTION: Uses File Input instead of <<<
       - name: Update release notes on lumiov-releases
         shell: pwsh
         env:
@@ -149,19 +146,21 @@ jobs:
           $tag = "${{ steps.version.outputs.tag }}"
           $notes = Get-Content release-notes.md -Raw
 
-          # Wait for electron-builder's release to be created
           Start-Sleep -Seconds 10
 
-          # Find the release by tag on the public repo
           $releases = gh api repos/mtayabnoor/lumiov-releases/releases --jq ".[] | select(.tag_name == \"$tag\") | .id" 2>$null
 
           if ($releases) {
-            # Update existing release with changelog
-            $body = @{ body = $notes; name = "🚀 Release $tag" } | ConvertTo-Json
-            gh api repos/mtayabnoor/lumiov-releases/releases/$releases -X PATCH --input - <<< $body
+            # FIX: Create a temp file for the JSON body to avoid <<< operator issues in PowerShell
+            $bodyObject = @{ body = $notes; name = "🚀 Release $tag" }
+            $bodyObject | ConvertTo-Json | Set-Content -Path "patch_body.json" -Encoding utf8
+            
+            # Use --input patch_body.json
+            gh api repos/mtayabnoor/lumiov-releases/releases/$releases -X PATCH --input patch_body.json
+            
             echo "✅ Updated release notes on lumiov-releases for $tag"
           } else {
-            echo "⚠️ Release $tag not found on lumiov-releases yet (electron-builder may not have published)"
+            echo "⚠️ Release $tag not found on lumiov-releases yet"
           }
 
   # ─── Back-merge to development ─────────────────────────────────
@@ -171,31 +170,25 @@ jobs:
     needs: release
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create back-merge PR
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: auto/back-merge-${{ needs.release.outputs.tag }}
-          base: development
-          title: "chore: Back-merge ${{ needs.release.outputs.tag }} to development"
-          body: |
-            ## 🔄 Automated Back-merge
-
-            This PR merges the release **${{ needs.release.outputs.tag }}** back into `development`.
-
+      # 👇 FIXED SECTION: Uses gh pr create instead of create-pull-request
+      - name: Create Back-merge PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --base development \
+            --head main \
+            --title "chore: Back-merge ${{ needs.release.outputs.tag }} to development" \
+            --body "## 🔄 Automated Back-merge
+            
+            This PR merges the release **${{ needs.release.outputs.tag }}** back into \`development\`.
+            
             **Changes include:**
-            - Version bump to `${{ needs.release.outputs.new_version }}`
-            - Updated `CHANGELOG.md`
-            - Any hotfixes applied to `main`
-
-            > This PR was created automatically by the release workflow.
-            > Review and merge to keep `development` in sync with `main`.
-          labels: |
-            automated
-            back-merge
-          reviewers: mtayabnoor
+            - Version bump to \`${{ needs.release.outputs.new_version }}\`
+            - Updated \`CHANGELOG.md\`
+            
+            > This PR was created automatically by the release workflow." \
+            --label "automated" \
+            --label "back-merge" \
+            --reviewer "mtayabnoor" || echo "PR already exists or no changes to merge"

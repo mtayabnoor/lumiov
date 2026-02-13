@@ -18,7 +18,41 @@ export const SocketEvent = {
   AGENT_CLEAR: "agent:clear",
 } as const;
 
-export type ResourceType = "pods" | "deployments" | "namespaces";
+export type ResourceType =
+  // Cluster
+  | "namespaces"
+  | "nodes"
+  // Workloads
+  | "pods"
+  | "deployments"
+  | "statefulsets"
+  | "daemonsets"
+  | "replicasets"
+  | "jobs"
+  | "cronjobs"
+  // Storage
+  | "persistentvolumeclaims"
+  | "persistentvolumes"
+  | "storageclasses"
+  // Network
+  | "services"
+  | "ingresses"
+  | "networkpolicies"
+  | "endpoints"
+  // Configuration
+  | "configmaps"
+  | "secrets"
+  | "resourcequotas"
+  | "limitranges"
+  | "horizontalpodautoscalers"
+  // Access Control
+  | "serviceaccounts"
+  | "roles"
+  | "rolebindings"
+  | "clusterroles"
+  | "clusterrolebindings"
+  // Custom Resources
+  | "customresourcedefinitions";
 
 export interface K8sListPayload<T = any> {
   resource: ResourceType;

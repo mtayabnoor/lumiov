@@ -72,7 +72,7 @@ jobs:
           $version = "${{ steps.version.outputs.version }}"
 
           # Update all package.json files
-          foreach ($file in @("package.json", "frontend/package.json", "backend/package.json")) {
+          foreach ($file in @("package.json", "frontend/package.json", "backend/package.json", "electron/package.json")) {
             $json = Get-Content $file -Raw | ConvertFrom-Json
             $json.version = $version
             $json | ConvertTo-Json -Depth 100 | Set-Content $file -NoNewline

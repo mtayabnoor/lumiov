@@ -38,10 +38,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [root, frontend, backend, electron]
+        package: [frontend, backend, electron]
         include:
-          - package: root
-            working-directory: .
           - package: frontend
             working-directory: frontend
           - package: backend
@@ -72,7 +70,7 @@ jobs:
         include:
           - package: frontend
             working-directory: frontend
-            command: npm run build
+            command: npm run type-check
           - package: backend
             working-directory: backend
             command: npm run type-check

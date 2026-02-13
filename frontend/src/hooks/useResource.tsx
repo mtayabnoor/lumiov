@@ -69,7 +69,7 @@ export const useResource = <T extends ResourceWithMetadata>(
             }
             return [...prev, object];
 
-          case "MODIFIED":
+          case "MODIFIED": {
             // CRITICAL FIX: "Upsert" logic.
             // If we find it, update it. If we DON'T find it, add it.
             const exists = prev.some(
@@ -84,6 +84,7 @@ export const useResource = <T extends ResourceWithMetadata>(
               // It wasn't in our list (maybe we missed the ADD event), so add it now.
               return [...prev, object];
             }
+          }
 
           case "DELETED":
             return prev.filter((p) => p.metadata.uid !== object.metadata.uid);

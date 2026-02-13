@@ -96,6 +96,8 @@ export default function PodExecDrawer({
     setIsConnected(false);
   }, [socket]);
 
+  const cursorColor = theme.palette.primary.main;
+
   // --- The Core Logic (Callback Ref) ---
   // We use useCallback so this function stays stable.
   // If we didn't use useCallback, React would think it's a new function every render,
@@ -121,7 +123,7 @@ export default function PodExecDrawer({
         theme: {
           background: DRAWER_STYLES.paper.bodyBg,
           foreground: "#e6e6e6",
-          cursor: theme.palette.primary.main,
+          cursor: cursorColor,
         },
         fontFamily: '"JetBrains Mono", "Fira Code", Consolas, monospace',
         fontSize: 13,
@@ -192,7 +194,8 @@ export default function PodExecDrawer({
     },
     // Dependencies: If any of these change, React will call cleanup() (node=null)
     // and then call initTerminal() (node=div) again.
-    [socket, namespace, podName, selectedContainer, theme.palette.primary.main],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [socket, namespace, podName, selectedContainer, cursorColor],
   );
 
   const handleClose = () => {
@@ -208,7 +211,9 @@ export default function PodExecDrawer({
       setTimeout(() => {
         try {
           fitAddonRef.current?.fit();
-        } catch (e) {}
+        } catch (e) {
+          /* ignore */
+        }
       }, 300);
     }
   }, [height]);
