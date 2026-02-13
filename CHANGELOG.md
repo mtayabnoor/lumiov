@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.11.1](https://github.com/mtayabnoor/lumiov/compare/v2.11.0...v2.11.1) (2026-02-13)
+
+
+### Bug Fixes
+
+* Fix background flickering ([9454cbf](https://github.com/mtayabnoor/lumiov/commit/9454cbf021bd07bc2be3b24535a4b4cfe2778d39))
+
 ## [2.11.0](https://github.com/mtayabnoor/lumiov/compare/v2.10.0...v2.11.0) (2026-02-11)
 
 
