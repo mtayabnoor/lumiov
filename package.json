@@ -17,6 +17,7 @@
     "package": "npm run build && cd electron && npx electron-builder",
     "clean": "rimraf electron/dist electron/release",
     "release": "standard-version",
+    "release:rc": "standard-version --prerelease rc",
     "release:dry-run": "standard-version --dry-run",
     "prepare": "husky install",
     "commitlint": "commitlint --edit"

@@ -2,14 +2,12 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - "website/**"
-      - ".github/workflows/deploy-website.yml"
+    tags:
+      - "v*"
+      - "!v*-rc*"
 
 concurrency:
-  group: release
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -17,7 +15,6 @@ env:
 
 permissions:
   contents: write
-  pull-requests: write # Required for creating the Back-merge PR
 
 jobs:
   # ─── Build ─────────────────────────────────────────────────────
@@ -63,10 +60,6 @@ jobs:
     name: Release
     runs-on: windows-latest
     needs: build
-    outputs:
-      new_version: ${{ steps.version.outputs.new_version }}
-      tag: ${{ steps.version.outputs.tag }}
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -88,32 +81,12 @@ jobs:
         with:
           name: build-artifacts
 
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Bump version and generate changelog
-        id: version
-        shell: pwsh
-        run: |
-          npm run release
-          $version = (Get-Content electron/package.json | ConvertFrom-Json).version
-          echo "new_version=$version" >> $env:GITHUB_OUTPUT
-          echo "tag=v$version" >> $env:GITHUB_OUTPUT
-          echo "🏷️ Release version: v$version"
-
       - name: Package Electron
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: cd electron && npm run package:publish
-
-      - name: Push release commit and tag
-        run: git push origin main --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Extract latest changelog entry
         id: changelog
@@ -123,13 +96,13 @@ jobs:
           if ($content -match '(?s)(## \[\d+\.\d+\.\d+\].*?)(?=## \[|$)') {
             $entry = $Matches[1].Trim()
           } else {
-            $entry = "Release v${{ steps.version.outputs.new_version }}"
+            $entry = "Release ${{ github.ref_name }}"
           }
           $entry | Out-File -FilePath release-notes.md -Encoding utf8
 
       - name: Create/Update GitHub Releases (multi-repo)
         run: |
-          TAG="${{ steps.version.outputs.tag }}"
+          TAG="${{ github.ref_name }}"
           NOTES=$(cat release-notes.md)
 
           for REPO in "mtayabnoor/lumiov" "mtayabnoor/lumiov-releases"; do
@@ -151,33 +124,3 @@ jobs:
           done
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
-  # ─── Back-merge to development ─────────────────────────────────
-  back-merge:
-    name: Back-merge to development
-    runs-on: ubuntu-latest
-    needs: release
-    steps:
-      - uses: actions/checkout@v4
-
-      # 👇 FIXED SECTION: Uses gh pr create instead of create-pull-request
-      - name: Create Back-merge PR
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr create \
-            --base development \
-            --head main \
-            --title "chore: Back-merge ${{ needs.release.outputs.tag }} to development" \
-            --body "## 🔄 Automated Back-merge
-            
-            This PR merges the release **${{ needs.release.outputs.tag }}** back into \`development\`.
-            
-            **Changes include:**
-            - Version bump to \`${{ needs.release.outputs.new_version }}\`
-            - Updated \`CHANGELOG.md\`
-            
-            > This PR was created automatically by the release workflow." \
-            --label "automated" \
-            --label "back-merge" \
-            --reviewer "mtayabnoor" || echo "PR already exists or no changes to merge"
