@@ -66,6 +66,7 @@ jobs:
     outputs:
       new_version: ${{ steps.version.outputs.new_version }}
       tag: ${{ steps.version.outputs.tag }}
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -126,42 +127,30 @@ jobs:
           }
           $entry | Out-File -FilePath release-notes.md -Encoding utf8
 
-      - name: Create GitHub Release (private repo)
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: "🚀 Release ${{ steps.version.outputs.tag }}"
-          body_path: release-notes.md
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create/Update GitHub Releases (multi-repo)
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          NOTES=$(cat release-notes.md)
 
-      # 👇 FIXED SECTION: Uses File Input instead of <<<
-      - name: Update release notes on lumiov-releases
-        shell: pwsh
+          for REPO in "mtayabnoor/lumiov" "mtayabnoor/lumiov-releases"; do
+            echo "Processing release for $REPO"
+            RELEASE_ID=$(gh api repos/$REPO/releases --jq ".[] | select(.tag_name==\"$TAG\") | .id" 2>/dev/null)
+
+            if [ -n "$RELEASE_ID" ]; then
+              echo "Updating existing release $TAG in $REPO"
+              gh api -X PATCH repos/$REPO/releases/$RELEASE_ID \
+                -f name="🚀 Release $TAG" \
+                -f body="$NOTES"
+            else
+              echo "Creating new release $TAG in $REPO"
+              gh release create "$TAG" release-notes.md \
+                --repo $REPO \
+                --title "🚀 Release $TAG" \
+                --notes-file release-notes.md
+            fi
+          done
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        run: |
-          $tag = "${{ steps.version.outputs.tag }}"
-          $notes = Get-Content release-notes.md -Raw
-
-          Start-Sleep -Seconds 10
-
-          $releases = gh api repos/mtayabnoor/lumiov-releases/releases --jq ".[] | select(.tag_name == \"$tag\") | .id" 2>$null
-
-          if ($releases) {
-            # FIX: Create a temp file for the JSON body to avoid <<< operator issues in PowerShell
-            $bodyObject = @{ body = $notes; name = "🚀 Release $tag" }
-            $bodyObject | ConvertTo-Json | Set-Content -Path "patch_body.json" -Encoding utf8
-            
-            # Use --input patch_body.json
-            gh api repos/mtayabnoor/lumiov-releases/releases/$releases -X PATCH --input patch_body.json
-            
-            echo "✅ Updated release notes on lumiov-releases for $tag"
-          } else {
-            echo "⚠️ Release $tag not found on lumiov-releases yet"
-          }
 
   # ─── Back-merge to development ─────────────────────────────────
   back-merge:
