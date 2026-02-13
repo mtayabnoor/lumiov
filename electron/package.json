@@ -1,6 +1,6 @@
 {
   "name": "lumiov",
-  "version": "2.11.5",
+  "version": "2.12.0-rc.1",
   "description": "Lumiov Kubernetes Manager",
   "author": "mtayabnoor",
   "main": "dist/electron/main.js",
