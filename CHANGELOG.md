@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.12.0](https://github.com/mtayabnoor/lumiov/compare/v2.12.0-rc.1...v2.12.0) (2026-02-13)
+
+
+### Features
+
+* Added functionality all resources (CondigMaps. DeamonSets, etc) ([c073b8b](https://github.com/mtayabnoor/lumiov/commit/c073b8bf4a7da48d78f002d671fa335f12785877))
+
+
+### Bug Fixes
+
+* Eslint errors ([409a42f](https://github.com/mtayabnoor/lumiov/commit/409a42f9712ea796318ac8666b998e8dd9c8b420))
+* Eslint errors ([0e579b3](https://github.com/mtayabnoor/lumiov/commit/0e579b3f74d525214ea49cc811d8af0a8d2a8e6c))
+* Update package.json to rc verson ([4593361](https://github.com/mtayabnoor/lumiov/commit/4593361798ee08d8f76790a4529f56f5698357e8))
+
+
+### Maintenance
+
+* **release:** v2.12.0-rc.1 ([80329b9](https://github.com/mtayabnoor/lumiov/commit/80329b98a0ce187078db5b0cb40da158ec0da79b))
+
+
+### CI/CD
+
+* Fixed lint and type-check config ([8eb9f49](https://github.com/mtayabnoor/lumiov/commit/8eb9f49a951fd0ea1594dd1cc952ce3c3847ebe9))
+* Update candidate file ([fbad64c](https://github.com/mtayabnoor/lumiov/commit/fbad64c1f3581b6190079e2a5c42527d00674494))
+* Updated release file ([61287a0](https://github.com/mtayabnoor/lumiov/commit/61287a0901d37edd45f616b5ff4f61d3143cdc47))
+
 ### [2.11.5](https://github.com/mtayabnoor/lumiov/compare/v2.11.4...v2.11.5) (2026-02-13)
 
 
