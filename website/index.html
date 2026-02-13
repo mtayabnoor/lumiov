@@ -40,6 +40,19 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- ═══════════════ ANNOUNCEMENT BANNER ═══════════════ -->
+    <div class="announcement" id="announcement">
+      <div class="container announcement__inner">
+        <p>🚀 Lumiov v2.11 is here — now with AI-powered pod diagnosis!</p>
+        <a
+          href="https://github.com/mtayabnoor/lumiov-releases/releases"
+          target="_blank"
+          rel="noopener"
+          >Read more →</a
+        >
+      </div>
+    </div>
+
     <!-- ═══════════════════ NAV ═══════════════════ -->
     <nav class="nav" id="nav">
       <div class="nav__inner container">
@@ -56,7 +69,7 @@
           <a href="#ai">AI Agent</a>
           <a href="#demo">Demo</a>
           <a href="#tech">Tech Stack</a>
-          <a href="#community">Download</a>
+          <a href="#download">Download</a>
         </div>
         <div class="nav__actions">
           <a
@@ -65,7 +78,17 @@
             rel="noopener"
             class="btn btn--primary btn--sm"
           >
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
             Download
           </a>
         </div>
@@ -85,22 +108,20 @@
       <div class="hero__glow hero__glow--1"></div>
       <div class="hero__glow hero__glow--2"></div>
       <div class="container hero__inner">
-        <div class="hero__badge">
-          <span class="pulse-dot"></span>
-          Free to Use &middot; Download Now
-        </div>
+        <span class="hero__eyebrow">Your Kubernetes Experience</span>
         <h1 class="hero__title">
-          The <span class="gradient-text">AI-Powered</span><br />
-          Kubernetes Manager
+          <span class="gradient-text">AI-Powered</span> Kubernetes
+          Manager
         </h1>
         <p class="hero__subtitle">
-          Monitor, diagnose, and manage your Kubernetes clusters with an
-          intelligent desktop app. Real-time insights, AI-powered pod analysis,
-          and a beautiful VS Code-inspired UI.
+          Lumiov is a user-friendly Kubernetes desktop application focused on
+          real-time monitoring and AI-powered diagnostics.
         </p>
         <div class="hero__cta">
           <a
             href="https://github.com/mtayabnoor/lumiov-releases/releases"
+            target="_blank"
+            rel="noopener"
             class="btn btn--primary btn--lg"
           >
             <svg
@@ -114,41 +135,76 @@
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            Download for Windows
-          </a>
-          <a
-            href="https://github.com/mtayabnoor/lumiov-releases/releases"
-            target="_blank"
-            rel="noopener"
-            class="btn btn--ghost btn--lg"
-          >
-            View Releases
-            <svg
-              class="icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="7" y1="17" x2="17" y2="7" />
-              <polyline points="7 7 17 7 17 17" />
-            </svg>
+            Install on your platform
           </a>
         </div>
-        <div class="hero__stats">
-          <div class="stat">
-            <span class="stat__value" data-target="realtime">Real-time</span>
-            <span class="stat__label">WebSocket Updates</span>
-          </div>
-          <div class="stat__divider"></div>
-          <div class="stat">
-            <span class="stat__value">AI-Powered</span>
-            <span class="stat__label">Pod Diagnostics</span>
-          </div>
-          <div class="stat__divider"></div>
-          <div class="stat">
-            <span class="stat__value">Free</span>
-            <span class="stat__label">Desktop App</span>
+
+        <!-- App Preview -->
+        <div class="hero__preview">
+          <div class="hero__preview-window">
+            <div class="preview-titlebar">
+              <div class="preview-titlebar__dots">
+                <span class="dot dot--red"></span>
+                <span class="dot dot--yellow"></span>
+                <span class="dot dot--green"></span>
+              </div>
+              <span class="preview-titlebar__title">Lumiov — Kubernetes Dashboard</span>
+            </div>
+            <div class="preview-content">
+              <div class="preview-sidebar">
+                <div class="preview-sidebar__item preview-sidebar__item--active">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-7-7H1m22 0h-4"/></svg>
+                  <span>Pods</span>
+                </div>
+                <div class="preview-sidebar__item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <span>Deployments</span>
+                </div>
+                <div class="preview-sidebar__item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                  <span>Services</span>
+                </div>
+                <div class="preview-sidebar__item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                  <span>Terminal</span>
+                </div>
+              </div>
+              <div class="preview-main">
+                <div class="preview-main__header">
+                  <span class="preview-main__title">Pods</span>
+                  <span class="preview-main__namespace">namespace: default</span>
+                </div>
+                <div class="preview-table">
+                  <div class="preview-table__header">
+                    <span>Name</span><span>Status</span><span>Restarts</span><span>Age</span><span>AI</span>
+                  </div>
+                  <div class="preview-table__row">
+                    <span>api-server-7d4f8</span>
+                    <span class="status status--running">Running</span>
+                    <span>0</span><span>2d</span>
+                    <span class="ai-badge">✓</span>
+                  </div>
+                  <div class="preview-table__row preview-table__row--warn">
+                    <span>auth-svc-b2c91</span>
+                    <span class="status status--error">CrashLoop</span>
+                    <span>5</span><span>1h</span>
+                    <span class="ai-badge ai-badge--active">⚡</span>
+                  </div>
+                  <div class="preview-table__row">
+                    <span>worker-node-3a8e</span>
+                    <span class="status status--running">Running</span>
+                    <span>1</span><span>5d</span>
+                    <span class="ai-badge">✓</span>
+                  </div>
+                  <div class="preview-table__row">
+                    <span>redis-cache-f912</span>
+                    <span class="status status--running">Running</span>
+                    <span>0</span><span>12d</span>
+                    <span class="ai-badge">✓</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -168,19 +224,14 @@
             real-time visibility and intelligent automation.
           </p>
         </div>
-        <div class="features__grid">
-          <div class="feature-card feature-card--highlight">
-            <div class="feature-card__icon feature-card__icon--blue">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <path
-                  d="M12 1v6m0 6v6m-7-7H1m22 0h-4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"
-                />
+
+        <!-- Feature row: alternating layout -->
+        <div class="feature-row">
+          <div class="feature-row__content">
+            <div class="feature-row__icon feature-row__icon--blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6m-7-7H1m22 0h-4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/>
               </svg>
             </div>
             <h3>Real-time Monitoring</h3>
@@ -189,20 +240,13 @@
               and more. See changes the instant they happen across your cluster.
             </p>
           </div>
-          <div class="feature-card">
-            <div class="feature-card__icon feature-card__icon--purple">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93" />
-                <path d="M8.56 9.8A4.002 4.002 0 0 1 12 2" />
-                <circle cx="12" cy="16" r="4" />
-                <path d="M12 20v2" />
-                <path d="M8 16h.01" />
-                <path d="M16 16h.01" />
+          <div class="feature-row__content">
+            <div class="feature-row__icon feature-row__icon--purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93"/>
+                <path d="M8.56 9.8A4.002 4.002 0 0 1 12 2"/>
+                <circle cx="12" cy="16" r="4"/>
+                <path d="M12 20v2"/><path d="M8 16h.01"/><path d="M16 16h.01"/>
               </svg>
             </div>
             <h3>AI Pod Diagnosis</h3>
@@ -211,16 +255,14 @@
               issues. Get actionable recommendations powered by AI.
             </p>
           </div>
-          <div class="feature-card">
-            <div class="feature-card__icon feature-card__icon--green">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <polyline points="4 17 10 11 4 5" />
-                <line x1="12" y1="19" x2="20" y2="19" />
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-row__content">
+            <div class="feature-row__icon feature-row__icon--green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="4 17 10 11 4 5"/>
+                <line x1="12" y1="19" x2="20" y2="19"/>
               </svg>
             </div>
             <h3>Terminal Exec</h3>
@@ -229,20 +271,13 @@
               in-app terminal. No more context-switching to kubectl.
             </p>
           </div>
-          <div class="feature-card">
-            <div class="feature-card__icon feature-card__icon--amber">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
+          <div class="feature-row__content">
+            <div class="feature-row__icon feature-row__icon--amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
               </svg>
             </div>
             <h3>Log Viewer</h3>
@@ -251,17 +286,15 @@
               filtering. View real-time logs from all containers at once.
             </p>
           </div>
-          <div class="feature-card">
-            <div class="feature-card__icon feature-card__icon--cyan">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <line x1="3" y1="9" x2="21" y2="9" />
-                <line x1="9" y1="21" x2="9" y2="9" />
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-row__content">
+            <div class="feature-row__icon feature-row__icon--cyan">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="9" y1="21" x2="9" y2="9"/>
               </svg>
             </div>
             <h3>Resource Editor</h3>
@@ -270,16 +303,11 @@
               syntax highlighting and managed fields toggle.
             </p>
           </div>
-          <div class="feature-card">
-            <div class="feature-card__icon feature-card__icon--red">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
-                <path d="M22 12A10 10 0 0 0 12 2v10z" />
+          <div class="feature-row__content">
+            <div class="feature-row__icon feature-row__icon--red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+                <path d="M22 12A10 10 0 0 0 12 2v10z"/>
               </svg>
             </div>
             <h3>Visual Charts</h3>
@@ -311,51 +339,19 @@
             </p>
             <ul class="ai-section__list">
               <li>
-                <svg
-                  class="check-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                 <span>Automated root cause analysis</span>
               </li>
               <li>
-                <svg
-                  class="check-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                 <span>Structured severity assessment</span>
               </li>
               <li>
-                <svg
-                  class="check-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                 <span>Step-by-step remediation recommendations</span>
               </li>
               <li>
-                <svg
-                  class="check-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                 <span>Context-aware — uses live pod data</span>
               </li>
             </ul>
@@ -366,24 +362,18 @@
                 <div class="ai-card__dot ai-card__dot--red"></div>
                 <div class="ai-card__dot ai-card__dot--yellow"></div>
                 <div class="ai-card__dot ai-card__dot--green"></div>
-                <span class="ai-card__title"
-                  >Pod Diagnosis — api-server-7d4f8</span
-                >
+                <span class="ai-card__title">Pod Diagnosis — api-server-7d4f8</span>
               </div>
               <div class="ai-card__body">
                 <div class="ai-card__section">
-                  <span class="ai-card__label ai-card__label--red"
-                    >⚠ SEVERITY: HIGH</span
-                  >
+                  <span class="ai-card__label ai-card__label--red">⚠ SEVERITY: HIGH</span>
                   <p class="ai-card__text">
                     CrashLoopBackOff — Container restarted 5 times in the last
                     10 minutes.
                   </p>
                 </div>
                 <div class="ai-card__section">
-                  <span class="ai-card__label ai-card__label--blue"
-                    >📋 ROOT CAUSE</span
-                  >
+                  <span class="ai-card__label ai-card__label--blue">📋 ROOT CAUSE</span>
                   <p class="ai-card__text">
                     Missing environment variable
                     <code>DATABASE_URL</code> required by the application
@@ -391,9 +381,7 @@
                   </p>
                 </div>
                 <div class="ai-card__section">
-                  <span class="ai-card__label ai-card__label--green"
-                    >✅ REMEDIATION</span
-                  >
+                  <span class="ai-card__label ai-card__label--green">✅ REMEDIATION</span>
                   <p class="ai-card__text">
                     Add the <code>DATABASE_URL</code> environment variable to
                     the pod spec or referenced ConfigMap/Secret.
@@ -427,7 +415,6 @@
               </svg>
             </div>
             <p class="demo-section__video-label">Demo video coming soon</p>
-            <!-- Replace with: <iframe src="your-video-url" ...></iframe> -->
           </div>
         </div>
       </div>
@@ -477,35 +464,79 @@
       </div>
     </section>
 
-    <!-- ═══════════════════ GET STARTED / CTA ═══════════════════ -->
-    <section class="section community-section" id="community">
+    <!-- ═══════════════════ DOWNLOAD ═══════════════════ -->
+    <section class="section download-section" id="download">
       <div class="container">
-        <div class="community-section__inner">
+        <div class="section__header">
+          <span class="section__tag">Get Lumiov</span>
           <h2 class="section__title">
-            Get <span class="gradient-text">Started</span>
+            Download for <span class="gradient-text">your platform</span>
           </h2>
-          <p class="community-section__text">
-            Download Lumiov for free and take control of your Kubernetes clusters
-            with AI-powered diagnostics and real-time monitoring.
+          <p class="section__subtitle">
+            Lumiov is free to use. Download the latest release and start
+            managing your Kubernetes clusters with AI-powered diagnostics.
           </p>
-          <div class="community-section__cta">
-            <a
-              href="https://github.com/mtayabnoor/lumiov-releases/releases"
-              target="_blank"
-              rel="noopener"
-              class="btn btn--primary btn--lg"
-            >
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download Latest Release
-            </a>
+        </div>
+
+        <div class="download-section__card">
+          <div class="download-section__platforms">
+            <div class="download-platform download-platform--active" data-platform="windows">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+              </svg>
+              <span>Windows</span>
+            </div>
+            <div class="download-platform" data-platform="linux">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.368 1.884 1.43.868.134 1.703-.272 2.191-.574.3-.18.599-.135.834-.268.209-.126.363-.325.484-.467a1.42 1.42 0 001.025-.403c.333-.4.05-.878-.148-1.202-.082-.134-.174-.27-.231-.4-.21-.464-.039-1.075.13-1.5.218-.549.399-1.078.181-1.544-.155-.332-.38-.465-.608-.533a.926.926 0 00-.396-.6c-.36-.333-.47-.87-.33-1.402.058-.133.026-.267.013-.399-.18-.935-.33-1.868-.93-2.67l-.002-.002c-.333-.466-.6-.868-.6-1.202 0-1.87-.397-3.938-1.612-5.141C16.557.617 14.67 0 12.504 0z"/>
+              </svg>
+              <span>Linux</span>
+            </div>
+            <div class="download-platform" data-platform="mac">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              <span>macOS</span>
+            </div>
           </div>
-          <div class="community-section__links">
-            <a
-              href="https://github.com/mtayabnoor/lumiov-releases/releases"
-              target="_blank"
-              rel="noopener"
-              >📦 All Releases</a
-            >
+
+          <div class="download-section__content">
+            <!-- Windows -->
+            <div class="download-info download-info--active" id="download-windows">
+              <div class="download-info__main">
+                <h3>Windows Installer</h3>
+                <p>Download the NSIS installer for Windows 10/11 (x64).</p>
+                <a
+                  href="https://github.com/mtayabnoor/lumiov-releases/releases"
+                  target="_blank"
+                  rel="noopener"
+                  class="btn btn--primary btn--lg"
+                >
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Download for Windows
+                </a>
+              </div>
+            </div>
+            <!-- Linux -->
+            <div class="download-info" id="download-linux">
+              <div class="download-info__main">
+                <h3>Linux</h3>
+                <p>Linux support coming soon. Stay tuned for AppImage and .deb packages.</p>
+                <button class="btn btn--ghost btn--lg" disabled>Coming Soon</button>
+              </div>
+            </div>
+            <!-- macOS -->
+            <div class="download-info" id="download-mac">
+              <div class="download-info__main">
+                <h3>macOS</h3>
+                <p>macOS support coming soon. Stay tuned for .dmg packages.</p>
+                <button class="btn btn--ghost btn--lg" disabled>Coming Soon</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -514,20 +545,29 @@
     <!-- ═══════════════════ FOOTER ═══════════════════ -->
     <footer class="footer">
       <div class="container footer__inner">
-        <div class="footer__brand">
-          <img src="assets/lumiov.png" alt="Lumiov" class="footer__logo" />
-          <span>Lumiov</span>
+        <div class="footer__top">
+          <div class="footer__brand">
+            <img src="assets/lumiov.png" alt="Lumiov" class="footer__logo" />
+            <span>Lumiov</span>
+            <p class="footer__tagline">AI-Powered Kubernetes Manager</p>
+          </div>
+          <div class="footer__columns">
+            <div class="footer__column">
+              <h4>Product</h4>
+              <a href="#features">Features</a>
+              <a href="#ai">AI Agent</a>
+              <a href="#demo">Demo</a>
+              <a href="#download">Download</a>
+            </div>
+            <div class="footer__column">
+              <h4>Resources</h4>
+              <a href="https://github.com/mtayabnoor/lumiov-releases/releases" target="_blank" rel="noopener">Releases</a>
+              <a href="#tech">Tech Stack</a>
+            </div>
+          </div>
         </div>
-        <p class="footer__copy">
-          &copy; 2025 Lumiov. All rights reserved.
-        </p>
-        <div class="footer__links">
-          <a
-            href="https://github.com/mtayabnoor/lumiov-releases/releases"
-            target="_blank"
-            rel="noopener"
-            >Releases</a
-          >
+        <div class="footer__bottom">
+          <p class="footer__copy">&copy; 2025 Lumiov. All rights reserved.</p>
         </div>
       </div>
     </footer>
