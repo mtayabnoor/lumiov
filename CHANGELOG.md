@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.11.5](https://github.com/mtayabnoor/lumiov/compare/v2.11.4...v2.11.5) (2026-02-13)
+
+
+### Bug Fixes
+
+* Improved app update process ([6a270c7](https://github.com/mtayabnoor/lumiov/commit/6a270c7c8180e282d60c97f9a959542a4b80d6ef))
+* Removed devtools for prod app ([46d74a7](https://github.com/mtayabnoor/lumiov/commit/46d74a700661213560c7e1e0709a3432ec5a7adb))
+
+
+### Maintenance
+
+* **release:** 2.11.4 ([2ed9765](https://github.com/mtayabnoor/lumiov/commit/2ed97659e12fef45b6fb9005875da0bb4fe495ac))
+
+
+### CI/CD
+
+* Update workflow to push change log to release repo ([889217b](https://github.com/mtayabnoor/lumiov/commit/889217bc62f95b44d0fe3d3f2aa553f6a28f043d))
+
 ### [2.11.4](https://github.com/mtayabnoor/lumiov/compare/v2.11.3...v2.11.4) (2026-02-13)
 
 
