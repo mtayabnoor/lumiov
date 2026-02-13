@@ -1,4 +1,4 @@
-name: Build and Release
+name: Release
 
 on:
   push:
@@ -6,85 +6,59 @@ on:
       - master
 
 jobs:
-  # 1. VALIDATION JOB
-  # Merged Lint, Typecheck, Security, and Build Test into one job.
-  # This saves 3 redundant 'npm install' runs.
-  validate:
-    name: Validate (Lint, Security, Build)
+  install-and-build:
+    name: Install & Build
     runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "npm"
-
-      # Optimization: Use 'npm ci' (clean install) and install everything ONCE
-      - name: Install Dependencies
-        run: |
-          npm ci
-          cd frontend && npm ci
-          cd ../backend && npm ci
-
-      - name: Frontend Checks (Type & Build)
-        run: |
-          cd frontend
-          npm run build
-        env:
-          CI: false
-
-      - name: Backend Checks (Typecheck)
-        run: |
-          cd backend
-          npm run type-check
-
-      - name: Security Audit
-        run: |
-          npm audit --audit-level=high
-          cd frontend && npm audit --audit-level=high
-          cd ../backend && npm audit --audit-level=high
-        continue-on-error: false
-
-      - name: Electron Build Test
-        run: npx tsc -p tsconfig.json
-
-  # 2. RELEASE JOB
-  # Only runs if 'validate' succeeds
-  release:
-    name: Release & Publish
-    needs: validate # <--- CRITICAL: Waits for validation to pass
-    runs-on: windows-latest
-    permissions:
-      contents: write
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
 
-      # We have to install again because this is a fresh VM,
-      # but now we have only done 2 installs total (instead of 4).
       - name: Install Dependencies
         run: |
           npm ci
           cd frontend && npm ci
           cd ../backend && npm ci
 
-      # Re-build needed for the actual artifacts
-      - name: Build All
+      - name: Build Frontend
+        run: npm run build:frontend
         env:
           CI: false
-        run: |
-          npm run build:frontend
-          npm run build:backend
-          npx tsc -p tsconfig.json
+
+      - name: Build Backend
+        run: npm run build:backend
+
+      - name: Build Electron
+        run: npx tsc -p tsconfig.json
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            electron/dist/
+            frontend/dist
+            backend/dist
+
+  release:
+    name: Publish Release
+    runs-on: windows-latest
+    needs: install-and-build
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Important for git merge operations later
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
 
       - name: Configure Git
         run: |
@@ -93,15 +67,18 @@ jobs:
 
       - name: Bump Version and Generate Changelog
         id: version
+        # We verify if this push is a Merge Commit.
+        # If you strictly only want merges from 'development' to trigger a release,
+        # we can check the commit message or parents.
+        # However, it is safer to rely on Branch Protection rules (see explanation below).
         run: |
           npm run release
           $version = (Get-Content package.json | ConvertFrom-Json).version
           echo "new_version=$version" >> $env:GITHUB_OUTPUT
           echo "tag=v$version" >> $env:GITHUB_OUTPUT
 
-      - name: Push Changes
-        run: |
-          git push origin master --follow-tags
+      - name: Push Changes (Master)
+        run: git push origin master --follow-tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -122,3 +99,14 @@ jobs:
           body_path: CHANGELOG.md
           draft: false
           prerelease: false
+
+      # --- NEW SECTION: BACK-MERGE TO DEVELOPMENT ---
+      - name: Back-merge to Development
+        if: success() # Only run if the release was successful
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch origin development
+          git checkout development
+          git merge master
+          git push origin development

@@ -1,0 +1,45 @@
+name: PR Security Scan
+
+on:
+  pull_request:
+    branches: [development]
+
+jobs:
+  audit-root:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - name: Install Root
+        run: npm ci
+      - name: Security Audit Root
+        run: npm audit --audit-level=high
+
+  audit-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - name: Install Frontend
+        run: cd frontend && npm ci
+      - name: Security Audit Frontend
+        run: cd frontend && npm audit --audit-level=high
+
+  audit-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - name: Install Backend
+        run: cd backend && npm ci
+      - name: Security Audit Backend
+        run: cd backend && npm audit --audit-level=high

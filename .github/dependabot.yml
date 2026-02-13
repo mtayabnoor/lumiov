@@ -1,9 +1,9 @@
 version: 2
 
 updates:
-  # Root package.json
+  # Root package.json (Electron app in root)
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/" # <-- root directory
     schedule:
       interval: "weekly"
       day: "monday"
@@ -13,12 +13,14 @@ updates:
       - "mtayabnoor"
     labels:
       - "dependencies"
+      - "electron"
       - "automated"
     commit-message:
       prefix: "chore"
       include: "scope"
+    target-branch: "development"
 
-  # Frontend package.json
+  # Frontend package.json (React app)
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
@@ -35,8 +37,9 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    target-branch: "development"
 
-  # Backend package.json
+  # Backend package.json (Express app)
   - package-ecosystem: "npm"
     directory: "/backend"
     schedule:
@@ -53,8 +56,9 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    target-branch: "dev"
 
-  # GitHub Actions
+  # GitHub Actions workflow updates
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -70,3 +74,4 @@ updates:
       - "automated"
     commit-message:
       prefix: "ci"
+    target-branch: "development"
