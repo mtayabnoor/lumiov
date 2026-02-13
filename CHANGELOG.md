@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.11.2](https://github.com/mtayabnoor/lumiov/compare/v2.11.0...v2.11.2) (2026-02-13)
+
+
+### Bug Fixes
+
+* Fix background flickering ([9454cbf](https://github.com/mtayabnoor/lumiov/commit/9454cbf021bd07bc2be3b24535a4b4cfe2778d39))
+
+
+### Maintenance
+
+* **release:** 2.11.1 ([4ca66f7](https://github.com/mtayabnoor/lumiov/commit/4ca66f7e283c0c01e5e2bac8eafed6a556cacce3))
+
+
+### CI/CD
+
+* Updated actions version ([17cc5b9](https://github.com/mtayabnoor/lumiov/commit/17cc5b94c0b773ab0e5decfd10f310d5cbd5e0f1))
+* Updated github actions workflows ([6f8e7c3](https://github.com/mtayabnoor/lumiov/commit/6f8e7c311f0c35688fc77c7cabcfa63d63ccf355))
+* Updated npm versions ([0b7d396](https://github.com/mtayabnoor/lumiov/commit/0b7d3963761ce72c3d9af7ec1d0e378300edc6e5))
+* Updated workflows ([2c5a24b](https://github.com/mtayabnoor/lumiov/commit/2c5a24bf26e8e0687e5c5a1968fba6e04fd83275))
+
 ### [2.11.1](https://github.com/mtayabnoor/lumiov/compare/v2.11.0...v2.11.1) (2026-02-13)
 
 
