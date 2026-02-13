@@ -1,6 +1,6 @@
 {
   "name": "lumiov",
-  "version": "2.12.3",
+  "version": "2.12.4",
   "description": "Lumiov Kubernetes Manager",
   "private": true,
   "type": "module",
