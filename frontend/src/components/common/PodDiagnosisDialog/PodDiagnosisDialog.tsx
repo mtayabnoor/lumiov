@@ -227,7 +227,7 @@ export default function PodDiagnosisDialog({
     // 1. Reset state immediately when opening or changing pods
     if (!open) return;
 
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setResult(null);
     setError(null);
     setLoading(true);
