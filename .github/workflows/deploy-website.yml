@@ -9,8 +9,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -18,22 +16,17 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy to GitHub Pages
+    name: Deploy to GitHub Pages (lumiov-releases)
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to lumiov-releases gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: website
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          # Use RELEASE_TOKEN (PAT) with repo scope to push to the public repo
+          personal_token: ${{ secrets.RELEASE_TOKEN }}
+          external_repository: mtayabnoor/lumiov-releases
+          publish_branch: gh-pages
+          publish_dir: ./website
+          cname: ""

@@ -27,7 +27,7 @@ export interface K8sListPayload<T = any> {
 
 export interface K8sEventPayload<T = any> {
   resource: ResourceType;
-  type: "ADDED" | "MODIFIED" | "DELETED";
+  type: "ADDED" | "MODIFIED" | "DELETED" | "BOOKMARK";
   object: T;
 }
 

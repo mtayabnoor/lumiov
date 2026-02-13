@@ -42,6 +42,9 @@ export const useResource = <T extends ResourceWithMetadata>(
 
       const { type, object } = payload;
 
+      // BOOKMARK events are K8s watch checkpoints, not data changes — ignore
+      if (type === "BOOKMARK") return;
+
       // 2. Guard: Invalid Data
       if (!object || !object.metadata?.uid) {
         console.warn("Received invalid K8s event", payload);

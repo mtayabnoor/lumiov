@@ -89,14 +89,14 @@ jobs:
         run: npm run build:backend
 
       - name: Build Electron
-        run: npx tsc -p tsconfig.json
+        run: npm run build:electron
 
       - name: Package Electron (pre-release)
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-        run: npm run package -- --publish always
+        run: cd electron && npm run package:publish
 
       - name: Push tag
         run: git push origin ${{ github.ref_name }} --follow-tags

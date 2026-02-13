@@ -47,9 +47,13 @@ if (!hasLock) {
 }
 
 function createWindow() {
+  // app.getAppPath() consistently returns the electron/ dir
+  // regardless of how Electron is launched
+  const appRoot = path.resolve(app.getAppPath(), "..");
+
   let iconPath;
   if (isDev) {
-    iconPath = path.join(process.cwd(), "frontend", "public", "lumiov.ico");
+    iconPath = path.join(appRoot, "frontend", "public", "lumiov.ico");
   } else {
     iconPath = path.join(process.resourcesPath, "lumiov.ico");
   }
@@ -73,16 +77,15 @@ function createWindow() {
   });
 
   if (isDev) {
-    mainWindow.loadFile(
-      path.join(process.cwd(), "frontend", "dist", "index.html"),
-    );
+    mainWindow.loadFile(path.join(appRoot, "frontend", "dist", "index.html"));
     mainWindow.webContents.openDevTools();
   } else {
     // In production, files are packaged in the asar archive
     // __dirname is inside app.asar/electron/dist/electron/
     // frontend/dist is at app.asar/frontend/dist/
+    mainWindow.webContents.openDevTools();
     mainWindow.loadFile(
-      path.join(process.resourcesPath, "frontend", "dist", "index.html"),
+      path.join(process.resourcesPath, "frontend", "index.html"),
     );
   }
 }
