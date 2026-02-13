@@ -80,10 +80,6 @@ function createWindow() {
     mainWindow.loadFile(path.join(appRoot, "frontend", "dist", "index.html"));
     mainWindow.webContents.openDevTools();
   } else {
-    // In production, files are packaged in the asar archive
-    // __dirname is inside app.asar/electron/dist/electron/
-    // frontend/dist is at app.asar/frontend/dist/
-    mainWindow.webContents.openDevTools();
     mainWindow.loadFile(
       path.join(process.resourcesPath, "frontend", "index.html"),
     );
