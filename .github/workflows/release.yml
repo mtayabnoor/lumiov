@@ -101,6 +101,7 @@ jobs:
           $entry | Out-File -FilePath release-notes.md -Encoding utf8
 
       - name: Create/Update GitHub Releases (multi-repo)
+        shell: bash
         run: |
           TAG="${{ github.ref_name }}"
           NOTES=$(cat release-notes.md)
@@ -124,3 +125,25 @@ jobs:
           done
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+
+  # ─── Sync Main ─────────────────────────────────────────────────
+  sync-main:
+    name: Sync Main
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Merge Release Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          echo "Merging tag ${{ github.ref_name }} into main..."
+          git merge ${{ github.ref_name }}
+          git push origin main
