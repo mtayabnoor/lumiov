@@ -49,7 +49,7 @@ if (!hasLock) {
 function createWindow() {
   let iconPath;
   if (isDev) {
-    iconPath = path.join(__dirname, "../../../frontend/public/lumiov.ico");
+    iconPath = path.join(process.cwd(), "frontend", "public", "lumiov.ico");
   } else {
     iconPath = path.join(process.resourcesPath, "lumiov.ico");
   }
@@ -74,7 +74,7 @@ function createWindow() {
 
   if (isDev) {
     mainWindow.loadFile(
-      path.resolve(__dirname, "../../../frontend/dist/index.html"),
+      path.join(process.cwd(), "frontend", "dist", "index.html"),
     );
     mainWindow.webContents.openDevTools();
   } else {
@@ -82,7 +82,7 @@ function createWindow() {
     // __dirname is inside app.asar/electron/dist/electron/
     // frontend/dist is at app.asar/frontend/dist/
     mainWindow.loadFile(
-      path.join(__dirname, "..", "..", "..", "frontend", "dist", "index.html"),
+      path.join(process.resourcesPath, "frontend", "dist", "index.html"),
     );
   }
 }

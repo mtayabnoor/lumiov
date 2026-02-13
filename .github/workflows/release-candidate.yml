@@ -40,6 +40,7 @@ jobs:
           npm ci
           cd frontend && npm ci
           cd ../backend && npm ci
+          cd ../electron && npm ci
 
       # Determine the RC number by counting existing RC tags for this version
       - name: Determine RC version

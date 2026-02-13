@@ -27,11 +27,13 @@ export async function launchBackend(isDev: boolean): Promise<ChildProcess> {
 
   if (isDev) {
     // --- DEVELOPMENT MODE ---
-    cwd = path.resolve(process.cwd(), "../backend");
+    // When running `electron ./electron` from root, process.cwd() is the project root
+    cwd = path.resolve(process.cwd(), "backend");
 
     if (!fs.existsSync(cwd)) {
       console.warn("⚠️ standard path failed, trying fallback...");
-      cwd = path.resolve(__dirname, "../../../backend");
+      // __dirname is electron/dist/electron/ at runtime
+      cwd = path.resolve(__dirname, "../../..", "backend");
     }
 
     // In dev, we can assume the developer has 'node' in their PATH
