@@ -17,7 +17,7 @@ jobs:
   # ─── Commit Lint ───────────────────────────────────────────────
   commitlint:
     name: Commit Lint
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
   # ─── Lint ──────────────────────────────────────────────────────
   lint:
     name: Lint (${{ matrix.package }})
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -62,7 +62,7 @@ jobs:
   # ─── Type Check ────────────────────────────────────────────────
   typecheck:
     name: Type Check (${{ matrix.package }})
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -116,7 +116,7 @@ jobs:
   # ─── Security Audit ────────────────────────────────────────────
   security:
     name: Security Audit (${{ matrix.package }})
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -148,7 +148,7 @@ jobs:
     name: CI Passed
     if: always()
     needs: [commitlint, lint, typecheck, build, security]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Check all jobs
         run: |
