@@ -1,15 +1,15 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - "website/**"
-      - ".github/workflows/deploy-website.yml"
+  workflow_dispatch:
+    inputs:
+      release-branch:
+        description: "Release branch to finalize (e.g. release/v2.13.0)"
+        required: true
+        type: string
 
 concurrency:
-  group: release
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -17,17 +17,89 @@ env:
 
 permissions:
   contents: write
-  pull-requests: write # Required for creating the Back-merge PR
 
 jobs:
-  # ─── Build ─────────────────────────────────────────────────────
-  build:
-    name: Build
-    runs-on: windows-latest
+  # ─── Finalize Version ──────────────────────────────────────────
+  finalize:
+    name: Finalize Version
+    runs-on: self-hosted
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.release-branch }}
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge release branch into main
+        run: |
+          git fetch origin main
+          git checkout main
+          git merge --no-ff "${{ inputs.release-branch }}" -m "chore: merge ${{ inputs.release-branch }} into main"
+
+      - name: Bump final version & changelog
+        id: version
+        run: |
+          # standard-version strips prerelease suffix and finalizes
+          npx standard-version --skip.bump
+
+          # Re-read version without RC suffix — strip it manually if standard-version didn't
+          CURRENT=$(node -p "require('./package.json').version")
+          FINAL="${CURRENT%%-rc*}"
+
+          if [ "$CURRENT" != "$FINAL" ]; then
+            # Manually set the final version in all package.json files
+            npm version "$FINAL" --no-git-tag-version
+            for pkg in frontend/package.json backend/package.json electron/package.json; do
+              if [ -f "$pkg" ]; then
+                node -e "
+                  const fs = require('fs');
+                  const p = JSON.parse(fs.readFileSync('$pkg','utf8'));
+                  p.version = '$FINAL';
+                  fs.writeFileSync('$pkg', JSON.stringify(p, null, 2) + '\n');
+                "
+              fi
+            done
+            # Re-generate changelog for clean final version
+            npx standard-version --skip.bump --skip.commit --skip.tag
+          fi
+
+          VERSION="$FINAL"
+          TAG="v${VERSION}"
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+          git add -A
+          git commit -m "chore(release): ${TAG}" --allow-empty
+          git tag -a "${TAG}" -m "Release ${TAG}"
+          git push origin main --follow-tags
+
+  # ─── Build ─────────────────────────────────────────────────────
+  build:
+    name: Build
+    needs: finalize
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.finalize.outputs.tag }}
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -58,20 +130,17 @@ jobs:
             frontend/dist
             backend/dist
 
-  # ─── Release ───────────────────────────────────────────────────
-  release:
-    name: Release
-    runs-on: windows-latest
-    needs: build
-    outputs:
-      new_version: ${{ steps.version.outputs.new_version }}
-      tag: ${{ steps.version.outputs.tag }}
-
+  # ─── Publish Release ───────────────────────────────────────────
+  publish:
+    name: Publish Release
+    needs: [finalize, build]
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ needs.finalize.outputs.tag }}
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -88,21 +157,6 @@ jobs:
         with:
           name: build-artifacts
 
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Bump version and generate changelog
-        id: version
-        shell: pwsh
-        run: |
-          npm run release
-          $version = (Get-Content electron/package.json | ConvertFrom-Json).version
-          echo "new_version=$version" >> $env:GITHUB_OUTPUT
-          echo "tag=v$version" >> $env:GITHUB_OUTPUT
-          echo "🏷️ Release version: v$version"
-
       - name: Package Electron
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
@@ -110,74 +164,89 @@ jobs:
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: cd electron && npm run package:publish
 
-      - name: Push release commit and tag
-        run: git push origin main --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
-      - name: Extract latest changelog entry
-        id: changelog
+      - name: Extract changelog entry
+        id: notes
         shell: pwsh
         run: |
           $content = Get-Content CHANGELOG.md -Raw
           if ($content -match '(?s)(## \[\d+\.\d+\.\d+\].*?)(?=## \[|$)') {
             $entry = $Matches[1].Trim()
           } else {
-            $entry = "Release v${{ steps.version.outputs.new_version }}"
+            $entry = "Release ${{ needs.finalize.outputs.tag }}"
           }
           $entry | Out-File -FilePath release-notes.md -Encoding utf8
 
-      - name: Create/Update GitHub Releases (multi-repo)
-        run: |
-          TAG="${{ steps.version.outputs.tag }}"
-          NOTES=$(cat release-notes.md)
-
-          for REPO in "mtayabnoor/lumiov" "mtayabnoor/lumiov-releases"; do
-            echo "Processing release for $REPO"
-            RELEASE_ID=$(gh api repos/$REPO/releases --jq ".[] | select(.tag_name==\"$TAG\") | .id" 2>/dev/null)
-
-            if [ -n "$RELEASE_ID" ]; then
-              echo "Updating existing release $TAG in $REPO"
-              gh api -X PATCH repos/$REPO/releases/$RELEASE_ID \
-                -f name="🚀 Release $TAG" \
-                -f body="$NOTES"
-            else
-              echo "Creating new release $TAG in $REPO"
-              gh release create "$TAG" release-notes.md \
-                --repo $REPO \
-                --title "🚀 Release $TAG" \
-                --notes-file release-notes.md
-            fi
-          done
+      - name: Create release in both repos
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          TAG="${{ needs.finalize.outputs.tag }}"
+          for REPO in "mtayabnoor/lumiov" "mtayabnoor/lumiov-releases"; do
+            echo "🚀 Publishing ${TAG} in ${REPO}"
+            gh release create "${TAG}" \
+              --repo "${REPO}" \
+              --title "🚀 Release ${TAG}" \
+              --notes-file release-notes.md \
+              2>/dev/null || \
+            gh release edit "${TAG}" \
+              --repo "${REPO}" \
+              --title "🚀 Release ${TAG}" \
+              --notes-file release-notes.md \
+              --draft=false \
+              --prerelease=false
+          done
 
-  # ─── Back-merge to development ─────────────────────────────────
-  back-merge:
-    name: Back-merge to development
-    runs-on: ubuntu-latest
-    needs: release
+  # ─── Sync Changelog to Public Repo ─────────────────────────────
+  sync-changelog:
+    name: Sync Changelog
+    needs: [finalize, publish]
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
 
-      # 👇 FIXED SECTION: Uses gh pr create instead of create-pull-request
-      - name: Create Back-merge PR
+      - name: Push CHANGELOG.md to lumiov-releases
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
-          gh pr create \
-            --base development \
-            --head main \
-            --title "chore: Back-merge ${{ needs.release.outputs.tag }} to development" \
-            --body "## 🔄 Automated Back-merge
-            
-            This PR merges the release **${{ needs.release.outputs.tag }}** back into \`development\`.
-            
-            **Changes include:**
-            - Version bump to \`${{ needs.release.outputs.new_version }}\`
-            - Updated \`CHANGELOG.md\`
-            
-            > This PR was created automatically by the release workflow." \
-            --label "automated" \
-            --label "back-merge" \
-            --reviewer "mtayabnoor" || echo "PR already exists or no changes to merge"
+          # Clone public repo, copy changelog, commit & push
+          git clone --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/mtayabnoor/lumiov-releases.git" public-repo
+          cp CHANGELOG.md public-repo/CHANGELOG.md
+
+          cd public-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add CHANGELOG.md
+          git diff --cached --quiet && echo "No changelog changes" && exit 0
+          git commit -m "docs: update changelog for ${{ needs.finalize.outputs.tag }}"
+          git push
+
+  # ─── Sync Development ──────────────────────────────────────────
+  sync-dev:
+    name: Sync Development
+    needs: [finalize, publish]
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: development
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Merge main back into development
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git merge origin/main --no-edit -m "chore: merge main back into development after ${{ needs.finalize.outputs.tag }}"
+          git push origin development
+
+      - name: Clean up release branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          git push origin --delete "${{ inputs.release-branch }}" 2>/dev/null || true
