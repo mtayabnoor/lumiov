@@ -134,7 +134,7 @@ jobs:
   publish:
     name: Publish Release
     needs: [finalize, build]
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
