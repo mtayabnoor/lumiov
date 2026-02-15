@@ -65,7 +65,7 @@ jobs:
 
           git checkout -b "${BRANCH}" 2>/dev/null || git checkout "${BRANCH}"
           git add -A
-          git commit -m "chore(release): ${TAG}"
+          git commit -m "chore(release): Release ${TAG}"
           git tag -a "${TAG}" -m "Release ${TAG}"
           git push origin "${BRANCH}" --follow-tags
 

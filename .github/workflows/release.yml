@@ -55,7 +55,7 @@ jobs:
         id: version
         run: |
           # standard-version strips prerelease suffix and finalizes
-          npx standard-version --skip.bump
+          npx standard-version --skip.bump --skip.commit --skip.tag
 
           # Re-read version without RC suffix — strip it manually if standard-version didn't
           CURRENT=$(node -p "require('./package.json').version")
@@ -85,7 +85,7 @@ jobs:
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
           git add -A
-          git commit -m "chore(release): ${TAG}" --allow-empty
+          git commit -m "chore(release): Release ${TAG}" --allow-empty
           git tag -a "${TAG}" -m "Release ${TAG}"
           git push origin main --follow-tags
 
