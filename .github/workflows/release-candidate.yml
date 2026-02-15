@@ -23,13 +23,13 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
       branch: ${{ steps.version.outputs.branch }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: development
           fetch-depth: 0
           token: ${{ secrets.RELEASE_TOKEN }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -75,12 +75,12 @@ jobs:
     needs: create-rc
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.create-rc.outputs.tag }}
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -107,7 +107,7 @@ jobs:
         run: cd electron && npm run package
 
       - name: Upload installer artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: rc-installer
           path: electron/release/*.exe
@@ -118,13 +118,13 @@ jobs:
     needs: [create-rc, build-rc]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.create-rc.outputs.tag }}
           fetch-depth: 0
 
       - name: Download installer
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: rc-installer
           path: ./installers
