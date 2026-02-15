@@ -22,7 +22,7 @@ jobs:
   # ─── Finalize Version ──────────────────────────────────────────
   finalize:
     name: Finalize Version
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
@@ -93,7 +93,7 @@ jobs:
   build:
     name: Build
     needs: finalize
-    runs-on: self-hosted
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -134,7 +134,7 @@ jobs:
   publish:
     name: Publish Release
     needs: [finalize, build]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -166,70 +166,37 @@ jobs:
 
       - name: Extract changelog entry
         id: notes
-        shell: pwsh
+        shell: bash
         run: |
-          $content = Get-Content CHANGELOG.md -Raw
-          if ($content -match '(?s)(## \[\d+\.\d+\.\d+\].*?)(?=## \[|$)') {
-            $entry = $Matches[1].Trim()
-          } else {
-            $entry = "Release ${{ needs.finalize.outputs.tag }}"
-          }
-          $entry | Out-File -FilePath release-notes.md -Encoding utf8
+          VERSION="${{ needs.finalize.outputs.version }}"
+          ENTRY=$(awk "/^## \[${VERSION//./\\.}\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md)
+          if [ -z "$ENTRY" ]; then
+            ENTRY="Release ${{ needs.finalize.outputs.tag }}"
+          fi
+          echo "$ENTRY" > release-notes.md
 
-      - name: Create release in both repos
+      - name: Create release
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           TAG="${{ needs.finalize.outputs.tag }}"
-          for REPO in "mtayabnoor/lumiov" "mtayabnoor/lumiov-releases"; do
-            echo "🚀 Publishing ${TAG} in ${REPO}"
-            gh release create "${TAG}" \
-              --repo "${REPO}" \
-              --title "🚀 Release ${TAG}" \
-              --notes-file release-notes.md \
-              2>/dev/null || \
-            gh release edit "${TAG}" \
-              --repo "${REPO}" \
-              --title "🚀 Release ${TAG}" \
-              --notes-file release-notes.md \
-              --draft=false \
-              --prerelease=false
-          done
-
-  # ─── Sync Changelog to Public Repo ─────────────────────────────
-  sync-changelog:
-    name: Sync Changelog
-    needs: [finalize, publish]
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 1
-
-      - name: Push CHANGELOG.md to lumiov-releases
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        run: |
-          # Clone public repo, copy changelog, commit & push
-          git clone --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/mtayabnoor/lumiov-releases.git" public-repo
-          cp CHANGELOG.md public-repo/CHANGELOG.md
-
-          cd public-repo
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add CHANGELOG.md
-          git diff --cached --quiet && echo "No changelog changes" && exit 0
-          git commit -m "docs: update changelog for ${{ needs.finalize.outputs.tag }}"
-          git push
+          echo "🚀 Publishing ${TAG}"
+          gh release create "${TAG}" \
+            --title "🚀 Release ${TAG}" \
+            --notes-file release-notes.md \
+            2>/dev/null || \
+          gh release edit "${TAG}" \
+            --title "🚀 Release ${TAG}" \
+            --notes-file release-notes.md \
+            --draft=false \
+            --prerelease=false
 
   # ─── Sync Development ──────────────────────────────────────────
   sync-dev:
     name: Sync Development
     needs: [finalize, publish]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:

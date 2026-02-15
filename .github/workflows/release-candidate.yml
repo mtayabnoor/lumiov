@@ -2,15 +2,6 @@ name: Release Candidate
 
 on:
   workflow_dispatch:
-    inputs:
-      bump:
-        description: "Version bump type"
-        required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
 
 concurrency:
   group: release-candidate
@@ -26,7 +17,7 @@ jobs:
   # ─── Create Release Candidate ──────────────────────────────────
   create-rc:
     name: Create Release Candidate
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
@@ -53,7 +44,7 @@ jobs:
       - name: Bump version & generate changelog
         id: version
         run: |
-          npx standard-version --release-as ${{ inputs.bump }} --prerelease rc --skip.commit --skip.tag
+          npx standard-version --prerelease rc --skip.commit --skip.tag
 
           VERSION=$(node -p "require('./package.json').version")
           TAG="v${VERSION}"
@@ -78,49 +69,94 @@ jobs:
           git tag -a "${TAG}" -m "Release ${TAG}"
           git push origin "${BRANCH}" --follow-tags
 
-  # ─── Publish Pre-Release ───────────────────────────────────────
-  publish-rc:
-    name: Publish Pre-Release
+  # ─── Build RC ────────────────────────────────────────────────────
+  build-rc:
+    name: Build RC
     needs: create-rc
-    runs-on: self-hosted
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.create-rc.outputs.tag }}
           fetch-depth: 0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install all dependencies
+        run: |
+          npm ci
+          cd frontend && npm ci
+          cd ../backend && npm ci
+          cd ../electron && npm ci
+
+      - name: Build frontend
+        run: npm run build:frontend
+
+      - name: Build backend
+        run: npm run build:backend
+
+      - name: Build Electron
+        run: npm run build:electron
+
+      - name: Package Electron
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: cd electron && npm run package
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rc-installer
+          path: electron/release/*.exe
+
+  # ─── Publish Pre-Release ───────────────────────────────────────
+  publish-rc:
+    name: Publish Pre-Release
+    needs: [create-rc, build-rc]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-rc.outputs.tag }}
+          fetch-depth: 0
+
+      - name: Download installer
+        uses: actions/download-artifact@v4
+        with:
+          name: rc-installer
+          path: ./installers
+
       - name: Extract changelog entry
         id: notes
         run: |
           VERSION="${{ needs.create-rc.outputs.version }}"
-          # Extract the section for this version from CHANGELOG.md
-          NOTES=$(awk "/^## \\[${VERSION//./\\.}\\]/{flag=1; next} /^## \\[/{flag=0} flag" CHANGELOG.md)
+          NOTES=$(awk "/^## \[${VERSION//./\\.}\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md)
           if [ -z "$NOTES" ]; then
             NOTES="Release Candidate ${{ needs.create-rc.outputs.tag }}"
           fi
-          # Use delimiter to handle multiline
           {
             echo "body<<NOTES_EOF"
             echo "$NOTES"
             echo "NOTES_EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Create pre-release in both repos
+      - name: Create pre-release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           TAG="${{ needs.create-rc.outputs.tag }}"
-          for REPO in "mtayabnoor/lumiov" "mtayabnoor/lumiov-releases"; do
-            echo "🚀 Creating pre-release ${TAG} in ${REPO}"
-            gh release create "${TAG}" \
-              --repo "${REPO}" \
+          echo "🚀 Creating pre-release ${TAG}"
+          gh release create "${TAG}" \
+            --title "🧪 ${TAG}" \
+            --notes "${{ steps.notes.outputs.body }}" \
+            --prerelease \
+            ./installers/*.exe \
+            2>/dev/null || \
+          { gh release edit "${TAG}" \
               --title "🧪 ${TAG}" \
               --notes "${{ steps.notes.outputs.body }}" \
-              --prerelease \
-              2>/dev/null || \
-            gh release edit "${TAG}" \
-              --repo "${REPO}" \
-              --title "🧪 ${TAG}" \
-              --notes "${{ steps.notes.outputs.body }}" \
-              --prerelease
-          done
+              --prerelease && \
+            gh release upload "${TAG}" ./installers/*.exe --clobber; }

@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: pages
@@ -16,17 +16,14 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy to GitHub Pages (lumiov-releases)
+    name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy to lumiov-releases gh-pages
+      - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          # Use RELEASE_TOKEN (PAT) with repo scope to push to the public repo
-          personal_token: ${{ secrets.RELEASE_TOKEN }}
-          external_repository: mtayabnoor/lumiov-releases
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./website
-          cname: ""
