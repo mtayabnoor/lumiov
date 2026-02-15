@@ -26,8 +26,7 @@
       "target": [
         "nsis"
       ],
-      "icon": "../frontend/public/lumiov.ico",
-      "sign": false
+      "icon": "../frontend/public/lumiov.ico"
     },
     "nsis": {
       "oneClick": false,
