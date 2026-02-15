@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/mtayabnoor/lumiov/compare/v1.1.0-rc.0...v1.1.0) (2026-02-15)
+
+
+### Maintenance
+
+* Merge release/v1.1.0 into main ([5b00dcc](https://github.com/mtayabnoor/lumiov/commit/5b00dcc643394a977ae7979303bf923e77511faf))
+
+## [1.1.0-rc.0](https://github.com/mtayabnoor/lumiov/compare/v1.0.1...v1.1.0-rc.0) (2026-02-15)
+
+
+### Features
+
+* Update icon for ai diagnosis button ([4d4bf98](https://github.com/mtayabnoor/lumiov/commit/4d4bf98cc192efffc4274952b52996d4e57ee1f0))
+
+
+### CI/CD
+
+* Updated release yml ([888fe61](https://github.com/mtayabnoor/lumiov/commit/888fe61a51484e448e380d3515d2f40965e8ffe7))
+
 ### [1.0.1](https://github.com/mtayabnoor/lumiov/compare/v1.0.1-rc.0...v1.0.1) (2026-02-15)
 
 
