@@ -209,7 +209,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
-          git merge origin/main --no-edit -m "chore: Merge main back into development after ${{ needs.finalize.outputs.tag }}"
+          git merge origin/main --no-ff --no-edit -m "chore: Merge main back into development after ${{ needs.finalize.outputs.tag }}"
           git push origin development
 
       - name: Clean up release branch
