@@ -2,15 +2,6 @@ name: Release Candidate
 
 on:
   workflow_dispatch:
-    inputs:
-      bump:
-        description: "Version bump type"
-        required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
 
 concurrency:
   group: release-candidate
@@ -53,7 +44,7 @@ jobs:
       - name: Bump version & generate changelog
         id: version
         run: |
-          npx standard-version --release-as ${{ inputs.bump }} --prerelease rc --skip.commit --skip.tag
+          npx standard-version --prerelease rc --skip.commit --skip.tag
 
           VERSION=$(node -p "require('./package.json').version")
           TAG="v${VERSION}"
