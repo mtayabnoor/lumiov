@@ -18,12 +18,6 @@
       {
         "provider": "github",
         "owner": "mtayabnoor",
-        "repo": "lumiov-releases",
-        "releaseType": "release"
-      },
-      {
-        "provider": "github",
-        "owner": "mtayabnoor",
         "repo": "lumiov",
         "releaseType": "release"
       }
@@ -33,7 +27,7 @@
         "nsis"
       ],
       "icon": "../frontend/public/lumiov.ico",
-      "cscLink": "../lumiov_dev.pfx"
+      "sign": false
     },
     "nsis": {
       "oneClick": false,
