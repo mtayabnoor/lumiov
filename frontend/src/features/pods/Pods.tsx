@@ -6,7 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArticleIcon from "@mui/icons-material/Article";
 import TerminalIcon from "@mui/icons-material/Terminal";
-import BiotechIcon from "@mui/icons-material/Biotech";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
   Box,
   CircularProgress,
@@ -272,7 +272,7 @@ function Pods() {
               //},
               //}}
             >
-              <BiotechIcon
+              <SmartToyIcon
                 sx={{
                   color: isConfigured ? "#b42323ff" : "#fff",
                   filter: isConfigured
