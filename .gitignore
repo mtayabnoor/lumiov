@@ -1,0 +1,9 @@
+node_modules
+electron
+backend
+frontend
+website
+.vscode
+test*
+.husky
+commands.txt
