@@ -1,10 +1,6 @@
-# Lumiov - Kubernetes Manager
+# Lumiov - AI Powered Kubernetes Manager
 
-<!-- VIDEO PLACEHOLDER -->
-
-[Insert Application Demo Video Here]
-
-<!-- VIDEO PLACEHOLDER END -->
+![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-2.gif)
 
 > [!WARNING]
 > **Beta Release**: This project is currently in active development. Features may change, and it may contain bugs. Please exercise caution when using it in production environments.
