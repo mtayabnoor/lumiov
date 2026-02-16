@@ -1,5 +1,9 @@
 # Lumiov - AI Powered Kubernetes Manager
 
+## Dark Theme
+![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-2.gif)
+
+## Light Theme
 ![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-3.gif)
 
 > [!WARNING]
