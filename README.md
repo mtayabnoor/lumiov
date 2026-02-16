@@ -1,5 +1,9 @@
-# Lumiov - AI Powered Kubernetes Manager (Beta)
-## A tool that brings clarity and visibility to Kubernetes.
+<h1 align="center">Lumiov</h1>
+
+<p align="center">
+  <b>AI Powered Kubernetes Manager (Beta)</b><br/>
+  <sub>A tool that brings clarity and visibility to Kubernetes.</sub>
+</p>
 
 ## Dark Theme
 ![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-2.gif)
