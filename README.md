@@ -1,5 +1,7 @@
 # Lumiov - AI Powered Kubernetes Manager
 
+![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-3.gif)
+
 ![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-2.gif)
 
 > [!WARNING]
