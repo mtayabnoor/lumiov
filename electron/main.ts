@@ -141,7 +141,12 @@ autoUpdater.on("update-downloaded", (info: UpdateDownloadedEvent) => {
       type: "info",
       title: "Update Ready",
       message: `Version ${info.version} has been downloaded.`,
-      detail: releaseNotes,
+      detail: releaseNotes
+        .replace(/<h\d[^>]*>/g, "\n\n")
+        .replace(/<li[^>]*>/g, "\n• ")
+        .replace(/<br[^>]*>/g, "\n")
+        .replace(/<[^>]+>/g, "")
+        .trim(),
       buttons: ["Restart Now", "Later"],
       defaultId: 0,
       cancelId: 1,
