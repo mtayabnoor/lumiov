@@ -2,8 +2,6 @@
 
 ![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-3.gif)
 
-![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-2.gif)
-
 > [!WARNING]
 > **Beta Release**: This project is currently in active development. Features may change, and it may contain bugs. Please exercise caution when using it in production environments.
 
