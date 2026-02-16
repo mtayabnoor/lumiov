@@ -2,10 +2,31 @@
 
 > A tool that brings clarity and visibility to Kubernetes.
 
-## Dark Theme
+### Screenshots
+
+<table>
+    <tr>
+        <td width="33%"><img src="https://raw.githubusercontent.com/mtayabnoor/lumiov/media/pod-diagnosis.png"></td>
+        <td width="33%"><img src="https://raw.githubusercontent.com/mtayabnoor/lumiov/media/cluster-agent.png"></td>
+    </tr>
+    <tr>
+        <td width="33%"><img src="https://raw.githubusercontent.com/mtayabnoor/lumiov/media/editor.png"></td>
+        <td width="33%"><img src="https://raw.githubusercontent.com/mtayabnoor/lumiov/media/terminal.png"></td>
+    </tr>
+    <tr>
+        <td width="33%"><img src="https://raw.githubusercontent.com/mtayabnoor/lumiov/media/pods-overview.png"></td>
+        <td width="33%"><img src="https://raw.githubusercontent.com/mtayabnoor/lumiov/media/dashboard.png"></td>
+    </tr>
+</table>
+
+### Demo
+
+#### Dark Theme
+
 ![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-2.gif)
 
-## Light Theme
+#### Light Theme
+
 ![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-3.gif)
 
 > [!WARNING]
