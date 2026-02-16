@@ -41,11 +41,10 @@ Lumiov follows a **three-tier architecture**:
 └──────────────┬──────────────┬───────────────────┘
                │              │
     ┌──────────▼─────┐   ┌────▼──────────────────┐
-    │   Frontend     │   │   Backend             │
     │   (React +     │   │   (Express +          │
     │   Vite)        │   │   Socket.IO)          │
     │                │◄─►│                       │
-    │   Port: 3000   │   │   Port: 5000          │
+    │   Port: 3000   │   │   Port: 3030          │
     └────────────────┘   └───────┬───────────────┘
                                  │
                          ┌───────▼────────────┐
@@ -71,12 +70,12 @@ Lumiov follows a **three-tier architecture**:
 | Category                    | Technology              | Version | Purpose                               |
 | --------------------------- | ----------------------- | ------- | ------------------------------------- |
 | **Desktop Runtime**         | Electron                | 40.1.0  | Cross-platform desktop app wrapper    |
-| **Frontend Framework**      | React                   | 19.2.3  | UI component library                  |
-| **Frontend Build Tool**     | Vite                    | 7.3.1   | Fast build tool and dev server        |
-| **Backend Framework**       | Express                 | 4.21.2  | HTTP server framework                 |
-| **Real-time Communication** | Socket.IO               | 4.8.3   | WebSocket library (client & server)   |
-| **Kubernetes Client**       | @kubernetes/client-node | 1.0.1   | Official Kubernetes JavaScript client |
-| **Language**                | TypeScript              | 5.3.0+  | Type-safe JavaScript                  |
+| **Frontend Framework**      | React                   | 19.x    | UI component library                  |
+| **Frontend Build Tool**     | Vite                    | 7.x     | Fast build tool and dev server        |
+| **Backend Framework**       | Express                 | 4.x     | HTTP server framework                 |
+| **Real-time Communication** | Socket.IO               | 4.8.x   | WebSocket library (client & server)   |
+| **Kubernetes Client**       | @kubernetes/client-node | 1.0.x   | Official Kubernetes JavaScript client |
+| **Language**                | TypeScript              | 5.x     | Type-safe JavaScript                  |
 | **Package Manager**         | npm                     | Latest  | Dependency management                 |
 
 ---
@@ -478,7 +477,7 @@ electron/
 {
   "dev": "concurrently \"dev:frontend\" \"dev:backend\" \"dev:electron\"",
   "dev:frontend": "cd frontend && npm start", // Vite dev server
-  "dev:backend": "cd backend && npm run dev", // tsx watch
+  "dev:backend": "cd backend && npm run dev", // tsx watch (port 3030)
   "dev:electron": "wait-on http://localhost:3000 && tsc && electron .",
 
   "build": "npm run build:frontend && build:backend && tsc",
@@ -577,7 +576,7 @@ All synchronized to same version number.
 **Development:**
 
 - Frontend: `http://localhost:3000` (Vite dev server)
-- Backend: `http://localhost:5000` (Express server)
+- Backend: `http://localhost:3030` (Express server)
 - Electron: Loads frontend from localhost
 
 **Production:**
