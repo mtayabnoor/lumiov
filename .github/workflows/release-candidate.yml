@@ -133,7 +133,7 @@ jobs:
         id: notes
         run: |
           VERSION="${{ needs.create-rc.outputs.version }}"
-          NOTES=$(awk "/^## \[${VERSION//./\\.}\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md)
+          NOTES=$(awk "/^#+ \[${VERSION//./\\.}/ {flag=1; next} /^#+ \[/ {flag=0} flag" CHANGELOG.md)
           if [ -z "$NOTES" ]; then
             NOTES="Release Candidate ${{ needs.create-rc.outputs.tag }}"
           fi

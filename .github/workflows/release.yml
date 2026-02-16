@@ -169,7 +169,7 @@ jobs:
         shell: bash
         run: |
           VERSION="${{ needs.finalize.outputs.version }}"
-          ENTRY=$(awk "/^## \[${VERSION//./\\.}\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md)
+          ENTRY=$(awk "/^#+ \[${VERSION//./\\.}/ {flag=1; next} /^#+ \[/ {flag=0} flag" CHANGELOG.md)
           if [ -z "$ENTRY" ]; then
             ENTRY="Release ${{ needs.finalize.outputs.tag }}"
           fi
