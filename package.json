@@ -9,7 +9,7 @@
     "dev:frontend": "cd frontend && npm start",
     "dev:backend": "cd backend && npm run dev",
     "dev:electron": "cd electron && tsc -p tsconfig.json && electron .",
-    "install:all": "npm run install:frontend && npm run install:backend && npm run install:electron",
+    "install:all": "npm install && npm run install:frontend && npm run install:backend && npm run install:electron",
     "install:frontend": "cd frontend && npm install",
     "install:backend": "cd backend && npm install",
     "install:electron": "cd electron && npm install",
