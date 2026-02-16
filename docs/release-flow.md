@@ -35,29 +35,29 @@ git push origin feature/my-feature
 
 ```bash
 git checkout development && git pull
-git checkout -b release/v2.12.0
-git push origin release/v2.12.0
+git checkout -b release/v1.2.0
+git push origin release/v1.2.0
 ```
 
-**🤖 Automation:** Creates tag `v2.12.0-rc.1` + GitHub Pre-Release + Electron build.
+**🤖 Automation:** Creates tag `v1.2.0-rc.1` + GitHub Pre-Release + Electron build.
 
 ### 3. Fix During RC (if needed)
 
 ```bash
-git checkout release/v2.12.0
+git checkout release/v1.2.0
 git commit -m "fix: Patch something"
 git push
 ```
 
-**🤖 Automation:** Creates `v2.12.0-rc.2`, `rc.3`, etc. automatically.
+**🤖 Automation:** Creates `v1.2.0-rc.2`, `rc.3`, etc. automatically.
 
 ### 4. Stable Release
 
-Open a PR on GitHub: `release/v2.12.0` → `main`, then merge.
+Open a PR on GitHub: `release/v1.2.0` → `main`, then merge.
 
 **🤖 Automation:**
 
-- Creates tag `v2.12.0` + GitHub Release
+- Creates tag `v1.2.0` + GitHub Release
 - Generates changelog
 - Builds and publishes signed Electron installer
 - Creates a back-merge PR (`main` → `development`)
@@ -85,8 +85,8 @@ Review and merge the auto-created PR to keep `development` in sync.
 
 ## Tagging Summary
 
-| Tag format     | When created   | Trigger                           |
-| -------------- | -------------- | --------------------------------- |
-| `v2.12.0-rc.1` | Pre-release    | Push to `release/v2.12.0`         |
-| `v2.12.0-rc.2` | Pre-release    | Another push to `release/v2.12.0` |
-| `v2.12.0`      | Stable release | Merge `release/v2.12.0` → `main`  |
+| Tag format    | When created   | Trigger                          |
+| ------------- | -------------- | -------------------------------- |
+| `v1.2.0-rc.1` | Pre-release    | Push to `release/v1.2.0`         |
+| `v1.2.0-rc.2` | Pre-release    | Another push to `release/v1.2.0` |
+| `v1.2.0`      | Stable release | Merge `release/v1.2.0` → `main`  |

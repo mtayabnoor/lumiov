@@ -274,9 +274,9 @@ function Pods() {
             >
               <SmartToyIcon
                 sx={{
-                  color: isConfigured ? "#b42323ff" : "#fff",
+                  color: isConfigured ? "#b42323ff" : "text.primary",
                   filter: isConfigured
-                    ? "drop-shadow(0 0 0.8px #ffffffff) drop-shadow(0 0 1px #ffffffff)"
+                    ? "drop-shadow(0 0 0.8px text.primary) drop-shadow(0 0 1px text.primary)"
                     : "none",
                   transition: "all 0.3s ease",
                 }}

@@ -59,16 +59,16 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         }}
       >
         {isUser ? (
-          <PersonIcon sx={{ fontSize: 18, color: "#fff" }} />
+          <PersonIcon sx={{ fontSize: 18, color: "text.primary" }} />
         ) : isError ? (
-          <ErrorOutlineIcon sx={{ fontSize: 18, color: "#fff" }} />
+          <ErrorOutlineIcon sx={{ fontSize: 18, color: "text.primary" }} />
         ) : (
           <PsychologyIcon
             fontSize="medium"
             sx={{
-              color: isConfigured ? "#b42323ff" : "#fff",
+              color: isConfigured ? "#b42323ff" : "text.primary",
               filter: isConfigured
-                ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
                 : "none",
               transition: "all 0.3s ease",
             }}
@@ -219,9 +219,9 @@ function TypingIndicator() {
         <PsychologyIcon
           fontSize="medium"
           sx={{
-            color: isConfigured ? "#b42323ff" : "#fff",
+            color: isConfigured ? "#b42323ff" : "text.primary",
             filter: isConfigured
-              ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+              ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
               : "none",
             transition: "all 0.3s ease",
           }}
@@ -330,9 +330,9 @@ export default function AgentChatPanel() {
             <PsychologyIcon
               fontSize="medium"
               sx={{
-                color: isConfigured ? "#b42323ff" : "#fff",
+                color: isConfigured ? "#b42323ff" : "text.primary",
                 filter: isConfigured
-                  ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                  ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
                   : "none",
                 transition: "all 0.3s ease",
               }}
@@ -342,14 +342,11 @@ export default function AgentChatPanel() {
             <Typography
               variant="subtitle1"
               fontWeight={600}
-              sx={{ color: "#fff" }}
+              sx={{ color: "text.primary" }}
             >
               Lumiov AI
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: "rgba(255,255,255,0.7)" }}
-            >
+            <Typography variant="caption" sx={{ color: "text.primary" }}>
               Cluster Assistant
             </Typography>
           </Box>
@@ -360,7 +357,7 @@ export default function AgentChatPanel() {
             <IconButton
               size="small"
               onClick={openConfigModal}
-              sx={{ color: "#fff" }}
+              sx={{ color: "text.primary" }}
             >
               <SettingsIcon fontSize="small" />
             </IconButton>
@@ -369,13 +366,17 @@ export default function AgentChatPanel() {
             <IconButton
               size="small"
               onClick={clearHistory}
-              sx={{ color: "#fff" }}
+              sx={{ color: "text.primary" }}
             >
               <DeleteOutlineIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Close">
-            <IconButton size="small" onClick={closeChat} sx={{ color: "#fff" }}>
+            <IconButton
+              size="small"
+              onClick={closeChat}
+              sx={{ color: "text.primary" }}
+            >
               <CloseIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -408,9 +409,9 @@ export default function AgentChatPanel() {
             <PsychologyIcon
               fontSize="medium"
               sx={{
-                color: isConfigured ? "#b42323ff" : "#fff",
+                color: isConfigured ? "#b42323ff" : "text.primary",
                 filter: isConfigured
-                  ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                  ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
                   : "none",
                 transition: "all 0.3s ease",
               }}

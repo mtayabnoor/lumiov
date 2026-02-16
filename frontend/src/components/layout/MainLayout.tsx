@@ -94,9 +94,9 @@ function MainLayout() {
               <PsychologyIcon
                 fontSize="medium"
                 sx={{
-                  color: isConfigured ? "#b42323ff" : "#fff",
+                  color: isConfigured ? "#b42323ff" : "text.primary",
                   filter: isConfigured
-                    ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                    ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
                     : "none",
                   transition: "all 0.3s ease",
                 }}
@@ -113,7 +113,7 @@ function MainLayout() {
             <IconButton
               onClick={toggleTheme}
               size="small"
-              sx={{ color: "#fff" }}
+              sx={{ color: "text.primary" }}
             >
               {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>

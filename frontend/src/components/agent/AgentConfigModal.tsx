@@ -92,9 +92,9 @@ export default function AgentConfigModal() {
           <PsychologyIcon
             fontSize="medium"
             sx={{
-              color: isConfigured ? "#b42323ff" : "#fff",
+              color: isConfigured ? "#b42323ff" : "text.primary",
               filter: isConfigured
-                ? "drop-shadow(0 0 2px #ffffffff) drop-shadow(0 0 4px #ffffffff)"
+                ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
                 : "none",
               transition: "all 0.3s ease",
             }}
@@ -224,7 +224,10 @@ export default function AgentConfigModal() {
         >
           {isConfiguring ? (
             <>
-              <CircularProgress size={16} sx={{ mr: 1, color: "#fff" }} />
+              <CircularProgress
+                size={16}
+                sx={{ mr: 1, color: "text.primary" }}
+              />
               Validating...
             </>
           ) : isConfigured ? (
