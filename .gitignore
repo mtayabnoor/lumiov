@@ -1,49 +1,39 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# --- Dependencies ---
 node_modules/
-/.pnp
+.pnp
 .pnp.js
+.vite
 
-# build output
-/dist
-/release
-**/dist/
-**/release/
+# --- Build Outputs ---
+# These will ignore folders in root AND all subfolders (frontend, backend, electron)
+dist/
+release/
+build/
+out/
+bin/
+obj/
 
-# testing
-/coverage
-
-# environment variables (catch-all)
+# --- Environment & Security ---
 .env
 .env.*
-
-# certificates & keys
 *.pfx
 *.p12
 *.pem
 *.key
 *.cert
-*.csr
 
-# OS files
-.DS_Store
-Thumbs.db
-Desktop.ini
-
-# IDE / editor
+# --- IDE & OS ---
 .vscode/
 .idea/
+.DS_Store
+Thumbs.db
 *.swp
-*.swo
-*~
 
-# logs
+# --- Logs ---
+*.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 
-# personal / local files
+# --- Personal Scripts ---
 commands.txt
 test-multi-container-pod.yaml
-
