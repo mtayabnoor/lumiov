@@ -1,43 +1,37 @@
-import type { ResourceTableConfig } from "../../interfaces/common";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ResourceTable from "../../components/common/Table/ResourceTable";
-import type { Namespace } from "../../interfaces/namespace";
-import { Box, CircularProgress, Alert } from "@mui/material";
-import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import { useResource } from "../../hooks/useResource";
+import type { ResourceTableConfig } from '../../interfaces/common';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ResourceTable from '../../components/common/Table/ResourceTable';
+import type { Namespace } from '../../interfaces/namespace';
+import { Box, CircularProgress, Alert } from '@mui/material';
+import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import { useResource } from '../../hooks/useResource';
 
 function Namespaces() {
-  const {
-    data: namespaces,
-    error,
-    loading,
-  } = useResource<Namespace>("namespaces");
+  const { data: namespaces, error, loading } = useResource<Namespace>('namespaces');
 
   const namespaceConfig: ResourceTableConfig = {
     columns: [
-      { key: "metadata.name", header: "NAME" },
+      { key: 'metadata.name', header: 'NAME' },
       {
-        key: "age",
-        header: "AGE",
+        key: 'age',
+        header: 'AGE',
         accessor: (namespace: Namespace) => (
-          <ResourceLiveAge
-            creationTimestamp={namespace.metadata.creationTimestamp}
-          />
+          <ResourceLiveAge creationTimestamp={namespace.metadata.creationTimestamp} />
         ),
       },
     ],
-    actions: [{ id: "delete", label: "Delete", icon: DeleteIcon }],
+    actions: [{ id: 'delete', label: 'Delete', icon: DeleteIcon }],
   };
 
   const handleAction = (actionId: string, row: any) => {
-    console.log("Action triggered:", actionId, row);
+    console.log('Action triggered:', actionId, row);
     // Add logic: e.g., navigate to logs, open delete dialog, etc.
   };
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );

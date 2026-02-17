@@ -7,8 +7,8 @@ export interface PolicyRule {
 }
 
 export interface Role {
-  apiVersion: "rbac.authorization.k8s.io/v1";
-  kind: "Role";
+  apiVersion: 'rbac.authorization.k8s.io/v1';
+  kind: 'Role';
   metadata: {
     name: string;
     namespace: string;
@@ -22,8 +22,8 @@ export interface Role {
 }
 
 export interface ClusterRole {
-  apiVersion: "rbac.authorization.k8s.io/v1";
-  kind: "ClusterRole";
+  apiVersion: 'rbac.authorization.k8s.io/v1';
+  kind: 'ClusterRole';
   metadata: {
     name: string;
     uid?: string;

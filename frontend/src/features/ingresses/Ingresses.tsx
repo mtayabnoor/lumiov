@@ -1,17 +1,17 @@
-import { useResource } from "../../hooks/useResource";
-import type { ResourceTableConfig } from "../../interfaces/common";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ResourceTable from "../../components/common/Table/ResourceTable";
-import type { Ingress } from "../../interfaces/ingress";
-import { Box, CircularProgress, Alert } from "@mui/material";
-import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import ResourceEditor from "../../components/common/Editor/ResourceEditor";
-import { useState } from "react";
+import { useResource } from '../../hooks/useResource';
+import type { ResourceTableConfig } from '../../interfaces/common';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ResourceTable from '../../components/common/Table/ResourceTable';
+import type { Ingress } from '../../interfaces/ingress';
+import { Box, CircularProgress, Alert } from '@mui/material';
+import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import { useState } from 'react';
 
 function Ingresses() {
-  const { data: ingresses, error, loading } = useResource<Ingress>("ingresses");
+  const { data: ingresses, error, loading } = useResource<Ingress>('ingresses');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -21,47 +21,46 @@ function Ingresses() {
 
   const config: ResourceTableConfig = {
     columns: [
-      { key: "metadata.namespace", header: "NAMESPACE" },
-      { key: "metadata.name", header: "NAME" },
+      { key: 'metadata.namespace', header: 'NAMESPACE' },
+      { key: 'metadata.name', header: 'NAME' },
       {
-        key: "class",
-        header: "CLASS",
-        accessor: (row: Ingress) => row.spec?.ingressClassName ?? "-",
+        key: 'class',
+        header: 'CLASS',
+        accessor: (row: Ingress) => row.spec?.ingressClassName ?? '-',
       },
       {
-        key: "hosts",
-        header: "HOSTS",
+        key: 'hosts',
+        header: 'HOSTS',
         accessor: (row: Ingress) => {
           const hosts = row.spec?.rules?.map((r) => r.host).filter(Boolean);
-          return hosts?.length ? hosts.join(", ") : "*";
+          return hosts?.length ? hosts.join(', ') : '*';
         },
       },
       {
-        key: "address",
-        header: "ADDRESS",
+        key: 'address',
+        header: 'ADDRESS',
         accessor: (row: Ingress) => {
           const ingress = row.status?.loadBalancer?.ingress;
-          if (ingress?.length)
-            return ingress.map((i) => i.ip || i.hostname).join(", ");
-          return "-";
+          if (ingress?.length) return ingress.map((i) => i.ip || i.hostname).join(', ');
+          return '-';
         },
       },
       {
-        key: "age",
-        header: "AGE",
+        key: 'age',
+        header: 'AGE',
         accessor: (row: Ingress) => (
           <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
         ),
       },
     ],
     actions: [
-      { id: "edit", label: "Edit", icon: EditIcon },
-      { id: "delete", label: "Delete", icon: DeleteIcon },
+      { id: 'edit', label: 'Edit', icon: EditIcon },
+      { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
 
   const handleAction = (actionId: string, row: Ingress) => {
-    if (actionId === "edit") {
+    if (actionId === 'edit') {
       setEditingResource({
         namespace: row.metadata.namespace,
         name: row.metadata.name,
@@ -72,7 +71,7 @@ function Ingresses() {
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );

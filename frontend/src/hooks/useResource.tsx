@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { useSocket } from "./useSocket";
+import { useEffect, useState } from 'react';
+import { useSocket } from './useSocket';
 import {
   SocketEvent,
   type K8sEventPayload,
   type K8sListPayload,
   type ResourceType,
-} from "../interfaces/socket";
+} from '../interfaces/socket';
 
 interface ResourceWithMetadata {
   metadata: {
@@ -14,9 +14,7 @@ interface ResourceWithMetadata {
   };
 }
 
-export const useResource = <T extends ResourceWithMetadata>(
-  resource: ResourceType,
-) => {
+export const useResource = <T extends ResourceWithMetadata>(resource: ResourceType) => {
   const socket = useSocket();
   const [data, setData] = useState<T[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -29,9 +27,7 @@ export const useResource = <T extends ResourceWithMetadata>(
     const handleList = (payload: K8sListPayload<T>) => {
       if (payload.resource !== resource) return;
       // VALIDATION: Filter out any garbage immediately
-      const validItems = (payload.items || []).filter(
-        (item) => item && item.metadata,
-      );
+      const validItems = (payload.items || []).filter((item) => item && item.metadata);
       setData(validItems);
       setLoading(false);
     };
@@ -43,22 +39,21 @@ export const useResource = <T extends ResourceWithMetadata>(
       const { type, object } = payload;
 
       // BOOKMARK events are K8s watch checkpoints, not data changes — ignore
-      if (type === "BOOKMARK") return;
+      if (type === 'BOOKMARK') return;
 
       // 2. Guard: Invalid Data
       if (!object || !object.metadata?.uid) {
-        console.warn("Received invalid K8s event", payload);
+        console.warn('Received invalid K8s event', payload);
         return;
       }
 
       setData((prev) => {
         // 3. Performance Optimization:
         // If the list is empty and it's not an ADD, we might just return (unless we handle Upsert)
-        if (prev.length === 0 && type !== "ADDED" && type !== "MODIFIED")
-          return prev;
+        if (prev.length === 0 && type !== 'ADDED' && type !== 'MODIFIED') return prev;
 
         switch (type) {
-          case "ADDED":
+          case 'ADDED':
             // Check if it already exists to prevent duplicates (Idempotency)
             if (prev.some((p) => p.metadata.uid === object.metadata.uid)) {
               // OPTIONAL: Even if it exists, it might be newer version.
@@ -69,12 +64,10 @@ export const useResource = <T extends ResourceWithMetadata>(
             }
             return [...prev, object];
 
-          case "MODIFIED": {
+          case 'MODIFIED': {
             // CRITICAL FIX: "Upsert" logic.
             // If we find it, update it. If we DON'T find it, add it.
-            const exists = prev.some(
-              (p) => p.metadata.uid === object.metadata.uid,
-            );
+            const exists = prev.some((p) => p.metadata.uid === object.metadata.uid);
 
             if (exists) {
               return prev.map((p) =>
@@ -86,7 +79,7 @@ export const useResource = <T extends ResourceWithMetadata>(
             }
           }
 
-          case "DELETED":
+          case 'DELETED':
             return prev.filter((p) => p.metadata.uid !== object.metadata.uid);
 
           default:
@@ -96,7 +89,7 @@ export const useResource = <T extends ResourceWithMetadata>(
     };
 
     const handleError = (payload: { message: string }) => {
-      console.error("Socket Error:", payload.message);
+      console.error('Socket Error:', payload.message);
       setError(payload.message);
       setLoading(false);
     };
@@ -110,7 +103,7 @@ export const useResource = <T extends ResourceWithMetadata>(
     if (socket.connected) {
       socket.emit(SocketEvent.SUBSCRIBE, resource);
     } else {
-      socket.once("connect", () => {
+      socket.once('connect', () => {
         socket.emit(SocketEvent.SUBSCRIBE, resource);
       });
     }

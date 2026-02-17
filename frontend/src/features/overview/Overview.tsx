@@ -1,24 +1,24 @@
-import { Box, Grid } from "@mui/material";
-import PodStatusChart from "../../components/charts/PodStatusChart";
-import DeploymentHealthChart from "../../components/charts/DeploymentHealthChart";
-import PodRestartChart from "../../components/charts/PodRestartChart";
-import NamespaceDistributionChart from "../../components/charts/NamespaceDistributionChart";
-import ContainerReadinessChart from "../../components/charts/ContainerReadinessChart";
-import SummaryCard from "../../components/charts/SummaryCard";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import { useResource } from "../../hooks/useResource";
-import type { Deployment } from "../../interfaces/deployment";
-import type { Pod } from "../../interfaces/pod";
+import { Box, Grid } from '@mui/material';
+import PodStatusChart from '../../components/charts/PodStatusChart';
+import DeploymentHealthChart from '../../components/charts/DeploymentHealthChart';
+import PodRestartChart from '../../components/charts/PodRestartChart';
+import NamespaceDistributionChart from '../../components/charts/NamespaceDistributionChart';
+import ContainerReadinessChart from '../../components/charts/ContainerReadinessChart';
+import SummaryCard from '../../components/charts/SummaryCard';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import { useResource } from '../../hooks/useResource';
+import type { Deployment } from '../../interfaces/deployment';
+import type { Pod } from '../../interfaces/pod';
 
 function Overview() {
-  const { data: pods, loading: podsLoading } = useResource<Pod>("pods");
+  const { data: pods, loading: podsLoading } = useResource<Pod>('pods');
   const { data: deployments, loading: depsLoading } =
-    useResource<Deployment>("deployments");
+    useResource<Deployment>('deployments');
 
   // Calculate summary metrics
-  const runningPods = pods.filter((p) => p.status?.phase === "Running").length;
-  const pendingPods = pods.filter((p) => p.status?.phase === "Pending").length;
-  const failedPods = pods.filter((p) => p.status?.phase === "Failed").length;
+  const runningPods = pods.filter((p) => p.status?.phase === 'Running').length;
+  const pendingPods = pods.filter((p) => p.status?.phase === 'Pending').length;
+  const failedPods = pods.filter((p) => p.status?.phase === 'Failed').length;
 
   const healthyDeployments = deployments.filter(
     (d) => d.status?.readyReplicas === d.spec?.replicas,
@@ -41,7 +41,7 @@ function Overview() {
           flexGrow: 0,
           flexShrink: 1,
           minHeight: 0,
-          overflow: "auto",
+          overflow: 'auto',
         }}
       >
         <Grid container spacing={3} sx={{ mb: 4 }}>

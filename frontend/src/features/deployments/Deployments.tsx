@@ -1,14 +1,14 @@
-import { useResource } from "../../hooks/useResource";
-import type { ResourceTableConfig } from "../../interfaces/common";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ResourceTable from "../../components/common/Table/ResourceTable";
-import type { Deployment } from "../../interfaces/deployment";
-import { Box, CircularProgress, Alert, Typography } from "@mui/material";
-import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import ResourceEditor from "../../components/common/Editor/ResourceEditor";
-import { useState } from "react";
+import { useResource } from '../../hooks/useResource';
+import type { ResourceTableConfig } from '../../interfaces/common';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ResourceTable from '../../components/common/Table/ResourceTable';
+import type { Deployment } from '../../interfaces/deployment';
+import { Box, CircularProgress, Alert, Typography } from '@mui/material';
+import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import { useState } from 'react';
 
 const getDeploymentReadyStatus = (event: Deployment) => {
   const desired = event?.status?.replicas ?? 0;
@@ -17,11 +17,7 @@ const getDeploymentReadyStatus = (event: Deployment) => {
 };
 
 function Deployments() {
-  const {
-    data: deployments,
-    error,
-    loading,
-  } = useResource<Deployment>("deployments");
+  const { data: deployments, error, loading } = useResource<Deployment>('deployments');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingDeployment, setEditingDeployment] = useState<{
@@ -31,28 +27,26 @@ function Deployments() {
 
   const deploymentConfig: ResourceTableConfig = {
     columns: [
-      { key: "metadata.namespace", header: "NAMESPACE" },
-      { key: "metadata.name", header: "NAME" },
+      { key: 'metadata.namespace', header: 'NAMESPACE' },
+      { key: 'metadata.name', header: 'NAME' },
       {
-        key: "status.numberReady",
-        header: "READY",
+        key: 'status.numberReady',
+        header: 'READY',
         accessor: (row: any) => getDeploymentReadyStatus(row),
       },
-      { key: "status.updatedReplicas", header: "UP-TO-DATE" },
-      { key: "status.availableReplicas", header: "AVAILABLE" },
+      { key: 'status.updatedReplicas', header: 'UP-TO-DATE' },
+      { key: 'status.availableReplicas', header: 'AVAILABLE' },
       {
-        key: "age",
-        header: "AGE",
+        key: 'age',
+        header: 'AGE',
         accessor: (deployment: Deployment) => (
-          <ResourceLiveAge
-            creationTimestamp={deployment.metadata.creationTimestamp}
-          />
+          <ResourceLiveAge creationTimestamp={deployment.metadata.creationTimestamp} />
         ),
       },
     ],
     actions: [
-      { id: "edit", label: "Edit", icon: EditIcon },
-      { id: "delete", label: "Delete", icon: DeleteIcon },
+      { id: 'edit', label: 'Edit', icon: EditIcon },
+      { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
 
@@ -60,7 +54,7 @@ function Deployments() {
     const namespace = deployment.metadata.namespace;
     const deploymentName = deployment.metadata.name;
 
-    if (actionId === "edit") {
+    if (actionId === 'edit') {
       setEditingDeployment({ namespace, deploymentName });
       setEditDrawerOpen(true);
     }
@@ -68,7 +62,7 @@ function Deployments() {
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );

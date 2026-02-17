@@ -1,6 +1,6 @@
 export interface RoleBinding {
-  apiVersion: "rbac.authorization.k8s.io/v1";
-  kind: "RoleBinding";
+  apiVersion: 'rbac.authorization.k8s.io/v1';
+  kind: 'RoleBinding';
   metadata: {
     name: string;
     namespace: string;
@@ -11,21 +11,21 @@ export interface RoleBinding {
     [key: string]: any;
   };
   subjects?: Array<{
-    kind: "User" | "Group" | "ServiceAccount";
+    kind: 'User' | 'Group' | 'ServiceAccount';
     name: string;
     namespace?: string;
     apiGroup?: string;
   }>;
   roleRef: {
     apiGroup: string;
-    kind: "Role" | "ClusterRole";
+    kind: 'Role' | 'ClusterRole';
     name: string;
   };
 }
 
 export interface ClusterRoleBinding {
-  apiVersion: "rbac.authorization.k8s.io/v1";
-  kind: "ClusterRoleBinding";
+  apiVersion: 'rbac.authorization.k8s.io/v1';
+  kind: 'ClusterRoleBinding';
   metadata: {
     name: string;
     uid?: string;
@@ -35,14 +35,14 @@ export interface ClusterRoleBinding {
     [key: string]: any;
   };
   subjects?: Array<{
-    kind: "User" | "Group" | "ServiceAccount";
+    kind: 'User' | 'Group' | 'ServiceAccount';
     name: string;
     namespace?: string;
     apiGroup?: string;
   }>;
   roleRef: {
     apiGroup: string;
-    kind: "ClusterRole";
+    kind: 'ClusterRole';
     name: string;
   };
 }

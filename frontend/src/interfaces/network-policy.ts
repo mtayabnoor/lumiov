@@ -1,6 +1,6 @@
 export interface NetworkPolicy {
-  apiVersion: "networking.k8s.io/v1";
-  kind: "NetworkPolicy";
+  apiVersion: 'networking.k8s.io/v1';
+  kind: 'NetworkPolicy';
   metadata: {
     name: string;
     namespace: string;
@@ -19,7 +19,7 @@ export interface NetworkPolicy {
         values?: string[];
       }>;
     };
-    policyTypes?: Array<"Ingress" | "Egress">;
+    policyTypes?: Array<'Ingress' | 'Egress'>;
     ingress?: Array<{
       from?: Array<{
         podSelector?: { matchLabels?: Record<string, string> };

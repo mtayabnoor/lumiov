@@ -1,6 +1,6 @@
-import type { SvgIconComponent } from "@mui/icons-material";
+import type { SvgIconComponent } from '@mui/icons-material';
 
-export type CellType = "text" | "number" | "duration" | "percent";
+export type CellType = 'text' | 'number' | 'duration' | 'percent';
 
 export interface ColumnDef {
   key: string; // dot-path OR an id (unused when accessor provided)

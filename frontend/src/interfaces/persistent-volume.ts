@@ -1,6 +1,6 @@
 export interface PersistentVolume {
-  apiVersion: "v1";
-  kind: "PersistentVolume";
+  apiVersion: 'v1';
+  kind: 'PersistentVolume';
   metadata: {
     name: string;
     uid?: string;
@@ -12,9 +12,9 @@ export interface PersistentVolume {
   spec: {
     capacity?: Record<string, string>;
     accessModes?: string[];
-    persistentVolumeReclaimPolicy?: "Retain" | "Recycle" | "Delete";
+    persistentVolumeReclaimPolicy?: 'Retain' | 'Recycle' | 'Delete';
     storageClassName?: string;
-    volumeMode?: "Filesystem" | "Block";
+    volumeMode?: 'Filesystem' | 'Block';
     claimRef?: {
       kind?: string;
       namespace?: string;
@@ -25,7 +25,7 @@ export interface PersistentVolume {
     [key: string]: any;
   };
   status?: {
-    phase?: "Available" | "Bound" | "Released" | "Failed" | "Pending";
+    phase?: 'Available' | 'Bound' | 'Released' | 'Failed' | 'Pending';
     message?: string;
     reason?: string;
   };

@@ -1,6 +1,6 @@
-import { Box } from "@mui/material";
-import { ReactNode } from "react";
-import PageHeader from "../PageHeader/PageHeader";
+import { Box } from '@mui/material';
+import { ReactNode } from 'react';
+import PageHeader from '../PageHeader/PageHeader';
 
 interface PageLayoutProps {
   title: string;
@@ -9,20 +9,15 @@ interface PageLayoutProps {
   actions?: ReactNode;
 }
 
-const PageLayout = ({
-  title,
-  description,
-  children,
-  actions,
-}: PageLayoutProps) => {
+const PageLayout = ({ title, description, children, actions }: PageLayoutProps) => {
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
         minHeight: 0, // Critical for Electron flex scrolling
-        overflow: "hidden",
+        overflow: 'hidden',
         p: 0,
       }}
     >
@@ -33,12 +28,12 @@ const PageLayout = ({
           pt: 3,
           pb: 2,
           flexShrink: 0,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
         }}
       >
-        <PageHeader title={title} description={description || ""} />
+        <PageHeader title={title} description={description || ''} />
         {actions && <Box>{actions}</Box>}
       </Box>
 
@@ -47,9 +42,9 @@ const PageLayout = ({
         sx={{
           flexGrow: 1,
           minHeight: 0, // Critical for Electron flex scrolling
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden", // Don't scroll here - let children scroll
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden', // Don't scroll here - let children scroll
           px: 3,
           pb: 3,
         }}

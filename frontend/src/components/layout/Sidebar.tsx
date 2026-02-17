@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Box,
   Drawer,
@@ -8,23 +8,21 @@ import {
   ListItemText,
   Toolbar,
   Collapse,
-} from "@mui/material";
-import { useNavigate, useLocation } from "react-router-dom";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import DnsIcon from "@mui/icons-material/Dns";
-import DashboardIcon from "@mui/icons-material/Dashboard";
+} from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import DnsIcon from '@mui/icons-material/Dns';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
-import { sidebarItems, iconMapping } from "./sidebarConfig";
+import { sidebarItems, iconMapping } from './sidebarConfig';
 
 const drawerWidth = 280;
 
 function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>(
-    {},
-  );
+  const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({});
 
   const handleToggle = (title: string) => {
     setOpenSections((prev) => ({ ...prev, [title]: !prev[title] }));
@@ -36,11 +34,11 @@ function Sidebar() {
       sx={{
         width: drawerWidth,
         flexShrink: 0,
-        [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
+        [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
       }}
     >
-      <Toolbar variant="dense" sx={{ minHeight: "45px !important" }} />
-      <Box sx={{ overflow: "auto" }}>
+      <Toolbar variant="dense" sx={{ minHeight: '45px !important' }} />
+      <Box sx={{ overflow: 'auto' }}>
         <List component="nav">
           {sidebarItems.map((group) => {
             const isChildActive = group.items.some(
@@ -54,13 +52,11 @@ function Sidebar() {
                 <ListItemButton
                   onClick={() => handleToggle(group.title)}
                   sx={{
-                    bgcolor: isChildActive ? "action.selected" : "inherit",
+                    bgcolor: isChildActive ? 'action.selected' : 'inherit',
                     fontWeight: isChildActive ? 600 : 400,
                   }}
                 >
-                  <ListItemIcon>
-                    {iconMapping[group.icon] || <DnsIcon />}
-                  </ListItemIcon>
+                  <ListItemIcon>{iconMapping[group.icon] || <DnsIcon />}</ListItemIcon>
                   <ListItemText primary={group.title} />
                   {isOpen ? <ExpandLess /> : <ExpandMore />}
                 </ListItemButton>
@@ -72,9 +68,9 @@ function Sidebar() {
                     disablePadding
                     sx={{
                       ml: 2,
-                      borderLeft: "1px solid",
-                      borderColor: "divider",
-                      bgcolor: "action.hover",
+                      borderLeft: '1px solid',
+                      borderColor: 'divider',
+                      bgcolor: 'action.hover',
                       py: 0.5,
                     }}
                   >
@@ -88,22 +84,22 @@ function Sidebar() {
                           py: 0.75,
                           borderRadius: 1,
                           mx: 1,
-                          "&.Mui-selected": {
-                            bgcolor: "primary.main",
-                            color: "primary.contrastText",
-                            "& .MuiListItemIcon-root": {
-                              color: "primary.contrastText",
+                          '&.Mui-selected': {
+                            bgcolor: 'primary.main',
+                            color: 'primary.contrastText',
+                            '& .MuiListItemIcon-root': {
+                              color: 'primary.contrastText',
                             },
                           },
-                          "&:hover": {
-                            bgcolor: "action.selected",
+                          '&:hover': {
+                            bgcolor: 'action.selected',
                           },
                         }}
                       >
                         <ListItemIcon
                           sx={{
                             minWidth: 36,
-                            color: "text.secondary",
+                            color: 'text.secondary',
                           }}
                         >
                           {iconMapping[subItem.icon] || <DashboardIcon />}
@@ -112,7 +108,7 @@ function Sidebar() {
                           primary={subItem.label}
                           slotProps={{
                             primary: {
-                              fontSize: "0.85rem",
+                              fontSize: '0.85rem',
                               fontWeight: 400,
                             },
                           }}

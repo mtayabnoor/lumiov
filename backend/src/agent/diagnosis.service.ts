@@ -20,9 +20,7 @@ const TimelineEventSchema = z.object({
 
 const FixSchema = z.object({
   title: z.string().describe('Short title for the fix'),
-  description: z
-    .string()
-    .describe('Detailed description of the fix and why it helps'),
+  description: z.string().describe('Detailed description of the fix and why it helps'),
   command: z
     .string()
     .nullable()
@@ -32,15 +30,11 @@ const FixSchema = z.object({
   priority: z
     .enum(['immediate', 'short-term', 'long-term'])
     .describe('How urgently this fix should be applied'),
-  risk: z
-    .enum(['low', 'medium', 'high'])
-    .describe('Risk level of applying this fix'),
+  risk: z.enum(['low', 'medium', 'high']).describe('Risk level of applying this fix'),
 });
 
 const DiagnosisReportSchema = z.object({
-  summary: z
-    .string()
-    .describe('One-paragraph executive summary of the pod issue'),
+  summary: z.string().describe('One-paragraph executive summary of the pod issue'),
   rootCause: z.string().describe('The most likely root cause of the problem'),
   confidence: z
     .number()
@@ -105,9 +99,7 @@ export interface DiagnosisResult {
   error?: string;
 }
 
-export async function diagnosePod(
-  req: DiagnosisRequest,
-): Promise<DiagnosisResult> {
+export async function diagnosePod(req: DiagnosisRequest): Promise<DiagnosisResult> {
   const { namespace, podName, apiKey } = req;
 
   console.log(`🔬 Starting diagnosis for pod: ${namespace}/${podName}`);
@@ -117,8 +109,7 @@ export async function diagnosePod(
   // Get pod details
   const pods = await k8sService.listResource('pods');
   const pod = pods.find(
-    (p: any) =>
-      p.metadata?.name === podName && p.metadata?.namespace === namespace,
+    (p: any) => p.metadata?.name === podName && p.metadata?.namespace === namespace,
   );
 
   if (!pod) {
@@ -175,15 +166,13 @@ export async function diagnosePod(
       state: cs.state,
       lastState: cs.lastState,
     })),
-    initContainerStatuses: pod.status?.initContainerStatuses?.map(
-      (cs: any) => ({
-        name: cs.name,
-        ready: cs.ready,
-        restartCount: cs.restartCount,
-        state: cs.state,
-        lastState: cs.lastState,
-      }),
-    ),
+    initContainerStatuses: pod.status?.initContainerStatuses?.map((cs: any) => ({
+      name: cs.name,
+      ready: cs.ready,
+      restartCount: cs.restartCount,
+      state: cs.state,
+      lastState: cs.lastState,
+    })),
     nodeName: pod.spec?.nodeName,
     nodeSelector: pod.spec?.nodeSelector,
     tolerations: pod.spec?.tolerations,
@@ -224,10 +213,7 @@ ${JSON.stringify(events, null, 2)}
 
 ## Container Logs
 ${Object.entries(containerLogs)
-  .map(
-    ([name, logs]) =>
-      `### ${name}\n\`\`\`\n${logs || '(no logs available)'}\n\`\`\``,
-  )
+  .map(([name, logs]) => `### ${name}\n\`\`\`\n${logs || '(no logs available)'}\n\`\`\``)
   .join('\n\n')}
 `;
 

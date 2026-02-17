@@ -1,14 +1,7 @@
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from "recharts";
-import { useTheme } from "@mui/material/styles";
-import { Box, Typography, Paper } from "@mui/material";
-import type { Pod } from "../../interfaces/pod";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { useTheme } from '@mui/material/styles';
+import { Box, Typography, Paper } from '@mui/material';
+import type { Pod } from '../../interfaces/pod';
 
 interface PodStatusChartProps {
   pods: Pod[];
@@ -17,26 +10,26 @@ interface PodStatusChartProps {
 
 // Pod phase colors following Kubernetes conventions with theme awareness
 const getPhaseColors = (isDark: boolean) => ({
-  Running: isDark ? "#4ade80" : "#22c55e", // green
-  Pending: isDark ? "#fbbf24" : "#f59e0b", // amber
-  Succeeded: isDark ? "#60a5fa" : "#3b82f6", // blue
-  Failed: isDark ? "#f87171" : "#ef4444", // red
-  Unknown: isDark ? "#9ca3af" : "#6b7280", // gray
+  Running: isDark ? '#4ade80' : '#22c55e', // green
+  Pending: isDark ? '#fbbf24' : '#f59e0b', // amber
+  Succeeded: isDark ? '#60a5fa' : '#3b82f6', // blue
+  Failed: isDark ? '#f87171' : '#ef4444', // red
+  Unknown: isDark ? '#9ca3af' : '#6b7280', // gray
 });
 
 function PodStatusChart({
   pods,
-  title = "Pod Status Distribution",
+  title = 'Pod Status Distribution',
 }: PodStatusChartProps) {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+  const isDark = theme.palette.mode === 'dark';
   const COLORS = getPhaseColors(isDark);
 
   const statusCounts: Record<string, number> = {};
 
   // 1. Count the frequency of each pod phase
   pods.forEach((pod) => {
-    const phase = pod.status?.phase || "Unknown";
+    const phase = pod.status?.phase || 'Unknown';
     statusCounts[phase] = (statusCounts[phase] || 0) + 1;
   });
 
@@ -55,10 +48,10 @@ function PodStatusChart({
           p: 3,
           borderRadius: 2,
           height: 300,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "background.paper",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.paper',
         }}
       >
         <Typography color="text.secondary">No pods available</Typography>
@@ -73,9 +66,9 @@ function PodStatusChart({
         p: 3,
         borderRadius: 2,
         height: 300,
-        display: "flex",
-        flexDirection: "column",
-        bgcolor: "background.paper",
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.paper',
       }}
     >
       <Typography
@@ -83,7 +76,7 @@ function PodStatusChart({
         sx={{
           mb: 2,
           fontWeight: 600,
-          color: "text.primary",
+          color: 'text.primary',
         }}
       >
         {title}
@@ -115,14 +108,14 @@ function PodStatusChart({
             <Tooltip
               contentStyle={{
                 backgroundColor: theme.palette.background.paper,
-                border: "none",
+                border: 'none',
                 borderRadius: 8,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                 color: theme.palette.text.primary,
               }}
               formatter={(value, name) => {
                 const v = Number(value) || 0;
-                return [`${v} pod${v !== 1 ? "s" : ""}`, String(name)];
+                return [`${v} pod${v !== 1 ? 's' : ''}`, String(name)];
               }}
             />
             <Legend
@@ -135,9 +128,7 @@ function PodStatusChart({
                 paddingLeft: 20,
               }}
               formatter={(value) => (
-                <span
-                  style={{ color: theme.palette.text.secondary, fontSize: 13 }}
-                >
+                <span style={{ color: theme.palette.text.secondary, fontSize: 13 }}>
                   {value}
                 </span>
               )}

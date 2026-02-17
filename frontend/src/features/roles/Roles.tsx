@@ -1,17 +1,17 @@
-import { useResource } from "../../hooks/useResource";
-import type { ResourceTableConfig } from "../../interfaces/common";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ResourceTable from "../../components/common/Table/ResourceTable";
-import type { Role } from "../../interfaces/role";
-import { Box, CircularProgress, Alert } from "@mui/material";
-import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import ResourceEditor from "../../components/common/Editor/ResourceEditor";
-import { useState } from "react";
+import { useResource } from '../../hooks/useResource';
+import type { ResourceTableConfig } from '../../interfaces/common';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ResourceTable from '../../components/common/Table/ResourceTable';
+import type { Role } from '../../interfaces/role';
+import { Box, CircularProgress, Alert } from '@mui/material';
+import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import { useState } from 'react';
 
 function Roles() {
-  const { data: roles, error, loading } = useResource<Role>("roles");
+  const { data: roles, error, loading } = useResource<Role>('roles');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -21,29 +21,29 @@ function Roles() {
 
   const config: ResourceTableConfig = {
     columns: [
-      { key: "metadata.namespace", header: "NAMESPACE" },
-      { key: "metadata.name", header: "NAME" },
+      { key: 'metadata.namespace', header: 'NAMESPACE' },
+      { key: 'metadata.name', header: 'NAME' },
       {
-        key: "rules",
-        header: "RULES",
+        key: 'rules',
+        header: 'RULES',
         accessor: (row: Role) => row.rules?.length ?? 0,
       },
       {
-        key: "age",
-        header: "AGE",
+        key: 'age',
+        header: 'AGE',
         accessor: (row: Role) => (
           <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
         ),
       },
     ],
     actions: [
-      { id: "edit", label: "Edit", icon: EditIcon },
-      { id: "delete", label: "Delete", icon: DeleteIcon },
+      { id: 'edit', label: 'Edit', icon: EditIcon },
+      { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
 
   const handleAction = (actionId: string, row: Role) => {
-    if (actionId === "edit") {
+    if (actionId === 'edit') {
       setEditingResource({
         namespace: row.metadata.namespace,
         name: row.metadata.name,
@@ -54,7 +54,7 @@ function Roles() {
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );
@@ -66,10 +66,7 @@ function Roles() {
     );
 
   return (
-    <PageLayout
-      title="Roles"
-      description="Real-time monitoring dashboard for roles"
-    >
+    <PageLayout title="Roles" description="Real-time monitoring dashboard for roles">
       <ResourceTable config={config} data={roles} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

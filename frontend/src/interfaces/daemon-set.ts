@@ -1,10 +1,10 @@
-import { Pod } from "./pod.js";
+import { Pod } from './pod.js';
 
 export type IntOrString = number | string; // e.g., 1 or "30%"
 
 export interface DaemonSet {
-  apiVersion: "apps/v1";
-  kind: "DaemonSet";
+  apiVersion: 'apps/v1';
+  kind: 'DaemonSet';
   metadata: {
     name: string;
     namespace: string;
@@ -19,7 +19,7 @@ export interface DaemonSet {
       matchLabels?: Record<string, string>;
       matchExpressions?: Array<{
         key: string;
-        operator: "In" | "NotIn" | "Exists" | "DoesNotExist" | string;
+        operator: 'In' | 'NotIn' | 'Exists' | 'DoesNotExist' | string;
         values?: string[];
       }>;
     };
@@ -35,7 +35,7 @@ export interface DaemonSet {
 
     // Rollout/behavior
     updateStrategy?: {
-      type?: "RollingUpdate" | "OnDelete";
+      type?: 'RollingUpdate' | 'OnDelete';
       rollingUpdate?: {
         // Max nodes that can be unavailable during update (int or % string)
         maxUnavailable?: IntOrString;
@@ -66,7 +66,7 @@ export interface DaemonSet {
     // Conditions
     conditions?: Array<{
       type: string; // e.g., "Ready", "NumberUnavailable", etc.
-      status: "True" | "False" | "Unknown" | string;
+      status: 'True' | 'False' | 'Unknown' | string;
       lastTransitionTime?: string;
       reason?: string;
       message?: string;

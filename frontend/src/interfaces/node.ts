@@ -1,6 +1,6 @@
 export interface Node {
-  apiVersion: "v1";
-  kind: "Node";
+  apiVersion: 'v1';
+  kind: 'Node';
   metadata: {
     name: string;
     uid?: string;
@@ -17,7 +17,7 @@ export interface Node {
     taints?: Array<{
       key: string;
       value?: string;
-      effect: "NoSchedule" | "PreferNoSchedule" | "NoExecute";
+      effect: 'NoSchedule' | 'PreferNoSchedule' | 'NoExecute';
       timeAdded?: string;
     }>;
     [key: string]: any;
@@ -27,7 +27,7 @@ export interface Node {
     allocatable?: Record<string, string>;
     conditions?: Array<{
       type: string;
-      status: "True" | "False" | "Unknown";
+      status: 'True' | 'False' | 'Unknown';
       lastHeartbeatTime?: string;
       lastTransitionTime?: string;
       reason?: string;

@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "builddddd": "tsc",
+    "build:ts": "tsc",
     "build": "ncc build src/server.ts -o dist",
     "start": "node dist/server.js",
     "lint": "eslint .",
@@ -29,6 +29,7 @@
     "@eslint/js": "^9.39.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.0",
+    "@types/dotenv": "^6.1.1",
     "@types/node": "^25.2.3",
     "@types/ws": "^8.18.1",
     "@vercel/ncc": "^0.38.4",

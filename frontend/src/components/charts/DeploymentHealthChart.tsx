@@ -8,10 +8,10 @@ import {
   ResponsiveContainer,
   Cell,
   Legend,
-} from "recharts";
-import { useTheme } from "@mui/material/styles";
-import { Box, Typography, Paper } from "@mui/material";
-import type { Deployment } from "../../interfaces/deployment";
+} from 'recharts';
+import { useTheme } from '@mui/material/styles';
+import { Box, Typography, Paper } from '@mui/material';
+import type { Deployment } from '../../interfaces/deployment';
 
 interface DeploymentHealthChartProps {
   deployments: Deployment[];
@@ -20,15 +20,15 @@ interface DeploymentHealthChartProps {
 
 function DeploymentHealthChart({
   deployments,
-  title = "Deployment Replica Status",
+  title = 'Deployment Replica Status',
 }: DeploymentHealthChartProps) {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+  const isDark = theme.palette.mode === 'dark';
 
   const colors = {
-    ready: isDark ? "#4ade80" : "#22c55e",
-    unavailable: isDark ? "#f87171" : "#ef4444",
-    updating: isDark ? "#fbbf24" : "#f59e0b",
+    ready: isDark ? '#4ade80' : '#22c55e',
+    unavailable: isDark ? '#f87171' : '#ef4444',
+    updating: isDark ? '#fbbf24' : '#f59e0b',
   };
 
   const chartData = deployments.slice(0, 8).map((deployment) => {
@@ -61,10 +61,10 @@ function DeploymentHealthChart({
           p: 3,
           borderRadius: 2,
           height: 300,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "background.paper",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.paper',
         }}
       >
         <Typography color="text.secondary">No deployments available</Typography>
@@ -79,9 +79,9 @@ function DeploymentHealthChart({
         p: 3,
         borderRadius: 2,
         height: 300,
-        display: "flex",
-        flexDirection: "column",
-        bgcolor: "background.paper",
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.paper',
       }}
     >
       <Typography
@@ -89,7 +89,7 @@ function DeploymentHealthChart({
         sx={{
           mb: 2,
           fontWeight: 600,
-          color: "text.primary",
+          color: 'text.primary',
         }}
       >
         {title}
@@ -106,7 +106,7 @@ function DeploymentHealthChart({
               strokeDasharray="3 3"
               horizontal={true}
               vertical={false}
-              stroke={isDark ? "#374151" : "#e5e7eb"}
+              stroke={isDark ? '#374151' : '#e5e7eb'}
             />
             <XAxis
               type="number"
@@ -125,14 +125,12 @@ function DeploymentHealthChart({
             <Tooltip
               contentStyle={{
                 backgroundColor: theme.palette.background.paper,
-                border: "none",
+                border: 'none',
                 borderRadius: 8,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                 color: theme.palette.text.primary,
               }}
-              labelFormatter={(_, payload) =>
-                payload?.[0]?.payload?.fullName || ""
-              }
+              labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName || ''}
               formatter={(value, name) => [
                 value ?? 0,
                 String(name).charAt(0).toUpperCase() + String(name).slice(1),
@@ -147,19 +145,14 @@ function DeploymentHealthChart({
                   style={{
                     color: theme.palette.text.secondary,
                     fontSize: 12,
-                    textTransform: "capitalize",
+                    textTransform: 'capitalize',
                   }}
                 >
                   {value}
                 </span>
               )}
             />
-            <Bar
-              dataKey="ready"
-              stackId="a"
-              fill={colors.ready}
-              radius={[0, 0, 0, 0]}
-            />
+            <Bar dataKey="ready" stackId="a" fill={colors.ready} radius={[0, 0, 0, 0]} />
             <Bar
               dataKey="updating"
               stackId="a"

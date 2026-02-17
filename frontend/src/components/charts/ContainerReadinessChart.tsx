@@ -1,14 +1,7 @@
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from "recharts";
-import { useTheme } from "@mui/material/styles";
-import { Box, Typography, Paper } from "@mui/material";
-import type { Pod } from "../../interfaces/pod";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { useTheme } from '@mui/material/styles';
+import { Box, Typography, Paper } from '@mui/material';
+import type { Pod } from '../../interfaces/pod';
 
 interface ContainerReadinessChartProps {
   pods: Pod[];
@@ -17,14 +10,14 @@ interface ContainerReadinessChartProps {
 
 function ContainerReadinessChart({
   pods,
-  title = "Container Readiness",
+  title = 'Container Readiness',
 }: ContainerReadinessChartProps) {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+  const isDark = theme.palette.mode === 'dark';
 
   const colors = {
-    ready: isDark ? "#4ade80" : "#22c55e",
-    notReady: isDark ? "#f87171" : "#ef4444",
+    ready: isDark ? '#4ade80' : '#22c55e',
+    notReady: isDark ? '#f87171' : '#ef4444',
   };
 
   let ready = 0;
@@ -44,8 +37,8 @@ function ContainerReadinessChart({
     ready === 0 && notReady === 0
       ? []
       : [
-          { name: "Ready", value: ready, color: colors.ready },
-          { name: "Not Ready", value: notReady, color: colors.notReady },
+          { name: 'Ready', value: ready, color: colors.ready },
+          { name: 'Not Ready', value: notReady, color: colors.notReady },
         ].filter((d) => d.value > 0);
 
   const totalContainers = chartData.reduce((sum, d) => sum + d.value, 0);
@@ -58,10 +51,10 @@ function ContainerReadinessChart({
           p: 3,
           borderRadius: 2,
           height: 300,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "background.paper",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.paper',
         }}
       >
         <Typography color="text.secondary">No containers available</Typography>
@@ -76,9 +69,9 @@ function ContainerReadinessChart({
         p: 3,
         borderRadius: 2,
         height: 300,
-        display: "flex",
-        flexDirection: "column",
-        bgcolor: "background.paper",
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.paper',
       }}
     >
       <Typography
@@ -86,13 +79,13 @@ function ContainerReadinessChart({
         sx={{
           mb: 2,
           fontWeight: 600,
-          color: "text.primary",
+          color: 'text.primary',
         }}
       >
         {title}
       </Typography>
 
-      <Box sx={{ flex: 1, minHeight: 0, minWidth: 0, position: "relative" }}>
+      <Box sx={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative' }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -118,15 +111,15 @@ function ContainerReadinessChart({
             <Tooltip
               contentStyle={{
                 backgroundColor: theme.palette.background.paper,
-                border: "none",
+                border: 'none',
                 borderRadius: 8,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                 color: theme.palette.text.primary,
               }}
               formatter={(value, name) => {
                 const v = Number(value) || 0;
                 return [
-                  `${v} container${v !== 1 ? "s" : ""} (${((v / totalContainers) * 100).toFixed(1)}%)`,
+                  `${v} container${v !== 1 ? 's' : ''} (${((v / totalContainers) * 100).toFixed(1)}%)`,
                   String(name),
                 ];
               }}
@@ -141,9 +134,7 @@ function ContainerReadinessChart({
                 paddingLeft: 20,
               }}
               formatter={(value) => (
-                <span
-                  style={{ color: theme.palette.text.secondary, fontSize: 13 }}
-                >
+                <span style={{ color: theme.palette.text.secondary, fontSize: 13 }}>
                   {value}
                 </span>
               )}
@@ -154,20 +145,17 @@ function ContainerReadinessChart({
         {/* Center label */}
         <Box
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "calc(50% - 40px)",
-            transform: "translate(-50%, -50%)",
-            textAlign: "center",
+            position: 'absolute',
+            top: '50%',
+            left: 'calc(50% - 40px)',
+            transform: 'translate(-50%, -50%)',
+            textAlign: 'center',
           }}
         >
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: 700, color: "text.primary" }}
-          >
+          <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
             {totalContainers}
           </Typography>
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Total
           </Typography>
         </Box>

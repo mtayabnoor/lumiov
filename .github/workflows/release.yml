@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release-branch:
-        description: "Release branch to finalize (e.g. release/v2.13.0)"
+        description: 'Release branch to finalize (e.g. release/v2.13.0)'
         required: true
         type: string
 
@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: "22"
+  NODE_VERSION: '22'
 
 permissions:
   contents: write

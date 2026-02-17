@@ -1,6 +1,6 @@
 export interface Service {
-  apiVersion: "v1";
-  kind: "Service";
+  apiVersion: 'v1';
+  kind: 'Service';
   metadata: {
     name: string;
     namespace: string;
@@ -11,7 +11,7 @@ export interface Service {
     [key: string]: any;
   };
   spec: {
-    type?: "ClusterIP" | "NodePort" | "LoadBalancer" | "ExternalName";
+    type?: 'ClusterIP' | 'NodePort' | 'LoadBalancer' | 'ExternalName';
     clusterIP?: string;
     clusterIPs?: string[];
     externalIPs?: string[];

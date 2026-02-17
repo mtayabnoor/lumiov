@@ -1,6 +1,6 @@
 export interface Endpoints {
-  apiVersion: "v1";
-  kind: "Endpoints";
+  apiVersion: 'v1';
+  kind: 'Endpoints';
   metadata: {
     name: string;
     namespace: string;

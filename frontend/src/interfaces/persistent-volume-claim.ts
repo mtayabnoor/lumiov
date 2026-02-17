@@ -1,6 +1,6 @@
 export interface PersistentVolumeClaim {
-  apiVersion: "v1";
-  kind: "PersistentVolumeClaim";
+  apiVersion: 'v1';
+  kind: 'PersistentVolumeClaim';
   metadata: {
     name: string;
     namespace: string;
@@ -18,14 +18,14 @@ export interface PersistentVolumeClaim {
     };
     storageClassName?: string;
     volumeName?: string;
-    volumeMode?: "Filesystem" | "Block";
+    volumeMode?: 'Filesystem' | 'Block';
     selector?: {
       matchLabels?: Record<string, string>;
     };
     [key: string]: any;
   };
   status?: {
-    phase?: "Pending" | "Bound" | "Lost";
+    phase?: 'Pending' | 'Bound' | 'Lost';
     accessModes?: string[];
     capacity?: Record<string, string>;
     conditions?: Array<{

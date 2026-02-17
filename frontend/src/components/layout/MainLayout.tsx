@@ -7,26 +7,26 @@ import {
   IconButton,
   Tooltip,
   Badge,
-} from "@mui/material";
-import { Outlet } from "react-router-dom";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import Sidebar from "./Sidebar";
-import { useThemeMode } from "../../context/ThemeContext";
-import { useAgent } from "../../context/AgentContext";
-import AgentChatPanel from "../agent/AgentChatPanel";
-import AgentConfigModal from "../agent/AgentConfigModal";
-import PsychologyIcon from "@mui/icons-material/Psychology";
+} from '@mui/material';
+import { Outlet } from 'react-router-dom';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import Sidebar from './Sidebar';
+import { useThemeMode } from '../../context/ThemeContext';
+import { useAgent } from '../../context/AgentContext';
+import AgentChatPanel from '../agent/AgentChatPanel';
+import AgentConfigModal from '../agent/AgentConfigModal';
+import PsychologyIcon from '@mui/icons-material/Psychology';
 
-const LOGO_SRC = "lumiov.png";
-const HEADER_HEIGHT = "50px";
+const LOGO_SRC = 'lumiov.png';
+const HEADER_HEIGHT = '50px';
 
 function MainLayout() {
   const { mode, toggleTheme } = useThemeMode();
   const { isConfigured, toggleChat } = useAgent();
 
   return (
-    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <CssBaseline />
 
       <AppBar
@@ -41,28 +41,28 @@ function MainLayout() {
           variant="dense"
           sx={{
             minHeight: `${HEADER_HEIGHT} !important`,
-            display: "flex",
-            alignItems: "center",
+            display: 'flex',
+            alignItems: 'center',
             px: 2,
           }}
         >
           {/* Logo + Title */}
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box
               component="img"
               src={LOGO_SRC}
               alt="Lumiov Logo"
-              sx={{ height: 35, width: 35, mr: 1.5, objectFit: "contain" }}
+              sx={{ height: 35, width: 35, mr: 1.5, objectFit: 'contain' }}
             />
             <Typography
               variant="subtitle2"
               noWrap
               component="div"
               sx={{
-                fontSize: "35px",
+                fontSize: '35px',
                 fontWeight: 600,
-                color: "#eeeeeeff",
-                letterSpacing: "0.5px",
+                color: '#eeeeeeff',
+                letterSpacing: '0.5px',
               }}
             >
               Lumiov
@@ -94,11 +94,11 @@ function MainLayout() {
               <PsychologyIcon
                 fontSize="medium"
                 sx={{
-                  color: isConfigured ? "#b42323ff" : "text.primary",
+                  color: isConfigured ? '#b42323ff' : 'text.primary',
                   filter: isConfigured
-                    ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
-                    : "none",
-                  transition: "all 0.3s ease",
+                    ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
+                    : 'none',
+                  transition: 'all 0.3s ease',
                 }}
               />
             </IconButton>
@@ -106,16 +106,10 @@ function MainLayout() {
 
           {/* Theme Toggle */}
           <Tooltip
-            title={
-              mode === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"
-            }
+            title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
-            <IconButton
-              onClick={toggleTheme}
-              size="small"
-              sx={{ color: "text.primary" }}
-            >
-              {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+            <IconButton onClick={toggleTheme} size="small" sx={{ color: 'text.primary' }}>
+              {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
           </Tooltip>
         </Toolbar>
@@ -127,9 +121,9 @@ function MainLayout() {
         component="main"
         sx={{
           flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         <Box sx={{ height: HEADER_HEIGHT }} />

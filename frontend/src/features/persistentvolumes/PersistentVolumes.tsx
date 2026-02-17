@@ -1,28 +1,28 @@
-import { useResource } from "../../hooks/useResource";
-import type { ResourceTableConfig } from "../../interfaces/common";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ResourceTable from "../../components/common/Table/ResourceTable";
-import type { PersistentVolume } from "../../interfaces/persistent-volume";
-import { Box, CircularProgress, Alert } from "@mui/material";
-import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import ResourceEditor from "../../components/common/Editor/ResourceEditor";
-import { useState } from "react";
+import { useResource } from '../../hooks/useResource';
+import type { ResourceTableConfig } from '../../interfaces/common';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ResourceTable from '../../components/common/Table/ResourceTable';
+import type { PersistentVolume } from '../../interfaces/persistent-volume';
+import { Box, CircularProgress, Alert } from '@mui/material';
+import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import { useState } from 'react';
 
 const getPvStatus = (pv: PersistentVolume) => {
   const phase = pv.status?.phase;
   switch (phase) {
-    case "Available":
-      return { kind: "status", label: "Available", cssClass: "success" };
-    case "Bound":
-      return { kind: "status", label: "Bound", cssClass: "success" };
-    case "Released":
-      return { kind: "status", label: "Released", cssClass: "warning" };
-    case "Failed":
-      return { kind: "status", label: "Failed", cssClass: "error" };
+    case 'Available':
+      return { kind: 'status', label: 'Available', cssClass: 'success' };
+    case 'Bound':
+      return { kind: 'status', label: 'Bound', cssClass: 'success' };
+    case 'Released':
+      return { kind: 'status', label: 'Released', cssClass: 'warning' };
+    case 'Failed':
+      return { kind: 'status', label: 'Failed', cssClass: 'error' };
     default:
-      return { kind: "status", label: phase || "Pending", cssClass: "info" };
+      return { kind: 'status', label: phase || 'Pending', cssClass: 'info' };
   }
 };
 
@@ -31,7 +31,7 @@ function PersistentVolumes() {
     data: pvs,
     error,
     loading,
-  } = useResource<PersistentVolume>("persistentvolumes");
+  } = useResource<PersistentVolume>('persistentvolumes');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -40,55 +40,54 @@ function PersistentVolumes() {
 
   const config: ResourceTableConfig = {
     columns: [
-      { key: "metadata.name", header: "NAME" },
+      { key: 'metadata.name', header: 'NAME' },
       {
-        key: "capacity",
-        header: "CAPACITY",
-        accessor: (row: PersistentVolume) => row.spec?.capacity?.storage ?? "-",
+        key: 'capacity',
+        header: 'CAPACITY',
+        accessor: (row: PersistentVolume) => row.spec?.capacity?.storage ?? '-',
       },
       {
-        key: "accessModes",
-        header: "ACCESS MODES",
+        key: 'accessModes',
+        header: 'ACCESS MODES',
+        accessor: (row: PersistentVolume) => row.spec?.accessModes?.join(', ') ?? '-',
+      },
+      {
+        key: 'reclaimPolicy',
+        header: 'RECLAIM POLICY',
         accessor: (row: PersistentVolume) =>
-          row.spec?.accessModes?.join(", ") ?? "-",
+          row.spec?.persistentVolumeReclaimPolicy ?? '-',
       },
       {
-        key: "reclaimPolicy",
-        header: "RECLAIM POLICY",
-        accessor: (row: PersistentVolume) =>
-          row.spec?.persistentVolumeReclaimPolicy ?? "-",
-      },
-      {
-        key: "status",
-        header: "STATUS",
+        key: 'status',
+        header: 'STATUS',
         accessor: (row: PersistentVolume) => getPvStatus(row),
       },
       {
-        key: "claim",
-        header: "CLAIM",
+        key: 'claim',
+        header: 'CLAIM',
         accessor: (row: PersistentVolume) => {
           const ref = row.spec?.claimRef;
-          if (!ref) return "-";
+          if (!ref) return '-';
           return `${ref.namespace}/${ref.name}`;
         },
       },
-      { key: "spec.storageClassName", header: "STORAGE CLASS" },
+      { key: 'spec.storageClassName', header: 'STORAGE CLASS' },
       {
-        key: "age",
-        header: "AGE",
+        key: 'age',
+        header: 'AGE',
         accessor: (row: PersistentVolume) => (
           <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
         ),
       },
     ],
     actions: [
-      { id: "edit", label: "Edit", icon: EditIcon },
-      { id: "delete", label: "Delete", icon: DeleteIcon },
+      { id: 'edit', label: 'Edit', icon: EditIcon },
+      { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
 
   const handleAction = (actionId: string, row: PersistentVolume) => {
-    if (actionId === "edit") {
+    if (actionId === 'edit') {
       setEditingResource({ name: row.metadata.name });
       setEditDrawerOpen(true);
     }
@@ -96,7 +95,7 @@ function PersistentVolumes() {
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );

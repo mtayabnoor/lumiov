@@ -1,21 +1,17 @@
-import { useResource } from "../../hooks/useResource";
-import type { ResourceTableConfig } from "../../interfaces/common";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ResourceTable from "../../components/common/Table/ResourceTable";
-import type { ResourceQuota } from "../../interfaces/resource-quota";
-import { Box, CircularProgress, Alert } from "@mui/material";
-import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import ResourceEditor from "../../components/common/Editor/ResourceEditor";
-import { useState } from "react";
+import { useResource } from '../../hooks/useResource';
+import type { ResourceTableConfig } from '../../interfaces/common';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ResourceTable from '../../components/common/Table/ResourceTable';
+import type { ResourceQuota } from '../../interfaces/resource-quota';
+import { Box, CircularProgress, Alert } from '@mui/material';
+import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import { useState } from 'react';
 
 function ResourceQuotas() {
-  const {
-    data: quotas,
-    error,
-    loading,
-  } = useResource<ResourceQuota>("resourcequotas");
+  const { data: quotas, error, loading } = useResource<ResourceQuota>('resourcequotas');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -25,35 +21,35 @@ function ResourceQuotas() {
 
   const config: ResourceTableConfig = {
     columns: [
-      { key: "metadata.namespace", header: "NAMESPACE" },
-      { key: "metadata.name", header: "NAME" },
+      { key: 'metadata.namespace', header: 'NAMESPACE' },
+      { key: 'metadata.name', header: 'NAME' },
       {
-        key: "resources",
-        header: "REQUEST (used/hard)",
+        key: 'resources',
+        header: 'REQUEST (used/hard)',
         accessor: (row: ResourceQuota) => {
           const hard = row.status?.hard ?? {};
           const used = row.status?.used ?? {};
           const keys = Object.keys(hard).slice(0, 3);
-          if (keys.length === 0) return "-";
-          return keys.map((k) => `${k}: ${used[k] ?? 0}/${hard[k]}`).join(", ");
+          if (keys.length === 0) return '-';
+          return keys.map((k) => `${k}: ${used[k] ?? 0}/${hard[k]}`).join(', ');
         },
       },
       {
-        key: "age",
-        header: "AGE",
+        key: 'age',
+        header: 'AGE',
         accessor: (row: ResourceQuota) => (
           <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
         ),
       },
     ],
     actions: [
-      { id: "edit", label: "Edit", icon: EditIcon },
-      { id: "delete", label: "Delete", icon: DeleteIcon },
+      { id: 'edit', label: 'Edit', icon: EditIcon },
+      { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
 
   const handleAction = (actionId: string, row: ResourceQuota) => {
-    if (actionId === "edit") {
+    if (actionId === 'edit') {
       setEditingResource({
         namespace: row.metadata.namespace,
         name: row.metadata.name,
@@ -64,7 +60,7 @@ function ResourceQuotas() {
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );

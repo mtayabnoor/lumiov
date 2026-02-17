@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback, useRef } from "react";
-import { Socket } from "socket.io-client";
-import { Terminal } from "@xterm/xterm";
-import { FitAddon } from "@xterm/addon-fit";
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { Socket } from 'socket.io-client';
+import { Terminal } from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
 import {
   Drawer,
   IconButton,
@@ -15,12 +15,12 @@ import {
   Chip,
   Tooltip,
   useTheme,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import TerminalIcon from "@mui/icons-material/Terminal";
-import "@xterm/xterm/css/xterm.css";
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import TerminalIcon from '@mui/icons-material/Terminal';
+import '@xterm/xterm/css/xterm.css';
 
 import {
   DRAWER_STYLES,
@@ -32,7 +32,7 @@ import {
   CONNECTED_CHIP_SX,
   PULSE_DOT_SX,
   DIVIDER_SX,
-} from "./drawerStyles";
+} from './drawerStyles';
 
 interface Container {
   name: string;
@@ -61,11 +61,11 @@ export default function PodExecDrawer({
 
   // --- State ---
   const [selectedContainer, setSelectedContainer] = useState(
-    defaultContainer || containers[0]?.name || "",
+    defaultContainer || containers[0]?.name || '',
   );
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [height, setHeight] = useState("50vh");
+  const [height, setHeight] = useState('50vh');
 
   // --- Refs ---
   // We keep track of the instance to be able to dispose of it later
@@ -77,9 +77,9 @@ export default function PodExecDrawer({
   // This function destroys the current terminal session
   const cleanupSession = useCallback(() => {
     if (socket) {
-      socket.emit("exec:stop");
-      socket.off("exec:data");
-      socket.off("exec:error");
+      socket.emit('exec:stop');
+      socket.off('exec:data');
+      socket.off('exec:error');
     }
 
     if (observerRef.current) {
@@ -114,7 +114,7 @@ export default function PodExecDrawer({
       // 2. Guard: If socket is missing, we can't do anything.
       if (!socket) return;
 
-      console.log("🚀 Initializing Terminal for:", selectedContainer);
+      console.log('🚀 Initializing Terminal for:', selectedContainer);
       setError(null);
 
       // 3. Instantiate Xterm
@@ -122,7 +122,7 @@ export default function PodExecDrawer({
         cursorBlink: true,
         theme: {
           background: DRAWER_STYLES.paper.bodyBg,
-          foreground: "#e6e6e6",
+          foreground: '#e6e6e6',
           cursor: cursorColor,
         },
         fontFamily: '"JetBrains Mono", "Fira Code", Consolas, monospace',
@@ -142,22 +142,22 @@ export default function PodExecDrawer({
       fitAddonRef.current = fitAddon;
 
       // 4. Socket Listeners
-      socket.on("exec:data", (data) => {
+      socket.on('exec:data', (data) => {
         term.write(data);
         setIsConnected(true);
       });
 
-      socket.on("exec:error", (err) => {
-        const msg = typeof err === "string" ? err : "Unknown Error";
+      socket.on('exec:error', (err) => {
+        const msg = typeof err === 'string' ? err : 'Unknown Error';
         term.writeln(`\r\n\x1b[31mError: ${msg}\x1b[0m`);
         setError(msg);
       });
 
       // Handle user typing
-      term.onData((data) => socket.emit("exec:input", data));
+      term.onData((data) => socket.emit('exec:input', data));
 
       // 5. Start Session
-      socket.emit("exec:start", {
+      socket.emit('exec:start', {
         namespace,
         podName,
         container: selectedContainer,
@@ -170,10 +170,10 @@ export default function PodExecDrawer({
         try {
           fitAddon.fit();
           if (term.cols > 0 && term.rows > 0) {
-            socket.emit("exec:resize", { cols: term.cols, rows: term.rows });
+            socket.emit('exec:resize', { cols: term.cols, rows: term.rows });
           }
         } catch (e) {
-          console.warn("Fit failed", e);
+          console.warn('Fit failed', e);
         }
       }, 300); // 300ms covers most standard MUI transitions
 
@@ -182,7 +182,7 @@ export default function PodExecDrawer({
         try {
           fitAddon.fit();
           if (term.cols > 0 && term.rows > 0) {
-            socket.emit("exec:resize", { cols: term.cols, rows: term.rows });
+            socket.emit('exec:resize', { cols: term.cols, rows: term.rows });
           }
         } catch (e) {
           /* ignore */
@@ -203,7 +203,7 @@ export default function PodExecDrawer({
     onClose();
   };
 
-  const toggleHeight = () => setHeight((h) => (h === "50vh" ? "85vh" : "50vh"));
+  const toggleHeight = () => setHeight((h) => (h === '50vh' ? '85vh' : '50vh'));
 
   // Re-fit when height changes (user clicks expand)
   useEffect(() => {
@@ -231,9 +231,7 @@ export default function PodExecDrawer({
       <Box sx={DRAWER_HEADER_SX}>
         <Box display="flex" alignItems="center" gap={2}>
           <Box display="flex" alignItems="center" gap={1}>
-            <TerminalIcon
-              sx={{ color: theme.palette.primary.main, fontSize: 20 }}
-            />
+            <TerminalIcon sx={{ color: theme.palette.primary.main, fontSize: 20 }} />
             <Box display="flex" flexDirection="column">
               <Typography
                 variant="subtitle2"
@@ -249,8 +247,8 @@ export default function PodExecDrawer({
                 variant="caption"
                 sx={{
                   color: DRAWER_STYLES.text.muted,
-                  fontFamily: "monospace",
-                  fontSize: "0.7rem",
+                  fontFamily: 'monospace',
+                  fontSize: '0.7rem',
                 }}
               >
                 {namespace}
@@ -298,14 +296,10 @@ export default function PodExecDrawer({
               icon={<Box sx={PULSE_DOT_SX} />}
             />
           )}
-          <Divider
-            orientation="vertical"
-            flexItem
-            sx={{ ...DIVIDER_SX, mx: 0.5 }}
-          />
-          <Tooltip title={height === "50vh" ? "Expand" : "Collapse"}>
+          <Divider orientation="vertical" flexItem sx={{ ...DIVIDER_SX, mx: 0.5 }} />
+          <Tooltip title={height === '50vh' ? 'Expand' : 'Collapse'}>
             <IconButton onClick={toggleHeight} size="small" sx={ICON_BUTTON_SX}>
-              {height === "50vh" ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              {height === '50vh' ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
           </Tooltip>
           <Tooltip title="Close">
@@ -320,7 +314,7 @@ export default function PodExecDrawer({
       <Box
         sx={{
           flex: 1,
-          position: "relative",
+          position: 'relative',
           p: 1,
           minHeight: 0,
           bgcolor: DRAWER_STYLES.paper.bodyBg,
@@ -330,14 +324,14 @@ export default function PodExecDrawer({
           <Alert
             severity="error"
             sx={{
-              position: "absolute",
+              position: 'absolute',
               top: 10,
               left: 10,
               right: 10,
               zIndex: 10,
               bgcolor: DRAWER_STYLES.status.error.bg,
               color: DRAWER_STYLES.status.error.text,
-              "& .MuiAlert-icon": { color: DRAWER_STYLES.status.error.text },
+              '& .MuiAlert-icon': { color: DRAWER_STYLES.status.error.text },
             }}
           >
             {error}
@@ -351,7 +345,7 @@ export default function PodExecDrawer({
         */}
         <div
           ref={initTerminal}
-          style={{ width: "100%", height: "100%", overflow: "hidden" }}
+          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
         />
       </Box>
     </Drawer>

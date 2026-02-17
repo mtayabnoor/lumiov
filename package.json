@@ -17,7 +17,7 @@
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && npm run build",
     "build:electron": "cd electron && tsc -p tsconfig.json",
-    "electron": "npm run build && electron electron/.",
+    "electron": "npm run build && npm run start --prefix electron",
     "package": "npm run build && cd electron && npm run package",
     "package:publish": "npm run build && cd electron && npm run package:publish",
     "clean": "rimraf electron/dist electron/release",
@@ -25,7 +25,8 @@
     "release:rc": "commit-and-tag-version --prerelease rc --skip.commit --skip.tag",
     "release:dry-run": "commit-and-tag-version --dry-run",
     "prepare": "husky install",
-    "commitlint": "commitlint --edit"
+    "commitlint": "commitlint --edit",
+    "format": "prettier --write \".\""
   },
   "devDependencies": {
     "@commitlint/cli": "^20.4.1",
@@ -33,6 +34,13 @@
     "commit-and-tag-version": "12.6.1",
     "concurrently": "^8.2.0",
     "husky": "^9.0.0",
+    "lint-staged": "16.2.7",
+    "prettier": "3.8.1",
     "rimraf": "^6.1.3"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx,json,css,md}": [
+      "prettier --write"
+    ]
   }
 }

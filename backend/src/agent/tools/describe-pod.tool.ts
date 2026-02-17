@@ -22,8 +22,7 @@ export function createDescribePodTool(): DynamicStructuredTool {
         const pods = await k8sService.listResource('pods');
 
         const pod = pods.find(
-          (p: any) =>
-            p.metadata?.name === name && p.metadata?.namespace === namespace,
+          (p: any) => p.metadata?.name === name && p.metadata?.namespace === namespace,
         );
 
         if (!pod) {

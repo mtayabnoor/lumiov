@@ -36,9 +36,7 @@ export const registerLogHandlers = (socket: Socket) => {
       return;
     }
 
-    console.log(
-      `📜 [Logs] Subscribe: ${podName} (${containerName || 'single'})`,
-    );
+    console.log(`📜 [Logs] Subscribe: ${podName} (${containerName || 'single'})`);
 
     // 2. CLEANUP: Stop any existing streams for this user immediately
     cleanupLogStream(socket.id);
@@ -50,9 +48,7 @@ export const registerLogHandlers = (socket: Socket) => {
 
     // Determine containers
     const containersToStream =
-      containerName === 'all' && containers?.length
-        ? containers
-        : [containerName || ''];
+      containerName === 'all' && containers?.length ? containers : [containerName || ''];
 
     // 4. PARALLEL EXECUTION: Start all streams at once
     const streamPromises = containersToStream.map(async (container) => {
@@ -88,10 +84,7 @@ export const registerLogHandlers = (socket: Socket) => {
           (err) => {
             const errString = String(err);
             if (errString.includes('400') && previous) {
-              socket.emit(
-                'logs:error',
-                `Container "${container}" has no previous logs.`,
-              );
+              socket.emit('logs:error', `Container "${container}" has no previous logs.`);
             } else {
               socket.emit('logs:error', errString);
             }
@@ -111,14 +104,8 @@ export const registerLogHandlers = (socket: Socket) => {
         }
       } catch (error) {
         const err = error as Error;
-        console.error(
-          `❌ [Logs] Failed to stream container ${container}:`,
-          err,
-        );
-        socket.emit(
-          'logs:error',
-          `Failed to stream ${container}: ${err.message}`,
-        );
+        console.error(`❌ [Logs] Failed to stream container ${container}:`, err);
+        socket.emit('logs:error', `Failed to stream ${container}: ${err.message}`);
       }
     });
 
