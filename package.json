@@ -21,8 +21,8 @@
     "package": "npm run build && cd electron && npm run package",
     "package:publish": "npm run build && cd electron && npm run package:publish",
     "clean": "rimraf electron/dist electron/release",
-    "release": "commit-and-tag-version",
-    "release:rc": "commit-and-tag-version --prerelease rc",
+    "release": "commit-and-tag-version --skip.bump --skip.commit --skip.tag",
+    "release:rc": "commit-and-tag-version --prerelease rc --skip.commit --skip.tag",
     "release:dry-run": "commit-and-tag-version --dry-run",
     "prepare": "husky install",
     "commitlint": "commitlint --edit"

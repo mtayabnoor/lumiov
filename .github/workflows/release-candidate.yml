@@ -44,7 +44,7 @@ jobs:
       - name: Bump version & generate changelog
         id: version
         run: |
-          npx standard-version --prerelease rc --skip.commit --skip.tag
+          npm run release:rc
 
           VERSION=$(node -p "require('./package.json').version")
           TAG="v${VERSION}"
