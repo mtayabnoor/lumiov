@@ -39,7 +39,7 @@
     "rimraf": "^6.1.3"
   },
   "lint-staged": {
-    "src/**/*.{ts,tsx,js,jsx,json,css,md}": [
+    "**/*.{ts,tsx,js,jsx,json,css,md}": [
       "prettier --write"
     ]
   }
