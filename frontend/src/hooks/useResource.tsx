@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useSocket } from "./useSocket";
 import {
   SocketEvent,
-  K8sEventPayload,
-  K8sListPayload,
-  ResourceType,
+  type K8sEventPayload,
+  type K8sListPayload,
+  type ResourceType,
 } from "../interfaces/socket";
 
 interface ResourceWithMetadata {

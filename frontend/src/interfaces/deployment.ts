@@ -1,4 +1,4 @@
-import { Pod } from "./pod.js";
+import type { Pod } from "./pod.js";
 
 export interface Deployment {
   apiVersion: "apps/v1";

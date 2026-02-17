@@ -1,9 +1,9 @@
 import { useResource } from "../../hooks/useResource";
-import { ResourceTableConfig } from "../../interfaces/common";
+import type { ResourceTableConfig } from "../../interfaces/common";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ResourceTable from "../../components/common/Table/ResourceTable";
-import { Ingress } from "../../interfaces/ingress";
+import type { Ingress } from "../../interfaces/ingress";
 import { Box, CircularProgress, Alert } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
 import PageLayout from "../../components/common/PageLayout/PageLayout";

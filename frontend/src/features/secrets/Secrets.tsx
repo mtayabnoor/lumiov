@@ -1,9 +1,9 @@
 import { useResource } from "../../hooks/useResource";
-import { ResourceTableConfig } from "../../interfaces/common";
+import type { ResourceTableConfig } from "../../interfaces/common";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ResourceTable from "../../components/common/Table/ResourceTable";
-import { Secret } from "../../interfaces/secret";
+import type { Secret } from "../../interfaces/secret";
 import { Box, CircularProgress, Alert } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
 import PageLayout from "../../components/common/PageLayout/PageLayout";

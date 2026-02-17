@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { useTheme } from "@mui/material/styles";
 import { Box, Typography, Paper } from "@mui/material";
-import { Deployment } from "../../interfaces/deployment";
+import type { Deployment } from "../../interfaces/deployment";
 
 interface DeploymentHealthChartProps {
   deployments: Deployment[];

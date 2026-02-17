@@ -7,8 +7,8 @@ import ContainerReadinessChart from "../../components/charts/ContainerReadinessC
 import SummaryCard from "../../components/charts/SummaryCard";
 import PageLayout from "../../components/common/PageLayout/PageLayout";
 import { useResource } from "../../hooks/useResource";
-import { Deployment } from "../../interfaces/deployment";
-import { Pod } from "../../interfaces/pod";
+import type { Deployment } from "../../interfaces/deployment";
+import type { Pod } from "../../interfaces/pod";
 
 function Overview() {
   const { data: pods, loading: podsLoading } = useResource<Pod>("pods");

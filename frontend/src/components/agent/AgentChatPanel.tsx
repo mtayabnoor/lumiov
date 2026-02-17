@@ -23,7 +23,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import PersonIcon from "@mui/icons-material/Person";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import { useAgent, ChatMessage } from "../../context/AgentContext";
+import { useAgent, type ChatMessage } from "../../context/AgentContext";
 
 const DRAWER_WIDTH = 420;
 

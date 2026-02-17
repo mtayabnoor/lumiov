@@ -1,7 +1,7 @@
 import ResourceTable from "../../components/common/Table/ResourceTable";
 import { useResource } from "../../hooks/useResource";
-import { Pod } from "../../interfaces/pod";
-import { ResourceTableConfig } from "../../interfaces/common";
+import type { Pod } from "../../interfaces/pod";
+import type { ResourceTableConfig } from "../../interfaces/common";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArticleIcon from "@mui/icons-material/Article";

@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import { useTheme } from "@mui/material/styles";
 import { Box, Typography, Paper } from "@mui/material";
-import { Pod } from "../../interfaces/pod";
+import type { Pod } from "../../interfaces/pod";
 
 interface PodStatusChartProps {
   pods: Pod[];

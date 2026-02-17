@@ -19,8 +19,8 @@ import {
   Chip,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { SelectChangeEvent } from "@mui/material/Select";
-import { ColumnDef, ResourceTableProps } from "../../../interfaces/common";
+import type { SelectChangeEvent } from "@mui/material/Select";
+import type { ColumnDef, ResourceTableProps } from "../../../interfaces/common";
 
 // --- Helper Functions ---
 

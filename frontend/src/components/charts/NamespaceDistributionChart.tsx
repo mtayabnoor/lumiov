@@ -10,8 +10,8 @@ import {
 } from "recharts";
 import { useTheme } from "@mui/material/styles";
 import { Box, Typography, Paper } from "@mui/material";
-import { Pod } from "../../interfaces/pod";
-import { Deployment } from "../../interfaces/deployment";
+import type { Pod } from "../../interfaces/pod";
+import type { Deployment } from "../../interfaces/deployment";
 
 interface NamespaceDistributionChartProps {
   pods?: Pod[];

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Socket } from "socket.io-client";
 import { getSocket } from "../services/socket";
-import {
+import type {
   ClientToServerEvents,
   ServerToClientEvents,
 } from "../interfaces/socket";

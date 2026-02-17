@@ -1,7 +1,7 @@
-import { ResourceTableConfig } from "../../interfaces/common";
+import type { ResourceTableConfig } from "../../interfaces/common";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ResourceTable from "../../components/common/Table/ResourceTable";
-import { Namespace } from "../../interfaces/namespace";
+import type { Namespace } from "../../interfaces/namespace";
 import { Box, CircularProgress, Alert } from "@mui/material";
 import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
 import PageLayout from "../../components/common/PageLayout/PageLayout";
