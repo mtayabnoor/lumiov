@@ -14,7 +14,7 @@ interface ResourceWithMetadata {
   };
 }
 
-export const useResource = <T extends ResourceWithMetadata>(resource: ResourceType) => {
+export function useResource<T extends ResourceWithMetadata>(resource: ResourceType) {
   const socket = useSocket();
   const [data, setData] = useState<T[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -118,7 +118,7 @@ export const useResource = <T extends ResourceWithMetadata>(resource: ResourceTy
   }, [socket]);
 
   return { data, error, loading, socket };
-};
+}
 
 interface DeleteParams {
   apiVersion: string;
@@ -127,7 +127,7 @@ interface DeleteParams {
   namespace?: string;
 }
 
-export const useDeleteResource = () => {
+export function useDeleteResource() {
   const [response, setResponse] = useState<Response | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteResouce = async ({ apiVersion, kind, name, namespace }: DeleteParams) => {
@@ -142,4 +142,4 @@ export const useDeleteResource = () => {
     setResponse(response);
   };
   return { deleteResouce, response, isDeleting };
-};
+}

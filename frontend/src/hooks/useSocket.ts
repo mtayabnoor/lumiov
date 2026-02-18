@@ -3,10 +3,10 @@ import { Socket } from 'socket.io-client';
 import { getSocket } from '../services/socket';
 import type { ClientToServerEvents, ServerToClientEvents } from '../interfaces/socket';
 
-export const useSocket = () => {
+export function useSocket() {
   const [socket] = useState<Socket<ServerToClientEvents, ClientToServerEvents> | null>(
     () => getSocket(),
   );
 
   return socket;
-};
+}

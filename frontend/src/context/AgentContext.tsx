@@ -5,7 +5,7 @@
  * Handles API token configuration and chat panel visibility.
  */
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, type ReactNode, useEffect } from 'react';
 import { useSocket } from '../hooks/useSocket';
 
 // Message types for the chat
