@@ -6,7 +6,6 @@ import {
   Typography,
   IconButton,
   Tooltip,
-  Badge,
 } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import LightModeIcon from '@mui/icons-material/LightMode';
