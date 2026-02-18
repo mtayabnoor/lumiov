@@ -551,25 +551,34 @@ export class K8sService {
     apiVersion: string,
     kind: string,
     name: string,
-    namespace: string,
+    namespace: string | undefined,
   ): Promise<string> {
     this.checkInit();
 
     try {
       console.log(
-        `🗑️ [K8S] Deleting Resource: kind: ${kind} name: ${name} in ns ${namespace}`,
+        `🗑️ [K8S] Deleting Resource: kind: ${kind} name: ${name} in ns ${namespace || 'CLUSTER-SCOPE'}`,
       );
-      const pod = {
-        apiVersion: apiVersion,
-        kind: kind,
-        metadata: {
-          name: name,
-          namespace: namespace,
-        },
+
+      // 1. Create the base metadata with just the name
+      const metadata: any = {
+        name: name,
       };
 
-      // Use the CoreV1Api to delete the pod
-      await this.objectApi!.delete(pod);
+      // 2. Only add 'namespace' key if it is defined and not empty
+      // This ensures cluster-scoped resources don't get a "namespace: undefined" key
+      if (namespace) {
+        metadata.namespace = namespace;
+      }
+
+      const resource = {
+        apiVersion: apiVersion,
+        kind: kind,
+        metadata: metadata,
+      };
+
+      // Use the CoreV1Api to delete the resource
+      await this.objectApi!.delete(resource);
 
       return `Resource Kind: ${kind} Name: ${name} deleted successfully.`;
     } catch (err: any) {

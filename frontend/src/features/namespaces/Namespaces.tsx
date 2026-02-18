@@ -24,9 +24,29 @@ function Namespaces() {
     actions: [{ id: 'delete', label: 'Delete', icon: DeleteIcon }],
   };
 
+  const deleteResource = async (namespace: string, resourceName: string) => {
+    try {
+      const res = await fetch(
+        `http://localhost:3030/api/resource?apiVersion=${encodeURIComponent('v1')}&kind=${encodeURIComponent('Namespace')}&namespace=${encodeURIComponent(namespace)}&name=${encodeURIComponent(resourceName)}`,
+        {
+          method: 'DELETE',
+        },
+      );
+
+      console.log(await res.text());
+    } catch (err) {
+      console.error('Error deleting resource:', err);
+    }
+  };
+
   const handleAction = (actionId: string, row: any) => {
-    console.log('Action triggered:', actionId, row);
-    // Add logic: e.g., navigate to logs, open delete dialog, etc.
+    const namespace = row.metadata.namespace;
+    const resourceName = row.metadata.name;
+    if (actionId === 'delete') {
+      if (window.confirm(`Are you sure you want to delete namespace ${resourceName}?`)) {
+        deleteResource(namespace, resourceName);
+      }
+    }
   };
 
   if (loading)

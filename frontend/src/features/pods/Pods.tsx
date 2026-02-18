@@ -279,9 +279,9 @@ function Pods() {
     ],
     actions: [
       { id: 'edit', label: 'Edit', icon: EditIcon },
-      { id: 'delete', label: 'Delete', icon: DeleteIcon },
       { id: 'logs', label: 'Logs', icon: ArticleIcon },
       { id: 'exec', label: 'Exec', icon: TerminalIcon },
+      { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
 
