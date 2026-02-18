@@ -27,7 +27,7 @@ export const InputComponents = (theme: Theme): Components => {
             boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
           },
         },
-        input: { padding: '8px 12px' },
+        //input: { padding: '8px 12px' },
       },
     },
   };

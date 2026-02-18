@@ -1,5 +1,3 @@
-import { type Palette, type PaletteOptions } from '@mui/material/styles';
-
 // Extend the Palette interface to add our custom semantic groups
 declare module '@mui/material/styles' {
   interface Palette {
