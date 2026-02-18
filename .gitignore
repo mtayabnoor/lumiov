@@ -36,4 +36,4 @@ yarn-debug.log*
 
 # --- Personal Scripts ---
 commands.txt
-test-multi-container-pod.yaml
+kubernetes_yaml_files/*
