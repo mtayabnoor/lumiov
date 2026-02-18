@@ -60,7 +60,7 @@ function MainLayout() {
               sx={{
                 fontSize: '35px',
                 fontWeight: 600,
-                color: '#eeeeeeff',
+
                 letterSpacing: '0.5px',
               }}
             >
