@@ -20,6 +20,7 @@ function Namespaces() {
   const namespaceConfig: ResourceTableConfig = {
     columns: [
       { key: 'metadata.name', header: 'NAME' },
+      { key: 'status.phase', header: 'STATUS' },
       {
         key: 'age',
         header: 'AGE',
@@ -75,15 +76,16 @@ function Namespaces() {
         onAction={handleAction}
         resourceType="namespaces"
       />
-      {/* The Dialog Component - Renders only when podToDelete is set */}
-      <ResourceDeleteConfirmDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-        onConfirm={confirmDelete}
-        resourceName={selectedNamespace!.metadata.name}
-        resourceKind="Namespace"
-        isDeleting={isDeleting}
-      />
+      {selectedNamespace && (
+        <ResourceDeleteConfirmDialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          onConfirm={confirmDelete}
+          resourceName={selectedNamespace.metadata.name}
+          resourceKind="Namespace"
+          isDeleting={isDeleting}
+        />
+      )}
     </PageLayout>
   );
 }
