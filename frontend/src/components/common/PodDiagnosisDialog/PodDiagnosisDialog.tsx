@@ -288,10 +288,12 @@ export default function PodDiagnosisDialog({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 3,
-          maxHeight: '85vh',
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 3,
+            maxHeight: '85vh',
+          },
         },
       }}
     >

@@ -101,16 +101,18 @@ export const getSelectSx = (primaryColor: string) => ({
 
 // Common menu props
 export const getMenuProps = () => ({
-  PaperProps: {
-    sx: {
-      bgcolor: DRAWER_STYLES.menu.bg,
-      color: DRAWER_STYLES.text.primary,
-      border: `1px solid ${DRAWER_STYLES.controls.inputBorder}`,
-      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
-      '& .MuiMenuItem-root': {
-        fontSize: '0.875rem',
-        '&:hover': { bgcolor: DRAWER_STYLES.menu.itemHover },
-        '&.Mui-selected': { bgcolor: DRAWER_STYLES.menu.itemSelected },
+  slotProps: {
+    paper: {
+      sx: {
+        bgcolor: DRAWER_STYLES.menu.bg,
+        color: DRAWER_STYLES.text.primary,
+        border: `1px solid ${DRAWER_STYLES.controls.inputBorder}`,
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+        '& .MuiMenuItem-root': {
+          fontSize: '0.875rem',
+          '&:hover': { bgcolor: DRAWER_STYLES.menu.itemHover },
+          '&.Mui-selected': { bgcolor: DRAWER_STYLES.menu.itemSelected },
+        },
       },
     },
   },

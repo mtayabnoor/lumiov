@@ -26,6 +26,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { useAgent, type ChatMessage } from '../../context/AgentContext';
 
 const DRAWER_WIDTH = 420;
+const HEADER_HEIGHT = 50; // Match AppBar height
 
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user';
@@ -289,20 +290,21 @@ export default function AgentChatPanel() {
       anchor="right"
       open={isChatOpen}
       onClose={closeChat}
-      sx={{
-        zIndex: (theme) => theme.zIndex.drawer + 2, // Above AppBar
-      }}
-      PaperProps={{
-        sx: {
-          width: DRAWER_WIDTH,
-          maxWidth: '100vw',
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          bgcolor: 'background.default',
-          borderLeft: '1px solid',
-          borderColor: 'divider',
+      slotProps={{
+        paper: {
+          sx: {
+            width: DRAWER_WIDTH,
+            maxWidth: '100vw',
+            height: `calc(100vh - ${HEADER_HEIGHT}px)`,
+            marginTop: `${HEADER_HEIGHT}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            bgcolor: 'background.default',
+            borderLeft: '1px solid',
+            borderColor: 'divider',
+          },
         },
+        backdrop: { sx: { marginTop: `${HEADER_HEIGHT}px` } },
       }}
     >
       {/* Header */}

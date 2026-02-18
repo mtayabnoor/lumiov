@@ -226,21 +226,21 @@ function ResourceEditor({
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{
-        sx: {
-          width: { xs: '100vw', md: '55vw' },
-          minWidth: { md: '700px' },
-          maxWidth: '1000px',
-          display: 'flex',
-          flexDirection: 'column',
-          bgcolor: 'background.paper',
-          marginTop: `${HEADER_HEIGHT}px`,
-          height: `calc(100vh - ${HEADER_HEIGHT}px)`,
-          borderLeft: 1,
-          borderColor: 'divider',
-        },
-      }}
       slotProps={{
+        paper: {
+          sx: {
+            width: { xs: '100vw', md: '55vw' },
+            minWidth: { md: '700px' },
+            maxWidth: '1000px',
+            display: 'flex',
+            flexDirection: 'column',
+            bgcolor: 'background.paper',
+            marginTop: `${HEADER_HEIGHT}px`,
+            height: `calc(100vh - ${HEADER_HEIGHT}px)`,
+            borderLeft: 1,
+            borderColor: 'divider',
+          },
+        },
         backdrop: { sx: { marginTop: `${HEADER_HEIGHT}px` } },
       }}
     >
