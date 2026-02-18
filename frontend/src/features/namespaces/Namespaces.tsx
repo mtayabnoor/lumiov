@@ -6,9 +6,16 @@ import { Box, CircularProgress, Alert } from '@mui/material';
 import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
 import PageLayout from '../../components/common/PageLayout/PageLayout';
 import { useResource } from '../../hooks/useResource';
+import { useDeleteResource } from '../../hooks/useResource';
+import ResourceDeleteConfirmDialog from '../../components/common/DeleteConfirmDialog/ResourceDeleteConfirmDialog';
+import { useState } from 'react';
 
 function Namespaces() {
   const { data: namespaces, error, loading } = useResource<Namespace>('namespaces');
+  const { deleteResouce, isDeleting } = useDeleteResource();
+
+  const [selectedNamespace, setSelectedNamespace] = useState<Namespace | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const namespaceConfig: ResourceTableConfig = {
     columns: [
@@ -24,28 +31,23 @@ function Namespaces() {
     actions: [{ id: 'delete', label: 'Delete', icon: DeleteIcon }],
   };
 
-  const deleteResource = async (namespace: string, resourceName: string) => {
-    try {
-      const res = await fetch(
-        `http://localhost:3030/api/resource?apiVersion=${encodeURIComponent('v1')}&kind=${encodeURIComponent('Namespace')}&namespace=${encodeURIComponent(namespace)}&name=${encodeURIComponent(resourceName)}`,
-        {
-          method: 'DELETE',
-        },
-      );
-
-      console.log(await res.text());
-    } catch (err) {
-      console.error('Error deleting resource:', err);
+  const confirmDelete = () => {
+    if (selectedNamespace) {
+      deleteResouce({
+        apiVersion: 'v1',
+        kind: 'Namespace',
+        name: selectedNamespace.metadata.name,
+      });
     }
+
+    setSelectedNamespace(null);
+    setDeleteDialogOpen(false);
   };
 
   const handleAction = (actionId: string, row: any) => {
-    const namespace = row.metadata.namespace;
-    const resourceName = row.metadata.name;
+    setSelectedNamespace(row);
     if (actionId === 'delete') {
-      if (window.confirm(`Are you sure you want to delete namespace ${resourceName}?`)) {
-        deleteResource(namespace, resourceName);
-      }
+      setDeleteDialogOpen(true);
     }
   };
 
@@ -72,6 +74,15 @@ function Namespaces() {
         data={namespaces}
         onAction={handleAction}
         resourceType="namespaces"
+      />
+      {/* The Dialog Component - Renders only when podToDelete is set */}
+      <ResourceDeleteConfirmDialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        resourceName={selectedNamespace?.metadata?.name!}
+        resourceKind="Namespace"
+        isDeleting={isDeleting}
       />
     </PageLayout>
   );

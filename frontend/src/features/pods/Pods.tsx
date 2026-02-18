@@ -1,5 +1,5 @@
 import ResourceTable from '../../components/common/Table/ResourceTable';
-import { useResource } from '../../hooks/useResource';
+import { useResource, useDeleteResource } from '../../hooks/useResource';
 import type { Pod } from '../../interfaces/pod';
 import type { ResourceTableConfig } from '../../interfaces/common';
 import EditIcon from '@mui/icons-material/Edit';
@@ -16,7 +16,7 @@ import PodDiagnosisDialog from '../../components/common/PodDiagnosisDialog/PodDi
 import { useAgent } from '../../context/AgentContext';
 import PageLayout from '../../components/common/PageLayout/PageLayout';
 import ResourceEditor from '../../components/common/Editor/ResourceEditor';
-
+import ResourceDeleteConfirmDialog from '../../components/common/DeleteConfirmDialog/ResourceDeleteConfirmDialog';
 // --- Helper Functions (Defined outside the component) ---
 
 const getPodReadyStatus = (pod: Pod) => {
@@ -164,46 +164,18 @@ const getPodMemReq = (pod: Pod) => {
 
 function Pods() {
   const { data: pods, error, loading, socket } = useResource<Pod>('pods');
+  const { deleteResouce, isDeleting } = useDeleteResource();
   const { isConfigured } = useAgent();
 
-  const [execDialogOpen, setExecDialogOpen] = useState(false);
   const [selectedPod, setSelectedPod] = useState<{
     namespace: string;
     podName: string;
-    containers: { name: string }[];
+    containers?: { name: string }[];
     defaultContainer?: string;
   } | null>(null);
-
-  // Logs drawer state
-  const [logsDialogOpen, setLogsDialogOpen] = useState(false);
-  const [selectedLogPod, setSelectedLogPod] = useState<{
-    namespace: string;
-    podName: string;
-    containers: { name: string }[];
-    defaultContainer?: string;
-  } | null>(null);
-
-  // Edit drawer state
-  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
-  const [editingPod, setEditingPod] = useState<{
-    namespace: string;
-    podName: string;
-  } | null>(null);
-
-  // Diagnosis dialog state
-  const [diagnosisOpen, setDiagnosisOpen] = useState(false);
-  const [diagnosingPod, setDiagnosingPod] = useState<{
-    namespace: string;
-    podName: string;
-  } | null>(null);
-
-  const handleDiagnose = (pod: Pod) => {
-    setDiagnosingPod({
-      namespace: pod.metadata.namespace,
-      podName: pod.metadata.name,
-    });
-    setDiagnosisOpen(true);
-  };
+  const [actionType, setActionType] = useState<
+    'exec' | 'logs' | 'edit' | 'diagnosis' | 'delete' | null
+  >(null);
 
   const podConfig: ResourceTableConfig = {
     columns: [
@@ -285,19 +257,12 @@ function Pods() {
     ],
   };
 
-  const deleteResource = async (namespace: string, podName: string) => {
-    try {
-      const res = await fetch(
-        `http://localhost:3030/api/resource?apiVersion=${encodeURIComponent('v1')}&kind=${encodeURIComponent('Pod')}&namespace=${encodeURIComponent(namespace)}&name=${encodeURIComponent(podName)}`,
-        {
-          method: 'DELETE',
-        },
-      );
-
-      console.log(await res.text());
-    } catch (err) {
-      console.error('Error deleting resource:', err);
-    }
+  const handleDiagnose = (pod: Pod) => {
+    setActionType('diagnosis');
+    setSelectedPod({
+      namespace: pod.metadata.namespace,
+      podName: pod.metadata.name,
+    });
   };
 
   const handleAction = (actionId: string, pod: Pod) => {
@@ -309,33 +274,38 @@ function Pods() {
       })) || [];
     const defaultContainer = containers[0]?.name;
 
+    setSelectedPod({ namespace, podName, containers, defaultContainer });
+
     if (actionId === 'edit') {
-      setEditingPod({ namespace, podName });
-      setEditDrawerOpen(true);
+      setActionType('edit');
     }
     if (actionId === 'delete') {
-      if (window.confirm(`Are you sure you want to delete pod ${podName}?`)) {
-        deleteResource(namespace, podName);
-      }
+      setActionType('delete');
     }
     if (actionId === 'logs') {
-      setSelectedLogPod({ namespace, podName, containers, defaultContainer });
-      setLogsDialogOpen(true);
+      setActionType('logs');
     }
     if (actionId === 'exec') {
-      setSelectedPod({ namespace, podName, containers, defaultContainer });
-      setExecDialogOpen(true);
+      setActionType('exec');
     }
   };
 
-  const handleCloseExecDialog = () => {
-    setExecDialogOpen(false);
+  const handleClose = () => {
+    setActionType(null);
     setSelectedPod(null);
   };
 
-  const handleCloseLogsDialog = () => {
-    setLogsDialogOpen(false);
-    setSelectedLogPod(null);
+  const confirmDelete = () => {
+    if (selectedPod) {
+      deleteResouce({
+        apiVersion: 'v1',
+        kind: 'Pod',
+        namespace: selectedPod.namespace,
+        name: selectedPod.podName,
+      });
+    }
+
+    handleClose();
   };
 
   if (loading)
@@ -354,53 +324,57 @@ function Pods() {
   return (
     <PageLayout title="Pods" description="Real-time monitoring dashboard for pods">
       <ResourceTable config={podConfig} data={pods} onAction={handleAction} />
-      {selectedPod && (
+      {selectedPod && actionType === 'exec' && (
         <PodExecDrawer
-          open={execDialogOpen}
-          onClose={handleCloseExecDialog}
+          open={true}
+          onClose={handleClose}
           namespace={selectedPod.namespace}
           podName={selectedPod.podName}
-          containers={selectedPod.containers}
+          containers={selectedPod.containers!}
           defaultContainer={selectedPod.defaultContainer}
           socket={socket}
         />
       )}
-      {selectedLogPod && (
+      {selectedPod && actionType === 'logs' && (
         <PodLogsDrawer
-          open={logsDialogOpen}
-          onClose={handleCloseLogsDialog}
-          namespace={selectedLogPod.namespace}
-          podName={selectedLogPod.podName}
-          containers={selectedLogPod.containers}
-          defaultContainer={selectedLogPod.defaultContainer}
+          open={true}
+          onClose={handleClose}
+          namespace={selectedPod.namespace}
+          podName={selectedPod.podName}
+          containers={selectedPod.containers!}
+          defaultContainer={selectedPod.defaultContainer}
           socket={socket}
         />
       )}
 
-      {editingPod && (
+      {selectedPod && actionType === 'edit' && (
         <ResourceEditor
-          open={editDrawerOpen}
-          onClose={() => {
-            setEditDrawerOpen(false);
-            setEditingPod(null);
-          }}
+          open={true}
+          onClose={handleClose}
           apiVersion="v1"
           kind="Pod"
-          namespace={editingPod.namespace}
-          name={editingPod.podName}
+          namespace={selectedPod.namespace}
+          name={selectedPod.podName}
         />
       )}
 
-      {/* AI Diagnosis Dialog */}
-      {diagnosingPod && (
+      {selectedPod && actionType === 'diagnosis' && (
         <PodDiagnosisDialog
-          open={diagnosisOpen}
-          onClose={() => {
-            setDiagnosisOpen(false);
-            setDiagnosingPod(null);
-          }}
-          namespace={diagnosingPod.namespace}
-          podName={diagnosingPod.podName}
+          open={true}
+          onClose={handleClose}
+          namespace={selectedPod.namespace}
+          podName={selectedPod.podName}
+        />
+      )}
+
+      {selectedPod && actionType === 'delete' && (
+        <ResourceDeleteConfirmDialog
+          open={true}
+          onClose={handleClose}
+          onConfirm={confirmDelete}
+          resourceName={selectedPod?.podName || ''}
+          resourceKind="Pod"
+          isDeleting={isDeleting}
         />
       )}
     </PageLayout>
