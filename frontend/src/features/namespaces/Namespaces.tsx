@@ -80,7 +80,7 @@ function Namespaces() {
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={confirmDelete}
-        resourceName={selectedNamespace?.metadata?.name!}
+        resourceName={selectedNamespace!.metadata.name}
         resourceKind="Namespace"
         isDeleting={isDeleting}
       />

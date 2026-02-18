@@ -26,7 +26,15 @@
     "release:dry-run": "commit-and-tag-version --dry-run",
     "prepare": "husky install",
     "commitlint": "commitlint --edit",
-    "format": "prettier --write \".\""
+    "format": "prettier --write \".\"",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:electron": "cd electron && npm run lint",
+    "lint:all": "npm run lint:frontend && npm run lint:backend && npm run lint:electron",
+    "type-check:frontend": "cd frontend && npm run type-check",
+    "type-check:backend": "cd backend && npm run type-check",
+    "type-check:electron": "cd electron && npm run type-check",
+    "type-check:all": "npm run type-check:frontend && npm run type-check:backend && npm run type-check:electron"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.4.1",
