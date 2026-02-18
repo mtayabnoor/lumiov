@@ -119,3 +119,27 @@ export const useResource = <T extends ResourceWithMetadata>(resource: ResourceTy
 
   return { data, error, loading, socket };
 };
+
+interface DeleteParams {
+  apiVersion: string;
+  kind: string;
+  name: string;
+  namespace?: string;
+}
+
+export const useDeleteResource = () => {
+  const [response, setResponse] = useState<Response | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteResouce = async ({ apiVersion, kind, name, namespace }: DeleteParams) => {
+    setIsDeleting(true);
+    const response = await fetch(
+      `http://localhost:3030/api/resource?apiVersion=${encodeURIComponent(apiVersion)}&kind=${encodeURIComponent(kind)}&namespace=${encodeURIComponent(namespace ?? '')}&name=${encodeURIComponent(name)}`,
+      {
+        method: 'DELETE',
+      },
+    );
+    setIsDeleting(false);
+    setResponse(response);
+  };
+  return { deleteResouce, response, isDeleting };
+};
