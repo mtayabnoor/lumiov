@@ -67,6 +67,7 @@ export default {
     [
       '@semantic-release/git',
       {
+        successComment: false,
         assets: [
           'package.json',
           'package-lock.json',
