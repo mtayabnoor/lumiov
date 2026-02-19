@@ -1,6 +1,6 @@
 export interface ConfigMap {
-  apiVersion: "v1";
-  kind: "ConfigMap";
+  apiVersion: 'v1';
+  kind: 'ConfigMap';
   metadata: {
     name: string;
     namespace: string;

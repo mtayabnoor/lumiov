@@ -8,18 +8,12 @@ export function createScaleDeploymentTool(): DynamicStructuredTool {
     description: 'Scale a deployment in a namespace',
     schema: z.object({
       name: z.string().describe('The name of the deployment to scale'),
-      namespace: z
-        .string()
-        .describe('The namespace where the deployment is located'),
+      namespace: z.string().describe('The namespace where the deployment is located'),
       replicas: z.number().describe('The number of replicas to scale to'),
     }),
     func: async ({ name, namespace, replicas }) => {
       try {
-        const result = await k8sService.scaleDeployment(
-          name,
-          namespace,
-          replicas,
-        );
+        const result = await k8sService.scaleDeployment(name, namespace, replicas);
         return result;
       } catch (error: any) {
         return JSON.stringify({

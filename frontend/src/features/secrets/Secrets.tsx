@@ -1,17 +1,17 @@
-import { useResource } from "../../hooks/useResource";
-import { ResourceTableConfig } from "../../interfaces/common";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ResourceTable from "../../components/common/Table/ResourceTable";
-import { Secret } from "../../interfaces/secret";
-import { Box, CircularProgress, Alert } from "@mui/material";
-import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import ResourceEditor from "../../components/common/Editor/ResourceEditor";
-import { useState } from "react";
+import { useResource } from '../../hooks/useResource';
+import type { ResourceTableConfig } from '../../interfaces/common';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ResourceTable from '../../components/common/Table/ResourceTable';
+import type { Secret } from '../../interfaces/secret';
+import { Box, CircularProgress, Alert } from '@mui/material';
+import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import { useState } from 'react';
 
 function Secrets() {
-  const { data: secrets, error, loading } = useResource<Secret>("secrets");
+  const { data: secrets, error, loading } = useResource<Secret>('secrets');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -21,34 +21,34 @@ function Secrets() {
 
   const config: ResourceTableConfig = {
     columns: [
-      { key: "metadata.namespace", header: "NAMESPACE" },
-      { key: "metadata.name", header: "NAME" },
+      { key: 'metadata.namespace', header: 'NAMESPACE' },
+      { key: 'metadata.name', header: 'NAME' },
       {
-        key: "type",
-        header: "TYPE",
-        accessor: (row: Secret) => row.type ?? "Opaque",
+        key: 'type',
+        header: 'TYPE',
+        accessor: (row: Secret) => row.type ?? 'Opaque',
       },
       {
-        key: "data",
-        header: "DATA",
+        key: 'data',
+        header: 'DATA',
         accessor: (row: Secret) => Object.keys(row.data ?? {}).length,
       },
       {
-        key: "age",
-        header: "AGE",
+        key: 'age',
+        header: 'AGE',
         accessor: (row: Secret) => (
           <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
         ),
       },
     ],
     actions: [
-      { id: "edit", label: "Edit", icon: EditIcon },
-      { id: "delete", label: "Delete", icon: DeleteIcon },
+      { id: 'edit', label: 'Edit', icon: EditIcon },
+      { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
 
   const handleAction = (actionId: string, row: Secret) => {
-    if (actionId === "edit") {
+    if (actionId === 'edit') {
       setEditingResource({
         namespace: row.metadata.namespace,
         name: row.metadata.name,
@@ -59,7 +59,7 @@ function Secrets() {
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );
@@ -71,10 +71,7 @@ function Secrets() {
     );
 
   return (
-    <PageLayout
-      title="Secrets"
-      description="Real-time monitoring dashboard for secrets"
-    >
+    <PageLayout title="Secrets" description="Real-time monitoring dashboard for secrets">
       <ResourceTable config={config} data={secrets} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

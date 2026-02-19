@@ -440,11 +440,11 @@ electron/
 
 ### Version Control & Quality
 
-| Tool                 | Version | Purpose                            |
-| -------------------- | ------- | ---------------------------------- |
-| **Husky**            | 9.0.0   | Git hooks management               |
-| **Commitlint**       | 18.6.0  | Commit message validation          |
-| **Standard-Version** | 9.5.0   | Automated versioning and changelog |
+| Tool                       | Version | Purpose                            |
+| -------------------------- | ------- | ---------------------------------- |
+| **Husky**                  | 9.0.0   | Git hooks management               |
+| **Commitlint**             | 18.6.0  | Commit message validation          |
+| **Commit-and-tag-version** | 12.6.1  | Automated versioning and changelog |
 
 ### Commit Convention: **Conventional Commits**
 
@@ -487,8 +487,9 @@ electron/
   "package": "npm run build && electron-builder",
   "clean": "rimraf dist release",
 
-  "release": "standard-version",
-  "release:dry-run": "standard-version --dry-run"
+  "release": "commit-and-tag-version --skip.bump --skip.commit --skip.tag",
+  "release:rc": "commit-and-tag-version --prerelease rc --skip.commit --skip.tag",
+  "release:dry-run": "commit-and-tag-version --dry-run"
 }
 ```
 
@@ -523,7 +524,7 @@ electron/
 
 1. Security audit (npm audit)
 2. Build all components
-3. Bump version automatically (standard-version)
+3. Bump version automatically (commit-and-tag-version)
 4. Generate changelog
 5. Push version commit and tag
 6. Build Electron app (electron-builder)
@@ -608,7 +609,7 @@ lumiov/
     "electron-builder": "26.7.0",
     "husky": "^9.0.0",
     "rimraf": "^5.0.0",
-    "standard-version": "^9.5.0",
+    "commit-and-tag-version": "12.6.1",
     "typescript": "^5.3.0",
     "wait-on": "^7.2.0"
   }

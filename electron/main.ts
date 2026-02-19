@@ -1,9 +1,9 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
-import path from "path";
-import { fileURLToPath } from "url";
-import updater from "electron-updater";
-import { UpdateDownloadedEvent } from "electron-updater";
-import { launchBackend, stopBackend } from "./backend-launcher.js";
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import updater from 'electron-updater';
+import { UpdateDownloadedEvent } from 'electron-updater';
+import { launchBackend, stopBackend } from './backend-launcher.js';
 
 app.disableHardwareAcceleration();
 
@@ -25,7 +25,7 @@ const hasLock = app.requestSingleInstanceLock();
 if (!hasLock) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
+  app.on('second-instance', () => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
@@ -45,20 +45,20 @@ if (!hasLock) {
       }
     } catch (e: any) {
       console.error(e);
-      dialog.showErrorBox("Startup Error", e.message);
+      dialog.showErrorBox('Startup Error', e.message);
       app.quit();
     }
   });
 }
 
 function createWindow() {
-  const appRoot = path.resolve(app.getAppPath(), "..");
+  const appRoot = path.resolve(app.getAppPath(), '..');
 
   let iconPath;
   if (isDev) {
-    iconPath = path.join(appRoot, "frontend", "public", "lumiov.ico");
+    iconPath = path.join(appRoot, 'frontend', 'public', 'lumiov.ico');
   } else {
-    iconPath = path.join(process.resourcesPath, "lumiov.ico");
+    iconPath = path.join(process.resourcesPath, 'lumiov.ico');
   }
 
   mainWindow = new BrowserWindow({
@@ -66,44 +66,42 @@ function createWindow() {
     height: 900,
     show: false,
     icon: iconPath,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: '#1a1a1a',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
-      preload: path.join(__dirname, "preload.cjs"),
+      preload: path.join(__dirname, 'preload.cjs'),
     },
   });
 
-  mainWindow.once("ready-to-show", () => {
+  mainWindow.once('ready-to-show', () => {
     mainWindow!.show();
   });
 
   if (isDev) {
-    mainWindow.loadFile(path.join(appRoot, "frontend", "dist", "index.html"));
+    mainWindow.loadFile(path.join(appRoot, 'frontend', 'dist', 'index.html'));
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(
-      path.join(process.resourcesPath, "frontend", "index.html"),
-    );
+    mainWindow.loadFile(path.join(process.resourcesPath, 'frontend', 'index.html'));
   }
 }
 
 // ═══════════════ Auto-Update Flow ═══════════════
 // Step 1: Update found → ask user if they want to download
-autoUpdater.on("update-available", (info) => {
+autoUpdater.on('update-available', (info) => {
   if (!mainWindow) return;
 
-  const version = info.version || "unknown";
+  const version = info.version || 'unknown';
 
   dialog
     .showMessageBox(mainWindow, {
-      type: "info",
-      title: "Update Available",
+      type: 'info',
+      title: 'Update Available',
       message: `A new version (v${version}) is available.`,
       detail:
-        "Would you like to download it now? The download happens in the background — you can keep working.",
-      buttons: ["Download", "Skip"],
+        'Would you like to download it now? The download happens in the background — you can keep working.',
+      buttons: ['Download', 'Skip'],
       defaultId: 0,
       cancelId: 1,
     })
@@ -115,7 +113,7 @@ autoUpdater.on("update-available", (info) => {
 });
 
 // Step 2: Download progress → send to renderer (optional: show in title bar)
-autoUpdater.on("download-progress", (progress) => {
+autoUpdater.on('download-progress', (progress) => {
   const percent = Math.round(progress.percent);
   if (mainWindow) {
     mainWindow.setTitle(`Lumiov — Downloading update ${percent}%`);
@@ -124,25 +122,30 @@ autoUpdater.on("download-progress", (progress) => {
 });
 
 // Step 3: Download complete → ask to restart
-autoUpdater.on("update-downloaded", (info: UpdateDownloadedEvent) => {
+autoUpdater.on('update-downloaded', (info: UpdateDownloadedEvent) => {
   if (!mainWindow) return;
 
   // Reset title bar
-  mainWindow.setTitle("Lumiov");
+  mainWindow.setTitle('Lumiov');
   mainWindow.setProgressBar(-1); // Remove progress bar
 
   const releaseNotes =
-    typeof info.releaseNotes === "string"
+    typeof info.releaseNotes === 'string'
       ? info.releaseNotes
-      : "New features and bug fixes.";
+      : 'New features and bug fixes.';
 
   dialog
     .showMessageBox(mainWindow, {
-      type: "info",
-      title: "Update Ready",
+      type: 'info',
+      title: 'Update Ready',
       message: `Version ${info.version} has been downloaded.`,
-      detail: releaseNotes,
-      buttons: ["Restart Now", "Later"],
+      detail: releaseNotes
+        .replace(/<h\d[^>]*>/g, '\n\n')
+        .replace(/<li[^>]*>/g, '\n• ')
+        .replace(/<br[^>]*>/g, '\n')
+        .replace(/<[^>]+>/g, '')
+        .trim(),
+      buttons: ['Restart Now', 'Later'],
       defaultId: 0,
       cancelId: 1,
     })
@@ -159,12 +162,12 @@ autoUpdater.on("update-downloaded", (info: UpdateDownloadedEvent) => {
     });
 });
 
-autoUpdater.on("error", (err) => {
-  console.error("Auto-update error:", err);
+autoUpdater.on('error', (err) => {
+  console.error('Auto-update error:', err);
 });
 
 // ─── Cleanup ───
-app.on("before-quit", async (e) => {
+app.on('before-quit', async (e) => {
   if (backendProcess && !isQuitting) {
     e.preventDefault();
     isQuitting = true;
@@ -174,7 +177,7 @@ app.on("before-quit", async (e) => {
   }
 });
 
-ipcMain.handle("get-platform", () => ({
+ipcMain.handle('get-platform', () => ({
   platform: process.platform,
   version: app.getVersion(),
 }));

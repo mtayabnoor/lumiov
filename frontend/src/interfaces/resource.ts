@@ -1,4 +1,4 @@
-import { Metadata } from "./metadata.js";
+import { Metadata } from './metadata.js';
 
 export interface K8sResource {
   apiVersion: string;

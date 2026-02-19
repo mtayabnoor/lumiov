@@ -1,6 +1,6 @@
 export interface Pod {
-  apiVersion: "v1";
-  kind: "Pod";
+  apiVersion: 'v1';
+  kind: 'Pod';
   metadata: {
     name: string;
     namespace: string;
@@ -30,11 +30,11 @@ export interface Pod {
 }
 
 export enum PodPhase {
-  Running = "Running",
-  Pending = "Pending",
-  Failed = "Failed",
-  Succeeded = "Succeeded",
-  Unknown = "Unknown",
+  Running = 'Running',
+  Pending = 'Pending',
+  Failed = 'Failed',
+  Succeeded = 'Succeeded',
+  Unknown = 'Unknown',
 }
 
 export interface Container {

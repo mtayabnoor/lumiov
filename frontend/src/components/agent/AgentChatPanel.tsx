@@ -4,7 +4,7 @@
  * Sliding drawer panel for chatting with the AI cluster assistant.
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from 'react';
 import {
   Drawer,
   Box,
@@ -15,28 +15,29 @@ import {
   Divider,
   Paper,
   CircularProgress,
-} from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import SettingsIcon from "@mui/icons-material/Settings";
-import CloseIcon from "@mui/icons-material/Close";
-import PsychologyIcon from "@mui/icons-material/Psychology";
-import PersonIcon from "@mui/icons-material/Person";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import { useAgent, ChatMessage } from "../../context/AgentContext";
+} from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import SettingsIcon from '@mui/icons-material/Settings';
+import CloseIcon from '@mui/icons-material/Close';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import PersonIcon from '@mui/icons-material/Person';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { useAgent, type ChatMessage } from '../../context/AgentContext';
 
 const DRAWER_WIDTH = 420;
+const HEADER_HEIGHT = 50; // Match AppBar height
 
 function MessageBubble({ message }: { message: ChatMessage }) {
-  const isUser = message.role === "user";
-  const isError = message.role === "error";
+  const isUser = message.role === 'user';
+  const isError = message.role === 'error';
   const { isConfigured } = useAgent();
 
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: isUser ? "row-reverse" : "row",
+        display: 'flex',
+        flexDirection: isUser ? 'row-reverse' : 'row',
         gap: 1.5,
         mb: 2,
       }}
@@ -46,31 +47,27 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         sx={{
           width: 32,
           height: 32,
-          borderRadius: "8px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           flexShrink: 0,
-          background: isUser
-            ? "primary.main"
-            : isError
-              ? "error.main"
-              : "primary.main",
+          background: isUser ? 'primary.main' : isError ? 'error.main' : 'primary.main',
         }}
       >
         {isUser ? (
-          <PersonIcon sx={{ fontSize: 18, color: "text.primary" }} />
+          <PersonIcon sx={{ fontSize: 18, color: 'text.primary' }} />
         ) : isError ? (
-          <ErrorOutlineIcon sx={{ fontSize: 18, color: "text.primary" }} />
+          <ErrorOutlineIcon sx={{ fontSize: 18, color: 'text.primary' }} />
         ) : (
           <PsychologyIcon
             fontSize="medium"
             sx={{
-              color: isConfigured ? "#b42323ff" : "text.primary",
+              color: isConfigured ? '#b42323ff' : 'text.primary',
               filter: isConfigured
-                ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
-                : "none",
-              transition: "all 0.3s ease",
+                ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
+                : 'none',
+              transition: 'all 0.3s ease',
             }}
           />
         )}
@@ -81,24 +78,20 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         elevation={0}
         sx={{
           p: 1.5,
-          maxWidth: "85%",
+          maxWidth: '85%',
           borderRadius: 2,
-          bgcolor: isUser
-            ? "primary.main"
-            : isError
-              ? "error.light"
-              : "background.paper",
-          color: isUser ? "primary.contrastText" : "text.primary",
-          border: isUser || isError ? "none" : "1px solid",
-          borderColor: "divider",
+          bgcolor: isUser ? 'primary.main' : isError ? 'error.light' : 'background.paper',
+          color: isUser ? 'primary.contrastText' : 'text.primary',
+          border: isUser || isError ? 'none' : '1px solid',
+          borderColor: 'divider',
         }}
       >
         <Box
           sx={{
-            "& p": { m: 0, mb: 1, "&:last-child": { mb: 0 } },
-            "& strong": { fontWeight: 600 },
+            '& p': { m: 0, mb: 1, '&:last-child': { mb: 0 } },
+            '& strong': { fontWeight: 600 },
             lineHeight: 1.6,
-            fontSize: "0.875rem",
+            fontSize: '0.875rem',
           }}
         >
           {isUser ? (
@@ -110,15 +103,15 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         <Typography
           variant="caption"
           sx={{
-            display: "block",
+            display: 'block',
             mt: 0.5,
             opacity: 0.7,
-            textAlign: isUser ? "right" : "left",
+            textAlign: isUser ? 'right' : 'left',
           }}
         >
           {message.timestamp.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
+            hour: '2-digit',
+            minute: '2-digit',
           })}
         </Typography>
       </Paper>
@@ -129,7 +122,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 // Helper component to format AI responses
 function FormattedMessage({ content }: { content: string }) {
   // Parse and format the message
-  const lines = content.split("\n");
+  const lines = content.split('\n');
 
   return (
     <>
@@ -142,24 +135,24 @@ function FormattedMessage({ content }: { content: string }) {
         }
 
         // Bold header (e.g., **Healthy:**)
-        if (trimmed.startsWith("**") && trimmed.endsWith(":**")) {
+        if (trimmed.startsWith('**') && trimmed.endsWith(':**')) {
           return (
             <Typography
               key={i}
               variant="subtitle2"
               sx={{ fontWeight: 600, mt: i > 0 ? 1 : 0, mb: 0.5 }}
             >
-              {trimmed.replace(/\*\*/g, "").replace(/:$/, "")}
+              {trimmed.replace(/\*\*/g, '').replace(/:$/, '')}
             </Typography>
           );
         }
 
         // Bullet point
-        if (trimmed.startsWith("•") || trimmed.startsWith("-")) {
-          const bulletContent = trimmed.replace(/^[•-]\s*/, "");
+        if (trimmed.startsWith('•') || trimmed.startsWith('-')) {
+          const bulletContent = trimmed.replace(/^[•-]\s*/, '');
           return (
-            <Box key={i} sx={{ display: "flex", gap: 1, mb: 0.25 }}>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Box key={i} sx={{ display: 'flex', gap: 1, mb: 0.25 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 •
               </Typography>
               <Typography variant="body2">
@@ -188,7 +181,7 @@ function FormattedText({ text }: { text: string }) {
   return (
     <>
       {parts.map((part, i) => {
-        if (part.startsWith("**") && part.endsWith("**")) {
+        if (part.startsWith('**') && part.endsWith('**')) {
           return (
             <Box component="strong" key={i} sx={{ fontWeight: 600 }}>
               {part.slice(2, -2)}
@@ -204,26 +197,26 @@ function FormattedText({ text }: { text: string }) {
 function TypingIndicator() {
   const { isConfigured } = useAgent();
   return (
-    <Box sx={{ display: "flex", gap: 1.5, mb: 2 }}>
+    <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
       <Box
         sx={{
           width: 32,
           height: 32,
-          borderRadius: "8px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "primary.main",
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'primary.main',
         }}
       >
         <PsychologyIcon
           fontSize="medium"
           sx={{
-            color: isConfigured ? "#b42323ff" : "text.primary",
+            color: isConfigured ? '#b42323ff' : 'text.primary',
             filter: isConfigured
-              ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
-              : "none",
-            transition: "all 0.3s ease",
+              ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
+              : 'none',
+            transition: 'all 0.3s ease',
           }}
         />
       </Box>
@@ -232,11 +225,11 @@ function TypingIndicator() {
         sx={{
           p: 1.5,
           borderRadius: 2,
-          bgcolor: "background.paper",
-          border: "1px solid",
-          borderColor: "divider",
-          display: "flex",
-          alignItems: "center",
+          bgcolor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
+          display: 'flex',
+          alignItems: 'center',
           gap: 1,
         }}
       >
@@ -260,14 +253,14 @@ export default function AgentChatPanel() {
     openConfigModal,
   } = useAgent();
 
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isConfigured } = useAgent();
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
   // Focus input when panel opens
@@ -281,12 +274,12 @@ export default function AgentChatPanel() {
     if (!input.trim() || isLoading) return;
 
     const message = input;
-    setInput("");
+    setInput('');
     await sendMessage(message);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -297,20 +290,21 @@ export default function AgentChatPanel() {
       anchor="right"
       open={isChatOpen}
       onClose={closeChat}
-      sx={{
-        zIndex: (theme) => theme.zIndex.drawer + 2, // Above AppBar
-      }}
-      PaperProps={{
-        sx: {
-          width: DRAWER_WIDTH,
-          maxWidth: "100vw",
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          bgcolor: "background.default",
-          borderLeft: "1px solid",
-          borderColor: "divider",
+      slotProps={{
+        paper: {
+          sx: {
+            width: DRAWER_WIDTH,
+            maxWidth: '100vw',
+            height: `calc(100vh - ${HEADER_HEIGHT}px)`,
+            marginTop: `${HEADER_HEIGHT}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            bgcolor: 'background.default',
+            borderLeft: '1px solid',
+            borderColor: 'divider',
+          },
         },
+        backdrop: { sx: { marginTop: `${HEADER_HEIGHT}px` } },
       }}
     >
       {/* Header */}
@@ -318,23 +312,23 @@ export default function AgentChatPanel() {
         sx={{
           p: 1.5,
           minHeight: 50,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          bgcolor: "primary.background",
-          color: "primary.contrastText",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          bgcolor: 'primary.background',
+          color: 'primary.contrastText',
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box>
             <PsychologyIcon
               fontSize="medium"
               sx={{
-                color: isConfigured ? "#b42323ff" : "text.primary",
+                color: isConfigured ? '#b42323ff' : 'text.primary',
                 filter: isConfigured
-                  ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
-                  : "none",
-                transition: "all 0.3s ease",
+                  ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
+                  : 'none',
+                transition: 'all 0.3s ease',
               }}
             />
           </Box>
@@ -342,11 +336,11 @@ export default function AgentChatPanel() {
             <Typography
               variant="subtitle1"
               fontWeight={600}
-              sx={{ color: "text.primary" }}
+              sx={{ color: 'text.primary' }}
             >
               Lumiov AI
             </Typography>
-            <Typography variant="caption" sx={{ color: "text.primary" }}>
+            <Typography variant="caption" sx={{ color: 'text.primary' }}>
               Cluster Assistant
             </Typography>
           </Box>
@@ -357,7 +351,7 @@ export default function AgentChatPanel() {
             <IconButton
               size="small"
               onClick={openConfigModal}
-              sx={{ color: "text.primary" }}
+              sx={{ color: 'text.primary' }}
             >
               <SettingsIcon fontSize="small" />
             </IconButton>
@@ -366,17 +360,13 @@ export default function AgentChatPanel() {
             <IconButton
               size="small"
               onClick={clearHistory}
-              sx={{ color: "text.primary" }}
+              sx={{ color: 'text.primary' }}
             >
               <DeleteOutlineIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Close">
-            <IconButton
-              size="small"
-              onClick={closeChat}
-              sx={{ color: "text.primary" }}
-            >
+            <IconButton size="small" onClick={closeChat} sx={{ color: 'text.primary' }}>
               <CloseIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -387,33 +377,33 @@ export default function AgentChatPanel() {
       <Box
         sx={{
           flexGrow: 1,
-          overflowY: "auto",
+          overflowY: 'auto',
           p: 2,
-          display: "flex",
-          flexDirection: "column",
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         {messages.length === 0 ? (
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
               opacity: 0.6,
-              textAlign: "center",
+              textAlign: 'center',
               px: 3,
             }}
           >
             <PsychologyIcon
               fontSize="medium"
               sx={{
-                color: isConfigured ? "#b42323ff" : "text.primary",
+                color: isConfigured ? '#b42323ff' : 'text.primary',
                 filter: isConfigured
-                  ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
-                  : "none",
-                transition: "all 0.3s ease",
+                  ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
+                  : 'none',
+                transition: 'all 0.3s ease',
               }}
             />
             <Typography variant="body1" fontWeight={500} gutterBottom>
@@ -461,12 +451,10 @@ export default function AgentChatPanel() {
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading}
                   sx={{
-                    bgcolor: input.trim() ? "primary.main" : "transparent",
-                    color: input.trim()
-                      ? "primary.contrastText"
-                      : "text.secondary",
-                    "&:hover": {
-                      bgcolor: input.trim() ? "primary.dark" : "transparent",
+                    bgcolor: input.trim() ? 'primary.main' : 'transparent',
+                    color: input.trim() ? 'primary.contrastText' : 'text.secondary',
+                    '&:hover': {
+                      bgcolor: input.trim() ? 'primary.dark' : 'transparent',
                     },
                   }}
                 >
@@ -476,7 +464,7 @@ export default function AgentChatPanel() {
             },
           }}
           sx={{
-            "& .MuiOutlinedInput-root": {
+            '& .MuiOutlinedInput-root': {
               borderRadius: 3,
               pr: 0.5,
             },

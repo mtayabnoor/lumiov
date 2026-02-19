@@ -1,6 +1,6 @@
 export interface CronJob {
-  apiVersion: "batch/v1";
-  kind: "CronJob";
+  apiVersion: 'batch/v1';
+  kind: 'CronJob';
   metadata: {
     name: string;
     namespace: string;
@@ -12,7 +12,7 @@ export interface CronJob {
   };
   spec: {
     schedule: string;
-    concurrencyPolicy?: "Allow" | "Forbid" | "Replace";
+    concurrencyPolicy?: 'Allow' | 'Forbid' | 'Replace';
     suspend?: boolean;
     successfulJobsHistoryLimit?: number;
     failedJobsHistoryLimit?: number;

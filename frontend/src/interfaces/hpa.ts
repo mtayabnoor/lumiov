@@ -1,6 +1,6 @@
 export interface HorizontalPodAutoscaler {
-  apiVersion: "autoscaling/v1";
-  kind: "HorizontalPodAutoscaler";
+  apiVersion: 'autoscaling/v1';
+  kind: 'HorizontalPodAutoscaler';
   metadata: {
     name: string;
     namespace: string;

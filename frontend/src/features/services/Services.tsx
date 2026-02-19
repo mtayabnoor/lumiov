@@ -1,17 +1,17 @@
-import { useResource } from "../../hooks/useResource";
-import { ResourceTableConfig } from "../../interfaces/common";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ResourceTable from "../../components/common/Table/ResourceTable";
-import { Service } from "../../interfaces/service";
-import { Box, CircularProgress, Alert } from "@mui/material";
-import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import ResourceEditor from "../../components/common/Editor/ResourceEditor";
-import { useState } from "react";
+import { useResource } from '../../hooks/useResource';
+import type { ResourceTableConfig } from '../../interfaces/common';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ResourceTable from '../../components/common/Table/ResourceTable';
+import type { Service } from '../../interfaces/service';
+import { Box, CircularProgress, Alert } from '@mui/material';
+import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import { useState } from 'react';
 
 function Services() {
-  const { data: services, error, loading } = useResource<Service>("services");
+  const { data: services, error, loading } = useResource<Service>('services');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -21,60 +21,58 @@ function Services() {
 
   const config: ResourceTableConfig = {
     columns: [
-      { key: "metadata.namespace", header: "NAMESPACE" },
-      { key: "metadata.name", header: "NAME" },
+      { key: 'metadata.namespace', header: 'NAMESPACE' },
+      { key: 'metadata.name', header: 'NAME' },
       {
-        key: "type",
-        header: "TYPE",
-        accessor: (row: Service) => row.spec?.type ?? "ClusterIP",
+        key: 'type',
+        header: 'TYPE',
+        accessor: (row: Service) => row.spec?.type ?? 'ClusterIP',
       },
       {
-        key: "clusterIP",
-        header: "CLUSTER-IP",
-        accessor: (row: Service) => row.spec?.clusterIP ?? "-",
+        key: 'clusterIP',
+        header: 'CLUSTER-IP',
+        accessor: (row: Service) => row.spec?.clusterIP ?? '-',
       },
       {
-        key: "externalIP",
-        header: "EXTERNAL-IP",
+        key: 'externalIP',
+        header: 'EXTERNAL-IP',
         accessor: (row: Service) => {
           const ingress = row.status?.loadBalancer?.ingress;
-          if (ingress?.length)
-            return ingress.map((i) => i.ip || i.hostname).join(", ");
-          if (row.spec?.externalIPs?.length)
-            return row.spec.externalIPs.join(", ");
-          return "<none>";
+          if (ingress?.length) return ingress.map((i) => i.ip || i.hostname).join(', ');
+          if (row.spec?.externalIPs?.length) return row.spec.externalIPs.join(', ');
+          return '<none>';
         },
       },
       {
-        key: "ports",
-        header: "PORT(S)",
+        key: 'ports',
+        header: 'PORT(S)',
         accessor: (row: Service) => {
-          if (!row.spec?.ports?.length) return "-";
+          if (!row.spec?.ports?.length) return '-';
           return row.spec.ports
             .map((p) => {
-              let s = `${p.port}/${p.protocol ?? "TCP"}`;
+              let s = `${p.port}/${p.protocol ?? 'TCP'}`;
               if (p.nodePort) s += `:${p.nodePort}`;
               return s;
             })
-            .join(", ");
+            .join(', ');
         },
       },
       {
-        key: "age",
-        header: "AGE",
+        key: 'age',
+        header: 'AGE',
         accessor: (row: Service) => (
           <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
         ),
       },
     ],
     actions: [
-      { id: "edit", label: "Edit", icon: EditIcon },
-      { id: "delete", label: "Delete", icon: DeleteIcon },
+      { id: 'edit', label: 'Edit', icon: EditIcon },
+      { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
 
   const handleAction = (actionId: string, row: Service) => {
-    if (actionId === "edit") {
+    if (actionId === 'edit') {
       setEditingResource({
         namespace: row.metadata.namespace,
         name: row.metadata.name,
@@ -85,7 +83,7 @@ function Services() {
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );

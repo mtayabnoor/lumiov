@@ -5,19 +5,13 @@
  * Handles API token configuration and chat panel visibility.
  */
 
-import {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-} from "react";
-import { useSocket } from "../hooks/useSocket";
+import { createContext, useContext, useState, type ReactNode, useEffect } from 'react';
+import { useSocket } from '../hooks/useSocket';
 
 // Message types for the chat
 export interface ChatMessage {
   id: string;
-  role: "user" | "assistant" | "error";
+  role: 'user' | 'assistant' | 'error';
   content: string;
   timestamp: Date;
 }
@@ -46,20 +40,18 @@ interface AgentContextType {
   clearHistory: () => void;
 
   // Configuration
-  configureAgent: (
-    apiKey: string,
-  ) => Promise<{ success: boolean; error?: string }>;
+  configureAgent: (apiKey: string) => Promise<{ success: boolean; error?: string }>;
   resetConfiguration: () => void;
 }
 
 const AgentContext = createContext<AgentContextType | undefined>(undefined);
 
-const API_KEY_STORAGE_KEY = "lumiov-agent-api-key";
+const API_KEY_STORAGE_KEY = 'lumiov-agent-api-key';
 
 export function useAgent() {
   const context = useContext(AgentContext);
   if (!context) {
-    throw new Error("useAgent must be used within AgentProvider");
+    throw new Error('useAgent must be used within AgentProvider');
   }
   return context;
 }
@@ -85,8 +77,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   // Generate unique message IDs
-  const generateId = () =>
-    `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   // Try to restore configuration on mount
   useEffect(() => {
@@ -94,7 +85,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
     if (storedKey && socket) {
       // Attempt to reconfigure with stored key
       socket.emit(
-        "agent:configure",
+        'agent:configure',
         storedKey,
         (result: { success: boolean; error?: string }) => {
           if (result.success) {
@@ -113,7 +104,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
     apiKey: string,
   ): Promise<{ success: boolean; error?: string }> => {
     if (!socket) {
-      return { success: false, error: "Not connected to server" };
+      return { success: false, error: 'Not connected to server' };
     }
 
     setIsConfiguring(true);
@@ -122,7 +113,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
     // We wrap the socket callback in a Promise so the UI can 'await' the result.
     return new Promise((resolve) => {
       socket.emit(
-        "agent:configure",
+        'agent:configure',
         apiKey,
         (result: { success: boolean; error?: string }) => {
           setIsConfiguring(false);
@@ -134,7 +125,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
             setIsChatOpen(true); // Open chat panel automatically
             resolve({ success: true });
           } else {
-            const errorMsg = result.error || "Configuration failed";
+            const errorMsg = result.error || 'Configuration failed';
             setConfigError(errorMsg);
             resolve({ success: false, error: errorMsg });
           }
@@ -159,7 +150,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
 
     const userMessage: ChatMessage = {
       id: generateId(),
-      role: "user",
+      role: 'user',
       content: content.trim(),
       timestamp: new Date(),
     };
@@ -168,7 +159,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
     setIsLoading(true);
 
     socket.emit(
-      "agent:chat",
+      'agent:chat',
       content.trim(),
       (result: { response?: string; error?: string }) => {
         setIsLoading(false);
@@ -176,7 +167,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
         if (result.error) {
           const errorMessage: ChatMessage = {
             id: generateId(),
-            role: "error",
+            role: 'error',
             content: result.error,
             timestamp: new Date(),
           };
@@ -184,7 +175,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
         } else if (result.response) {
           const assistantMessage: ChatMessage = {
             id: generateId(),
-            role: "assistant",
+            role: 'assistant',
             content: result.response,
             timestamp: new Date(),
           };
@@ -198,7 +189,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
   const clearHistory = () => {
     if (!socket) return;
 
-    socket.emit("agent:clear", () => {
+    socket.emit('agent:clear', () => {
       setMessages([]);
     });
   };

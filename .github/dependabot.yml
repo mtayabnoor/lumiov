@@ -2,88 +2,88 @@ version: 2
 
 updates:
   # Root package.json (Electron shell)
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
     open-pull-requests-limit: 10
     reviewers:
-      - "mtayabnoor"
+      - 'mtayabnoor'
     labels:
-      - "dependencies"
-      - "electron"
-      - "automated"
+      - 'dependencies'
+      - 'electron'
+      - 'automated'
     commit-message:
-      prefix: "chore"
-      include: "scope"
-    target-branch: "development"
+      prefix: 'chore'
+      include: 'scope'
+    target-branch: 'development'
     groups:
       minor-patch:
-        update-types: ["minor", "patch"]
+        update-types: ['minor', 'patch']
 
   # Frontend package.json (React app)
-  - package-ecosystem: "npm"
-    directory: "/frontend"
+  - package-ecosystem: 'npm'
+    directory: '/frontend'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
     open-pull-requests-limit: 10
     reviewers:
-      - "mtayabnoor"
+      - 'mtayabnoor'
     labels:
-      - "dependencies"
-      - "frontend"
-      - "automated"
+      - 'dependencies'
+      - 'frontend'
+      - 'automated'
     commit-message:
-      prefix: "chore"
-      include: "scope"
-    target-branch: "development"
+      prefix: 'chore'
+      include: 'scope'
+    target-branch: 'development'
     groups:
       minor-patch:
-        update-types: ["minor", "patch"]
+        update-types: ['minor', 'patch']
 
   # Backend package.json (Express app)
-  - package-ecosystem: "npm"
-    directory: "/backend"
+  - package-ecosystem: 'npm'
+    directory: '/backend'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
     open-pull-requests-limit: 10
     reviewers:
-      - "mtayabnoor"
+      - 'mtayabnoor'
     labels:
-      - "dependencies"
-      - "backend"
-      - "automated"
+      - 'dependencies'
+      - 'backend'
+      - 'automated'
     commit-message:
-      prefix: "chore"
-      include: "scope"
-    target-branch: "development"
+      prefix: 'chore'
+      include: 'scope'
+    target-branch: 'development'
     groups:
       minor-patch:
-        update-types: ["minor", "patch"]
+        update-types: ['minor', 'patch']
 
   # GitHub Actions workflows
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
     open-pull-requests-limit: 5
     reviewers:
-      - "mtayabnoor"
+      - 'mtayabnoor'
     labels:
-      - "dependencies"
-      - "ci/cd"
-      - "automated"
+      - 'dependencies'
+      - 'ci/cd'
+      - 'automated'
     commit-message:
-      prefix: "ci"
-    target-branch: "development"
+      prefix: 'ci'
+    target-branch: 'development'
     groups:
       actions:
-        patterns: ["*"]
+        patterns: ['*']

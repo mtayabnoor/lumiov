@@ -1,11 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 // Reuse your logic, but adapted for a component
-const ResourceLiveAge = ({
-  creationTimestamp,
-}: {
-  creationTimestamp?: string;
-}) => {
+const ResourceLiveAge = ({ creationTimestamp }: { creationTimestamp?: string }) => {
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -17,7 +13,7 @@ const ResourceLiveAge = ({
   }, []);
 
   const calculateAge = () => {
-    if (!creationTimestamp) return "-";
+    if (!creationTimestamp) return '-';
     const now = new Date();
     const creation = new Date(creationTimestamp);
     const ageMs = Math.max(now.getTime() - creation.getTime(), 0);

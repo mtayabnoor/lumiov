@@ -18,13 +18,10 @@ export const registerAgentHandlers = (socket: Socket) => {
   console.log(`🧠 Agent handlers registered for: ${socket.id}`);
 
   // Check if session is already configured (e.g., from localStorage token)
-  socket.on(
-    'agent:status',
-    (callback: (status: { configured: boolean }) => void) => {
-      const status = getSessionStatus(socket.id);
-      callback(status);
-    },
-  );
+  socket.on('agent:status', (callback: (status: { configured: boolean }) => void) => {
+    const status = getSessionStatus(socket.id);
+    callback(status);
+  });
 
   // Configure the agent with an API key
   socket.on(
@@ -57,9 +54,7 @@ export const registerAgentHandlers = (socket: Socket) => {
       message: string,
       callback: (result: { response?: string; error?: string }) => void,
     ) => {
-      console.log(
-        `💬 Agent chat from ${socket.id}: "${message.substring(0, 50)}..."`,
-      );
+      console.log(`💬 Agent chat from ${socket.id}: "${message.substring(0, 50)}..."`);
 
       const result = await chat(socket.id, message);
 

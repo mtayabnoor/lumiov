@@ -1,0 +1,9 @@
+node_modules
+dist
+backend/dist
+frontend/dist
+electron/dist
+build
+coverage
+package-lock.json
+.husky

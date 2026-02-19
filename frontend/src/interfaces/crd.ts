@@ -1,6 +1,6 @@
 export interface CustomResourceDefinition {
-  apiVersion: "apiextensions.k8s.io/v1";
-  kind: "CustomResourceDefinition";
+  apiVersion: 'apiextensions.k8s.io/v1';
+  kind: 'CustomResourceDefinition';
   metadata: {
     name: string;
     uid?: string;
@@ -19,7 +19,7 @@ export interface CustomResourceDefinition {
       listKind?: string;
       categories?: string[];
     };
-    scope: "Namespaced" | "Cluster";
+    scope: 'Namespaced' | 'Cluster';
     versions: Array<{
       name: string;
       served: boolean;

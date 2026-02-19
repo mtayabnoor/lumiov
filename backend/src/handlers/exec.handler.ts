@@ -75,15 +75,11 @@ export function registerExecHandlers(socket: Socket) {
   // CLEANUP on disconnect
   socket.on('disconnect', () => {
     if (currentExecSession) {
-      console.log(
-        `❌ Exec client ${socket.id} disconnected. Cleaning up session.`,
-      );
+      console.log(`❌ Exec client ${socket.id} disconnected. Cleaning up session.`);
       currentExecSession.kill();
       currentExecSession = null;
     } else {
-      console.log(
-        `❌ Exec client ${socket.id} disconnected. No active session.`,
-      );
+      console.log(`❌ Exec client ${socket.id} disconnected. No active session.`);
     }
   });
 }

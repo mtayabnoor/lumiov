@@ -1,8 +1,8 @@
-import { Pod } from "./pod.js";
+import type { Pod } from './pod.js';
 
 export interface Deployment {
-  apiVersion: "apps/v1";
-  kind: "Deployment";
+  apiVersion: 'apps/v1';
+  kind: 'Deployment';
   metadata: {
     name: string;
     namespace: string;

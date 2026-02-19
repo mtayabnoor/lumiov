@@ -13,15 +13,15 @@ export interface Fix {
   title: string;
   description: string;
   command: string | null;
-  priority: "immediate" | "short-term" | "long-term";
-  risk: "low" | "medium" | "high";
+  priority: 'immediate' | 'short-term' | 'long-term';
+  risk: 'low' | 'medium' | 'high';
 }
 
 export interface DiagnosisReport {
   summary: string;
   rootCause: string;
   confidence: number;
-  severity: "critical" | "high" | "medium" | "low";
+  severity: 'critical' | 'high' | 'medium' | 'low';
   category: string;
   affectedContainers: string[];
   timeline: TimelineEvent[];

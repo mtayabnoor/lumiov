@@ -1,19 +1,19 @@
-import React from "react";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import React from 'react';
+import { Box, CircularProgress, Typography } from '@mui/material';
 
 interface LoadingProps {
   message?: string;
 }
 
-export const Loading: React.FC<LoadingProps> = ({ message = "Loading..." }) => {
+export const Loading: React.FC<LoadingProps> = ({ message = 'Loading...' }) => {
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
         minHeight: 200,
       }}
     >

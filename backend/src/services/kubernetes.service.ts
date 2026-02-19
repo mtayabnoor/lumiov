@@ -105,9 +105,7 @@ export class K8sService {
 
         // ─── Storage ───
         case 'persistentvolumeclaims':
-          return (
-            await this.coreApi!.listPersistentVolumeClaimForAllNamespaces()
-          ).items;
+          return (await this.coreApi!.listPersistentVolumeClaimForAllNamespaces()).items;
         case 'persistentvolumes':
           return (await this.coreApi!.listPersistentVolume()).items;
         case 'storageclasses':
@@ -117,11 +115,9 @@ export class K8sService {
         case 'services':
           return (await this.coreApi!.listServiceForAllNamespaces()).items;
         case 'ingresses':
-          return (await this.networkingApi!.listIngressForAllNamespaces())
-            .items;
+          return (await this.networkingApi!.listIngressForAllNamespaces()).items;
         case 'networkpolicies':
-          return (await this.networkingApi!.listNetworkPolicyForAllNamespaces())
-            .items;
+          return (await this.networkingApi!.listNetworkPolicyForAllNamespaces()).items;
         case 'endpoints':
           return (await this.coreApi!.listEndpointsForAllNamespaces()).items;
 
@@ -131,8 +127,7 @@ export class K8sService {
         case 'secrets':
           return (await this.coreApi!.listSecretForAllNamespaces()).items;
         case 'resourcequotas':
-          return (await this.coreApi!.listResourceQuotaForAllNamespaces())
-            .items;
+          return (await this.coreApi!.listResourceQuotaForAllNamespaces()).items;
         case 'limitranges':
           return (await this.coreApi!.listLimitRangeForAllNamespaces()).items;
         case 'horizontalpodautoscalers':
@@ -142,8 +137,7 @@ export class K8sService {
 
         // ─── Access Control ───
         case 'serviceaccounts':
-          return (await this.coreApi!.listServiceAccountForAllNamespaces())
-            .items;
+          return (await this.coreApi!.listServiceAccountForAllNamespaces()).items;
         case 'roles':
           return (await this.rbacApi!.listRoleForAllNamespaces()).items;
         case 'rolebindings':
@@ -155,8 +149,7 @@ export class K8sService {
 
         // ─── Custom Resources ───
         case 'customresourcedefinitions':
-          return (await this.apiExtensionsApi!.listCustomResourceDefinition())
-            .items;
+          return (await this.apiExtensionsApi!.listCustomResourceDefinition()).items;
 
         default:
           console.warn(`Unknown resource type: ${resource}`);
@@ -211,8 +204,7 @@ export class K8sService {
       roles: '/apis/rbac.authorization.k8s.io/v1/roles',
       rolebindings: '/apis/rbac.authorization.k8s.io/v1/rolebindings',
       clusterroles: '/apis/rbac.authorization.k8s.io/v1/clusterroles',
-      clusterrolebindings:
-        '/apis/rbac.authorization.k8s.io/v1/clusterrolebindings',
+      clusterrolebindings: '/apis/rbac.authorization.k8s.io/v1/clusterrolebindings',
       // Custom Resources
       customresourcedefinitions:
         '/apis/apiextensions.k8s.io/v1/customresourcedefinitions',
@@ -243,11 +235,7 @@ export class K8sService {
               console.warn(`⚠️ Watch error (${resource}):`, err);
               // If 401/403/404, do NOT retry
               const msg = String(err);
-              if (
-                msg.includes('401') ||
-                msg.includes('403') ||
-                msg.includes('404')
-              ) {
+              if (msg.includes('401') || msg.includes('403') || msg.includes('404')) {
                 onError(new Error(`Fatal Watch Error: ${msg}`));
                 isActive = false;
                 return;
@@ -413,13 +401,7 @@ export class K8sService {
 
     try {
       // 2. Start K8s Log Request
-      req = await this.log.log(
-        namespace,
-        pod,
-        container,
-        logStream,
-        logOptions,
-      );
+      req = await this.log.log(namespace, pod, container, logStream, logOptions);
     } catch (err: any) {
       console.error(`❌ Failed to start log stream for ${pod}:`, err);
       onError(err.message || 'Log stream failed');
@@ -475,9 +457,7 @@ export class K8sService {
       if (newSpec.yaml && !newSpec.kind) newSpec = yaml.load(newSpec.yaml);
 
       if (!newSpec || !newSpec.kind || !newSpec.metadata?.name) {
-        throw new Error(
-          'Invalid YAML: Missing kind, apiVersion, or metadata.name',
-        );
+        throw new Error('Invalid YAML: Missing kind, apiVersion, or metadata.name');
       }
 
       // 2. Fetch the LIVE version
@@ -523,9 +503,7 @@ export class K8sService {
         return liveSpec;
       }
 
-      console.log(
-        `📝 Detected changes. Replacing resource ${newSpec.metadata.name}...`,
-      );
+      console.log(`📝 Detected changes. Replacing resource ${newSpec.metadata.name}...`);
 
       // 5. Prepare for REPLACE (PUT)
       // We need the valid resourceVersion from the LIVE object to allow the update
@@ -573,25 +551,34 @@ export class K8sService {
     apiVersion: string,
     kind: string,
     name: string,
-    namespace: string,
+    namespace: string | undefined,
   ): Promise<string> {
     this.checkInit();
 
     try {
       console.log(
-        `🗑️ [K8S] Deleting Resource: kind: ${kind} name: ${name} in ns ${namespace}`,
+        `🗑️ [K8S] Deleting Resource: kind: ${kind} name: ${name} in ns ${namespace || 'CLUSTER-SCOPE'}`,
       );
-      const pod = {
-        apiVersion: apiVersion,
-        kind: kind,
-        metadata: {
-          name: name,
-          namespace: namespace,
-        },
+
+      // 1. Create the base metadata with just the name
+      const metadata: any = {
+        name: name,
       };
 
-      // Use the CoreV1Api to delete the pod
-      await this.objectApi!.delete(pod);
+      // 2. Only add 'namespace' key if it is defined and not empty
+      // This ensures cluster-scoped resources don't get a "namespace: undefined" key
+      if (namespace) {
+        metadata.namespace = namespace;
+      }
+
+      const resource = {
+        apiVersion: apiVersion,
+        kind: kind,
+        metadata: metadata,
+      };
+
+      // Use the CoreV1Api to delete the resource
+      await this.objectApi!.delete(resource);
 
       return `Resource Kind: ${kind} Name: ${name} deleted successfully.`;
     } catch (err: any) {
@@ -646,10 +633,7 @@ export class K8sService {
   /**
    * Get Kubernetes events related to a specific pod
    */
-  public async getPodEvents(
-    namespace: string,
-    podName: string,
-  ): Promise<any[]> {
+  public async getPodEvents(namespace: string, podName: string): Promise<any[]> {
     this.checkInit();
     try {
       const events = await this.coreApi!.listNamespacedEvent({

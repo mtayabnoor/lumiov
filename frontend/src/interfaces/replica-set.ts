@@ -1,6 +1,6 @@
 export interface ReplicaSet {
-  apiVersion: "apps/v1";
-  kind: "ReplicaSet";
+  apiVersion: 'apps/v1';
+  kind: 'ReplicaSet';
   metadata: {
     name: string;
     namespace: string;

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release-branch:
-        description: "Release branch to finalize (e.g. release/v2.13.0)"
+        description: 'Release branch to finalize (e.g. release/v2.13.0)'
         required: true
         type: string
 
@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: "22"
+  NODE_VERSION: '22'
 
 permissions:
   contents: write
@@ -54,10 +54,10 @@ jobs:
       - name: Bump final version & changelog
         id: version
         run: |
-          # standard-version strips prerelease suffix and finalizes
-          npx standard-version --skip.bump --skip.commit --skip.tag
+          # commit-and-tag-version strips prerelease suffix and finalizes
+          npm run release
 
-          # Re-read version without RC suffix — strip it manually if standard-version didn't
+          # Re-read version without RC suffix — strip it manually if commit-and-tag-version didn't
           CURRENT=$(node -p "require('./package.json').version")
           FINAL="${CURRENT%%-rc*}"
 
@@ -75,7 +75,7 @@ jobs:
               fi
             done
             # Re-generate changelog for clean final version
-            npx standard-version --skip.bump --skip.commit --skip.tag
+            npm run release
           fi
 
           VERSION="$FINAL"

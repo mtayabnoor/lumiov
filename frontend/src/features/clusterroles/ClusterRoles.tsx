@@ -1,21 +1,17 @@
-import { useResource } from "../../hooks/useResource";
-import { ResourceTableConfig } from "../../interfaces/common";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ResourceTable from "../../components/common/Table/ResourceTable";
-import { ClusterRole } from "../../interfaces/role";
-import { Box, CircularProgress, Alert } from "@mui/material";
-import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import ResourceEditor from "../../components/common/Editor/ResourceEditor";
-import { useState } from "react";
+import { useResource } from '../../hooks/useResource';
+import type { ResourceTableConfig } from '../../interfaces/common';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ResourceTable from '../../components/common/Table/ResourceTable';
+import type { ClusterRole } from '../../interfaces/role';
+import { Box, CircularProgress, Alert } from '@mui/material';
+import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import { useState } from 'react';
 
 function ClusterRoles() {
-  const {
-    data: clusterRoles,
-    error,
-    loading,
-  } = useResource<ClusterRole>("clusterroles");
+  const { data: clusterRoles, error, loading } = useResource<ClusterRole>('clusterroles');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -24,33 +20,33 @@ function ClusterRoles() {
 
   const config: ResourceTableConfig = {
     columns: [
-      { key: "metadata.name", header: "NAME" },
+      { key: 'metadata.name', header: 'NAME' },
       {
-        key: "rules",
-        header: "RULES",
+        key: 'rules',
+        header: 'RULES',
         accessor: (row: ClusterRole) => row.rules?.length ?? 0,
       },
       {
-        key: "aggregation",
-        header: "AGGREGATION",
-        accessor: (row: ClusterRole) => (row.aggregationRule ? "Yes" : "-"),
+        key: 'aggregation',
+        header: 'AGGREGATION',
+        accessor: (row: ClusterRole) => (row.aggregationRule ? 'Yes' : '-'),
       },
       {
-        key: "age",
-        header: "AGE",
+        key: 'age',
+        header: 'AGE',
         accessor: (row: ClusterRole) => (
           <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
         ),
       },
     ],
     actions: [
-      { id: "edit", label: "Edit", icon: EditIcon },
-      { id: "delete", label: "Delete", icon: DeleteIcon },
+      { id: 'edit', label: 'Edit', icon: EditIcon },
+      { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
 
   const handleAction = (actionId: string, row: ClusterRole) => {
-    if (actionId === "edit") {
+    if (actionId === 'edit') {
       setEditingResource({ name: row.metadata.name });
       setEditDrawerOpen(true);
     }
@@ -58,7 +54,7 @@ function ClusterRoles() {
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );
@@ -74,11 +70,7 @@ function ClusterRoles() {
       title="Cluster Roles"
       description="Real-time monitoring dashboard for cluster roles"
     >
-      <ResourceTable
-        config={config}
-        data={clusterRoles}
-        onAction={handleAction}
-      />
+      <ResourceTable config={config} data={clusterRoles} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor
           open={editDrawerOpen}

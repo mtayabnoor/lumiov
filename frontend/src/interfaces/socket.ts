@@ -1,58 +1,58 @@
 export const SocketEvent = {
-  WATCH: "watch",
-  DATA: "data",
-  ERROR: "error",
-  EXEC: "exec",
-  EXEC_DATA: "exec-data",
-  EXEC_INPUT: "exec-input",
-  EXEC_RESIZE: "exec-resize",
-  EXEC_ERROR: "exec-error",
-  K8S_LIST: "k8s-list",
-  K8S_EVENT: "k8s-event",
-  SUBSCRIBE: "subscribe",
-  UNSUBSCRIBE: "unsubscribe",
+  WATCH: 'watch',
+  DATA: 'data',
+  ERROR: 'error',
+  EXEC: 'exec',
+  EXEC_DATA: 'exec-data',
+  EXEC_INPUT: 'exec-input',
+  EXEC_RESIZE: 'exec-resize',
+  EXEC_ERROR: 'exec-error',
+  K8S_LIST: 'k8s-list',
+  K8S_EVENT: 'k8s-event',
+  SUBSCRIBE: 'subscribe',
+  UNSUBSCRIBE: 'unsubscribe',
   // Agent events
-  AGENT_STATUS: "agent:status",
-  AGENT_CONFIGURE: "agent:configure",
-  AGENT_CHAT: "agent:chat",
-  AGENT_CLEAR: "agent:clear",
+  AGENT_STATUS: 'agent:status',
+  AGENT_CONFIGURE: 'agent:configure',
+  AGENT_CHAT: 'agent:chat',
+  AGENT_CLEAR: 'agent:clear',
 } as const;
 
 export type ResourceType =
   // Cluster
-  | "namespaces"
-  | "nodes"
+  | 'namespaces'
+  | 'nodes'
   // Workloads
-  | "pods"
-  | "deployments"
-  | "statefulsets"
-  | "daemonsets"
-  | "replicasets"
-  | "jobs"
-  | "cronjobs"
+  | 'pods'
+  | 'deployments'
+  | 'statefulsets'
+  | 'daemonsets'
+  | 'replicasets'
+  | 'jobs'
+  | 'cronjobs'
   // Storage
-  | "persistentvolumeclaims"
-  | "persistentvolumes"
-  | "storageclasses"
+  | 'persistentvolumeclaims'
+  | 'persistentvolumes'
+  | 'storageclasses'
   // Network
-  | "services"
-  | "ingresses"
-  | "networkpolicies"
-  | "endpoints"
+  | 'services'
+  | 'ingresses'
+  | 'networkpolicies'
+  | 'endpoints'
   // Configuration
-  | "configmaps"
-  | "secrets"
-  | "resourcequotas"
-  | "limitranges"
-  | "horizontalpodautoscalers"
+  | 'configmaps'
+  | 'secrets'
+  | 'resourcequotas'
+  | 'limitranges'
+  | 'horizontalpodautoscalers'
   // Access Control
-  | "serviceaccounts"
-  | "roles"
-  | "rolebindings"
-  | "clusterroles"
-  | "clusterrolebindings"
+  | 'serviceaccounts'
+  | 'roles'
+  | 'rolebindings'
+  | 'clusterroles'
+  | 'clusterrolebindings'
   // Custom Resources
-  | "customresourcedefinitions";
+  | 'customresourcedefinitions';
 
 export interface K8sListPayload<T = any> {
   resource: ResourceType;
@@ -61,7 +61,7 @@ export interface K8sListPayload<T = any> {
 
 export interface K8sEventPayload<T = any> {
   resource: ResourceType;
-  type: "ADDED" | "MODIFIED" | "DELETED" | "BOOKMARK";
+  type: 'ADDED' | 'MODIFIED' | 'DELETED' | 'BOOKMARK';
   object: T;
 }
 
@@ -111,9 +111,7 @@ export interface ClientToServerEvents {
   [SocketEvent.EXEC_RESIZE]: (params: ExecResizeParams) => void;
   [SocketEvent.UNSUBSCRIBE]: (resource: ResourceType) => void;
   // Agent events with callbacks
-  [SocketEvent.AGENT_STATUS]: (
-    callback: (response: AgentStatusResponse) => void,
-  ) => void;
+  [SocketEvent.AGENT_STATUS]: (callback: (response: AgentStatusResponse) => void) => void;
   [SocketEvent.AGENT_CONFIGURE]: (
     apiKey: string,
     callback: (response: AgentConfigureResponse) => void,

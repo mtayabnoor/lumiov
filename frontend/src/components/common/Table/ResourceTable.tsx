@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -17,26 +17,26 @@ import {
   IconButton,
   Menu,
   Chip,
-} from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { SelectChangeEvent } from "@mui/material/Select";
-import { ColumnDef, ResourceTableProps } from "../../../interfaces/common";
+} from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import type { SelectChangeEvent } from '@mui/material/Select';
+import type { ColumnDef, ResourceTableProps } from '../../../interfaces/common';
 
 // --- Helper Functions ---
 
 const getByPath = (obj: any, path: string) => {
   // If path is "metadata.name", split it into ["metadata", "name"]
-  const keys = path.split(".");
+  const keys = path.split('.');
   let current = obj;
 
   for (const key of keys) {
     // If we hit a dead end (undefined/null), stop and return empty string
-    if (!current) return "";
+    if (!current) return '';
     current = current[key];
   }
 
   // If the result is null/undefined, return empty string, otherwise return the data
-  return current ?? "";
+  return current ?? '';
 };
 
 // Explicitly saying it returns ReactNode allows strings OR components
@@ -52,12 +52,7 @@ function getValue(row: any, col: ColumnDef): React.ReactNode {
 
 // --- Main Component ---
 
-function ResourceTable({
-  config,
-  data,
-  onAction,
-  resourceType,
-}: ResourceTableProps) {
+function ResourceTable({ config, data, onAction, resourceType }: ResourceTableProps) {
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
 
   // State for Action Menu
@@ -65,18 +60,18 @@ function ResourceTable({
   const [activeRow, setActiveRow] = useState<any | null>(null);
 
   // 1. Computed: Namespace List
-  const namespaces = data.map((p: any) => p?.metadata?.namespace || "");
+  const namespaces = data.map((p: any) => p?.metadata?.namespace || '');
   const namespaceList = Array.from(new Set(namespaces))
     .filter(Boolean)
     .sort() as string[];
 
   // 2. Computed: Filtered & Sorted
   const sorted = [...data].sort((a: any, b: any) => {
-    const nsA = a?.metadata?.namespace ?? "";
-    const nsB = b?.metadata?.namespace ?? "";
+    const nsA = a?.metadata?.namespace ?? '';
+    const nsB = b?.metadata?.namespace ?? '';
     const nsCompare = nsA.localeCompare(nsB);
     if (nsCompare !== 0) return nsCompare;
-    return (a?.metadata?.name ?? "").localeCompare(b?.metadata?.name ?? "");
+    return (a?.metadata?.name ?? '').localeCompare(b?.metadata?.name ?? '');
   });
 
   const filteredData =
@@ -89,7 +84,7 @@ function ResourceTable({
   // Handlers
   const handleNamespaceChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value;
-    setSelectedNamespaces(typeof value === "string" ? value.split(",") : value);
+    setSelectedNamespaces(typeof value === 'string' ? value.split(',') : value);
   };
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>, row: any) => {
@@ -112,7 +107,7 @@ function ResourceTable({
 
   const getRowStyle = (row: any) => {
     if (row?.metadata?.deletionTimestamp) {
-      return { backgroundColor: "#cd3d53ff", opacity: 0.7 };
+      return { backgroundColor: '#cd3d53ff', opacity: 0.7 };
     }
     return {};
   };
@@ -120,48 +115,45 @@ function ResourceTable({
   return (
     <Box
       sx={{
-        width: "100%",
+        width: '100%',
         flexGrow: 1, // Take remaining space
         minHeight: 0, // Allow shrinking for scroll
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start", // ensure items start at top
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start', // ensure items start at top
       }}
     >
       {/* 1. Filter Section */}
-      {resourceType !== "namespaces" && (
+      {resourceType !== 'namespaces' && (
         <Box
           sx={{
             pt: 1,
             pb: 2,
-            display: "flex",
-            justifyContent: "flex-start",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
           }}
         >
-          {" "}
+          {' '}
           {/* 1. Aligns content to left */}
           <FormControl
             size="small" // 2. Makes the height smaller (compact mode)
             sx={{ minWidth: 150, maxWidth: 300 }} // 3. Reduced width (was 200/400)
           >
-            <InputLabel size="small">Namespace</InputLabel>{" "}
+            <InputLabel size="small">Namespace</InputLabel>{' '}
             {/* 4. Ensure label matches small size */}
             <Select
               multiple
               value={selectedNamespaces}
               onChange={handleNamespaceChange}
-              renderValue={(selected) => selected.join(", ")}
+              renderValue={(selected) => selected.join(', ')}
               label="Namespace"
               // size="small" is inherited from FormControl, but you can add it here too to be safe
             >
               {namespaceList.map((ns) => (
                 <MenuItem key={ns} value={ns}>
-                  <Checkbox
-                    checked={selectedNamespaces.indexOf(ns) > -1}
-                    size="small"
-                  />{" "}
+                  <Checkbox checked={selectedNamespaces.indexOf(ns) > -1} size="small" />{' '}
                   {/* Optional: make checkbox small too */}
                   <ListItemText primary={ns} />
                 </MenuItem>
@@ -177,19 +169,19 @@ function ResourceTable({
           flexGrow: 0, // Don't grow if content is small
           flexShrink: 1, // Shrink if content is large (to trigger scroll)
           minHeight: 0, // Allow shrinking
-          overflow: "auto",
+          overflow: 'auto',
         }}
       >
         <Table stickyHeader size="small" aria-label="k8s table">
           <TableHead>
             <TableRow>
               {config.columns.map((col) => (
-                <TableCell key={col.key} sx={{ fontWeight: "bold" }}>
+                <TableCell key={col.key} sx={{ fontWeight: 'bold' }}>
                   {col.header}
                 </TableCell>
               ))}
               {(config.actions?.length ?? 0) > 0 && (
-                <TableCell align="right" sx={{ fontWeight: "bold", width: 50 }}>
+                <TableCell align="right" sx={{ fontWeight: 'bold', width: 50 }}>
                   Actions
                 </TableCell>
               )}
@@ -207,9 +199,9 @@ function ResourceTable({
                   // Check if it's our custom status object
                   const isStatusObj =
                     val &&
-                    typeof val === "object" &&
-                    "kind" in val &&
-                    (val as any).kind === "status";
+                    typeof val === 'object' &&
+                    'kind' in val &&
+                    (val as any).kind === 'status';
 
                   return (
                     <TableCell key={col.key}>
@@ -229,10 +221,7 @@ function ResourceTable({
 
                 {(config.actions?.length ?? 0) > 0 && (
                   <TableCell align="right">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => handleMenuClick(e, row)}
-                    >
+                    <IconButton size="small" onClick={(e) => handleMenuClick(e, row)}>
                       <MoreVertIcon />
                     </IconButton>
                   </TableCell>
@@ -258,10 +247,7 @@ function ResourceTable({
         onClick={(e) => e.stopPropagation()}
       >
         {(config.actions ?? []).map((action) => (
-          <MenuItem
-            key={action.id}
-            onClick={() => handleActionClick(action.id)}
-          >
+          <MenuItem key={action.id} onClick={() => handleActionClick(action.id)}>
             {action.icon && <action.icon sx={{ mr: 1, fontSize: 20 }} />}
             {action.label}
           </MenuItem>

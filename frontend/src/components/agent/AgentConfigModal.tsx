@@ -4,7 +4,7 @@
  * Modal dialog for configuring the OpenAI API key.
  */
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -20,12 +20,12 @@ import {
   InputAdornment,
   Link,
   Divider,
-} from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import PsychologyIcon from "@mui/icons-material/Psychology";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { useAgent } from "../../context/AgentContext";
+} from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useAgent } from '../../context/AgentContext';
 
 export default function AgentConfigModal() {
   const {
@@ -38,17 +38,17 @@ export default function AgentConfigModal() {
     resetConfiguration,
   } = useAgent();
 
-  const [apiKey, setApiKey] = useState("");
+  const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     if (!apiKey.trim()) {
-      setLocalError("Please enter an API key");
+      setLocalError('Please enter an API key');
       return;
     }
 
-    if (!apiKey.startsWith("sk-")) {
+    if (!apiKey.startsWith('sk-')) {
       setLocalError("API key should start with 'sk-'");
       return;
     }
@@ -57,19 +57,19 @@ export default function AgentConfigModal() {
     const result = await configureAgent(apiKey);
 
     if (result.success) {
-      setApiKey(""); // Clear the field on success
+      setApiKey(''); // Clear the field on success
     }
   };
 
   const handleClose = () => {
-    setApiKey("");
+    setApiKey('');
     setLocalError(null);
     closeConfigModal();
   };
 
   const handleDisconnect = () => {
     resetConfiguration();
-    setApiKey("");
+    setApiKey('');
     setLocalError(null);
   };
 
@@ -81,26 +81,28 @@ export default function AgentConfigModal() {
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 2,
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 2,
+          },
         },
       }}
     >
       <DialogTitle>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <PsychologyIcon
             fontSize="medium"
             sx={{
-              color: isConfigured ? "#b42323ff" : "text.primary",
+              color: isConfigured ? '#b42323ff' : 'text.primary',
               filter: isConfigured
-                ? "drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)"
-                : "none",
-              transition: "all 0.3s ease",
+                ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
+                : 'none',
+              transition: 'all 0.3s ease',
             }}
           />
           <Typography variant="h6" fontWeight={600}>
-            {isConfigured ? "AI Assistant Settings" : "Configure AI Assistant"}
+            {isConfigured ? 'AI Assistant Settings' : 'Configure AI Assistant'}
           </Typography>
         </Box>
       </DialogTitle>
@@ -114,19 +116,19 @@ export default function AgentConfigModal() {
             </Alert>
 
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Your OpenAI API key is stored locally. You can disconnect at any
-              time to remove your API key from this device.
+              Your OpenAI API key is stored locally. You can disconnect at any time to
+              remove your API key from this device.
             </Typography>
 
             <Box
               sx={{
                 p: 2,
-                border: "1px solid",
-                borderColor: "divider",
+                border: '1px solid',
+                borderColor: 'divider',
                 borderRadius: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
               }}
             >
               <Box>
@@ -155,8 +157,8 @@ export default function AgentConfigModal() {
           </Box>
         ) : (
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Enter your OpenAI API key to enable the AI cluster assistant. Your
-            key is stored locally and never sent to our servers.
+            Enter your OpenAI API key to enable the AI cluster assistant. Your key is
+            stored locally and never sent to our servers.
           </Typography>
         )}
 
@@ -170,7 +172,7 @@ export default function AgentConfigModal() {
           fullWidth
           label="OpenAI API Key"
           placeholder="sk-..."
-          type={showKey ? "text" : "password"}
+          type={showKey ? 'text' : 'password'}
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
           disabled={isConfiguring}
@@ -191,7 +193,7 @@ export default function AgentConfigModal() {
             },
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !isConfiguring) {
+            if (e.key === 'Enter' && !isConfiguring) {
               handleSubmit();
             }
           }}
@@ -200,9 +202,9 @@ export default function AgentConfigModal() {
         <Typography
           variant="caption"
           color="text.secondary"
-          sx={{ mt: 2, display: "block" }}
+          sx={{ mt: 2, display: 'block' }}
         >
-          Don't have an API key?{" "}
+          Don't have an API key?{' '}
           <Link
             href="https://platform.openai.com/api-keys"
             target="_blank"
@@ -215,7 +217,7 @@ export default function AgentConfigModal() {
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={handleClose} disabled={isConfiguring}>
-          {isConfigured ? "Close" : "Cancel"}
+          {isConfigured ? 'Close' : 'Cancel'}
         </Button>
         <Button
           variant="contained"
@@ -224,16 +226,13 @@ export default function AgentConfigModal() {
         >
           {isConfiguring ? (
             <>
-              <CircularProgress
-                size={16}
-                sx={{ mr: 1, color: "text.primary" }}
-              />
+              <CircularProgress size={16} sx={{ mr: 1, color: 'text.primary' }} />
               Validating...
             </>
           ) : isConfigured ? (
-            "Update Key"
+            'Update Key'
           ) : (
-            "Connect"
+            'Connect'
           )}
         </Button>
       </DialogActions>

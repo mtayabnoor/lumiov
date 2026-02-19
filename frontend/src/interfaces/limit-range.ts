@@ -1,6 +1,6 @@
 export interface LimitRange {
-  apiVersion: "v1";
-  kind: "LimitRange";
+  apiVersion: 'v1';
+  kind: 'LimitRange';
   metadata: {
     name: string;
     namespace: string;
@@ -12,7 +12,7 @@ export interface LimitRange {
   };
   spec: {
     limits: Array<{
-      type: "Pod" | "Container" | "PersistentVolumeClaim" | string;
+      type: 'Pod' | 'Container' | 'PersistentVolumeClaim' | string;
       max?: Record<string, string>;
       min?: Record<string, string>;
       default?: Record<string, string>;

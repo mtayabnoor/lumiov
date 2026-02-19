@@ -1,8 +1,8 @@
-import { Pod } from "./pod.js";
+import type { Pod } from './pod.js';
 
 export interface StatefulSet {
-  apiVersion: "apps/v1";
-  kind: "StatefulSet";
+  apiVersion: 'apps/v1';
+  kind: 'StatefulSet';
   metadata: {
     name: string;
     namespace: string;
@@ -47,17 +47,17 @@ export interface StatefulSet {
         [key: string]: any;
       };
     }>;
-    podManagementPolicy?: "OrderedReady" | "Parallel";
+    podManagementPolicy?: 'OrderedReady' | 'Parallel';
     updateStrategy?: {
-      type?: "RollingUpdate" | "OnDelete";
+      type?: 'RollingUpdate' | 'OnDelete';
       rollingUpdate?: {
         partition?: number;
       };
     };
     revisionHistoryLimit?: number;
     persistentVolumeClaimRetentionPolicy?: {
-      whenDeleted?: "Retain" | "Delete";
-      whenScaled?: "Retain" | "Delete";
+      whenDeleted?: 'Retain' | 'Delete';
+      whenScaled?: 'Retain' | 'Delete';
     };
     minReadySeconds?: number;
   };

@@ -1,6 +1,6 @@
 export interface Secret {
-  apiVersion: "v1";
-  kind: "Secret";
+  apiVersion: 'v1';
+  kind: 'Secret';
   metadata: {
     name: string;
     namespace: string;

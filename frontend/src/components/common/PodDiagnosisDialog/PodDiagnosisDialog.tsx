@@ -5,7 +5,7 @@
  * Shows root cause, confidence score, severity, timeline, fixes, and raw data.
  */
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -22,48 +22,45 @@ import {
   Paper,
   Divider,
   CircularProgress,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import BiotechIcon from "@mui/icons-material/Biotech";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import BuildIcon from "@mui/icons-material/Build";
-import ShieldIcon from "@mui/icons-material/Shield";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import type { DiagnosisResult, Fix } from "../../../interfaces/diagnosis";
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BuildIcon from '@mui/icons-material/Build';
+import ShieldIcon from '@mui/icons-material/Shield';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import type { DiagnosisResult, Fix } from '../../../interfaces/diagnosis';
 
 // ─── Severity / Priority Colors ────────────────────────────────
 
-const SEVERITY_COLORS: Record<
-  string,
-  "error" | "warning" | "info" | "success"
-> = {
-  critical: "error",
-  high: "error",
-  medium: "warning",
-  low: "info",
+const SEVERITY_COLORS: Record<string, 'error' | 'warning' | 'info' | 'success'> = {
+  critical: 'error',
+  high: 'error',
+  medium: 'warning',
+  low: 'info',
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  immediate: "#f44336",
-  "short-term": "#ff9800",
-  "long-term": "#4caf50",
+  immediate: '#f44336',
+  'short-term': '#ff9800',
+  'long-term': '#4caf50',
 };
 
 const RISK_COLORS: Record<string, string> = {
-  high: "#f44336",
-  medium: "#ff9800",
-  low: "#4caf50",
+  high: '#f44336',
+  medium: '#ff9800',
+  low: '#4caf50',
 };
 
 // ─── Sub-Components ────────────────────────────────────────────
 
 function ConfidenceGauge({ value }: { value: number }) {
-  const color = value >= 80 ? "#4caf50" : value >= 50 ? "#ff9800" : "#f44336";
+  const color = value >= 80 ? '#4caf50' : value >= 50 ? '#ff9800' : '#f44336';
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 2, my: 1 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, my: 1 }}>
       <Box sx={{ flexGrow: 1 }}>
         <LinearProgress
           variant="determinate"
@@ -71,8 +68,8 @@ function ConfidenceGauge({ value }: { value: number }) {
           sx={{
             height: 10,
             borderRadius: 5,
-            backgroundColor: "rgba(255,255,255,0.08)",
-            "& .MuiLinearProgress-bar": {
+            backgroundColor: 'rgba(255,255,255,0.08)',
+            '& .MuiLinearProgress-bar': {
               borderRadius: 5,
               backgroundColor: color,
             },
@@ -81,7 +78,7 @@ function ConfidenceGauge({ value }: { value: number }) {
       </Box>
       <Typography
         variant="h6"
-        sx={{ fontWeight: 700, color, minWidth: 50, textAlign: "right" }}
+        sx={{ fontWeight: 700, color, minWidth: 50, textAlign: 'right' }}
       >
         {value}%
       </Typography>
@@ -104,41 +101,41 @@ function FixCard({ fix, index }: { fix: Fix; index: number }) {
       sx={{
         p: 2,
         mb: 1.5,
-        border: "1px solid",
-        borderColor: "divider",
+        border: '1px solid',
+        borderColor: 'divider',
         borderRadius: 2,
-        "&:hover": { borderColor: "primary.main", bgcolor: "action.hover" },
+        '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' },
       }}
     >
       <Box
         sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
           gap: 1,
         }}
       >
         <Box sx={{ flexGrow: 1 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
             <Typography
               variant="body2"
               sx={{
                 fontWeight: 700,
-                color: "text.primary",
-                fontSize: "0.85rem",
+                color: 'text.primary',
+                fontSize: '0.85rem',
               }}
             >
               {index + 1}. {fix.title}
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", gap: 0.5, mb: 1 }}>
+          <Box sx={{ display: 'flex', gap: 0.5, mb: 1 }}>
             <Chip
               label={fix.priority}
               size="small"
               sx={{
-                fontSize: "0.65rem",
+                fontSize: '0.65rem',
                 height: 20,
-                bgcolor: PRIORITY_COLORS[fix.priority] + "22",
+                bgcolor: PRIORITY_COLORS[fix.priority] + '22',
                 color: PRIORITY_COLORS[fix.priority],
                 fontWeight: 600,
               }}
@@ -147,9 +144,9 @@ function FixCard({ fix, index }: { fix: Fix; index: number }) {
               label={`Risk: ${fix.risk}`}
               size="small"
               sx={{
-                fontSize: "0.65rem",
+                fontSize: '0.65rem',
                 height: 20,
-                bgcolor: RISK_COLORS[fix.risk] + "22",
+                bgcolor: RISK_COLORS[fix.risk] + '22',
                 color: RISK_COLORS[fix.risk],
                 fontWeight: 600,
               }}
@@ -157,7 +154,7 @@ function FixCard({ fix, index }: { fix: Fix; index: number }) {
           </Box>
           <Typography
             variant="body2"
-            sx={{ color: "text.secondary", fontSize: "0.8rem" }}
+            sx={{ color: 'text.secondary', fontSize: '0.8rem' }}
           >
             {fix.description}
           </Typography>
@@ -169,18 +166,18 @@ function FixCard({ fix, index }: { fix: Fix; index: number }) {
           sx={{
             mt: 1.5,
             p: 1.5,
-            bgcolor: "rgba(0,0,0,0.3)",
+            bgcolor: 'rgba(0,0,0,0.3)',
             borderRadius: 1,
-            fontFamily: "monospace",
-            fontSize: "0.75rem",
-            position: "relative",
-            overflowX: "auto",
+            fontFamily: 'monospace',
+            fontSize: '0.75rem',
+            position: 'relative',
+            overflowX: 'auto',
           }}
         >
           <IconButton
             size="small"
             onClick={() => handleCopy(fix.command!)}
-            sx={{ position: "absolute", top: 2, right: 2, opacity: 0.7 }}
+            sx={{ position: 'absolute', top: 2, right: 2, opacity: 0.7 }}
           >
             <ContentCopyIcon sx={{ fontSize: 14 }} />
           </IconButton>
@@ -189,10 +186,10 @@ function FixCard({ fix, index }: { fix: Fix; index: number }) {
             <Typography
               variant="caption"
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 top: 6,
                 right: 32,
-                color: "#4caf50",
+                color: '#4caf50',
               }}
             >
               Copied!
@@ -232,10 +229,10 @@ export default function PodDiagnosisDialog({
     setError(null);
     setLoading(true);
 
-    const apiKey = localStorage.getItem("lumiov-agent-api-key") || "";
+    const apiKey = localStorage.getItem('lumiov-agent-api-key') || '';
 
     if (!apiKey) {
-      setError("No OpenAI API key configured.");
+      setError('No OpenAI API key configured.');
       setLoading(false);
       return;
     }
@@ -244,9 +241,9 @@ export default function PodDiagnosisDialog({
     const controller = new AbortController();
     const signal = controller.signal;
 
-    fetch("http://localhost:3030/api/diagnose", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    fetch('http://localhost:3030/api/diagnose', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ namespace, podName, apiKey }),
       signal, // <-- Attach the signal here
     })
@@ -256,7 +253,7 @@ export default function PodDiagnosisDialog({
         if (signal.aborted) return;
 
         if (!res.ok) {
-          setError(data.error || "Diagnosis request failed");
+          setError(data.error || 'Diagnosis request failed');
           if (data.rawData) setResult({ rawData: data.rawData });
         } else {
           setResult(data);
@@ -264,10 +261,10 @@ export default function PodDiagnosisDialog({
       })
       .catch((err) => {
         // Ignore errors caused by us cancelling the request
-        if (err.name === "AbortError") return;
+        if (err.name === 'AbortError') return;
 
         if (!signal.aborted) {
-          setError(err.message || "Network error");
+          setError(err.message || 'Network error');
         }
       })
       .finally(() => {
@@ -291,28 +288,30 @@ export default function PodDiagnosisDialog({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 3,
-          maxHeight: "85vh",
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 3,
+            maxHeight: '85vh',
+          },
         },
       }}
     >
       {/* ── Header ── */}
       <DialogTitle
         sx={{
-          display: "flex",
-          alignItems: "center",
+          display: 'flex',
+          alignItems: 'center',
           gap: 1,
           pb: 1,
         }}
       >
-        <BiotechIcon sx={{ color: "primary.main" }} />
+        <SmartToyIcon sx={{ color: '#b42323ff' }} />
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1rem" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>
             Pod Diagnosis
           </Typography>
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             {namespace}/{podName}
           </Typography>
         </Box>
@@ -328,28 +327,28 @@ export default function PodDiagnosisDialog({
         {loading && (
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
               py: 8,
               gap: 2,
             }}
           >
             <CircularProgress size={48} />
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Collecting pod data and running AI analysis...
             </Typography>
             <Typography
               variant="caption"
               sx={{
-                color: "text.disabled",
+                color: 'text.disabled',
                 maxWidth: 400,
-                textAlign: "center",
+                textAlign: 'center',
               }}
             >
-              Fetching events, container logs, and pod status. This may take
-              10-20 seconds.
+              Fetching events, container logs, and pod status. This may take 10-20
+              seconds.
             </Typography>
           </Box>
         )}
@@ -363,13 +362,13 @@ export default function PodDiagnosisDialog({
 
         {/* ── Report ── */}
         {report && !loading && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {/* Summary + Severity */}
             <Box>
               <Box
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 1,
                   mb: 1,
                 }}
@@ -377,35 +376,31 @@ export default function PodDiagnosisDialog({
                 <WarningAmberIcon
                   sx={{
                     color:
-                      report.severity === "critical" ||
-                      report.severity === "high"
-                        ? "error.main"
-                        : "warning.main",
+                      report.severity === 'critical' || report.severity === 'high'
+                        ? 'error.main'
+                        : 'warning.main',
                     fontSize: 20,
                   }}
                 />
-                <Typography
-                  variant="subtitle2"
-                  sx={{ fontWeight: 700, flexGrow: 1 }}
-                >
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, flexGrow: 1 }}>
                   Summary
                 </Typography>
                 <Chip
                   label={report.severity.toUpperCase()}
                   size="small"
                   color={SEVERITY_COLORS[report.severity]}
-                  sx={{ fontWeight: 700, fontSize: "0.7rem" }}
+                  sx={{ fontWeight: 700, fontSize: '0.7rem' }}
                 />
                 <Chip
                   label={report.category}
                   size="small"
                   variant="outlined"
-                  sx={{ fontSize: "0.7rem" }}
+                  sx={{ fontSize: '0.7rem' }}
                 />
               </Box>
               <Typography
                 variant="body2"
-                sx={{ color: "text.secondary", lineHeight: 1.6 }}
+                sx={{ color: 'text.secondary', lineHeight: 1.6 }}
               >
                 {report.summary}
               </Typography>
@@ -415,12 +410,8 @@ export default function PodDiagnosisDialog({
 
             {/* Root Cause + Confidence */}
             <Box>
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}
-              >
-                <CheckCircleOutlineIcon
-                  sx={{ fontSize: 20, color: "primary.main" }}
-                />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <CheckCircleOutlineIcon sx={{ fontSize: 20, color: 'primary.main' }} />
                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                   Root Cause
                 </Typography>
@@ -428,7 +419,7 @@ export default function PodDiagnosisDialog({
               <Typography
                 variant="body2"
                 sx={{
-                  color: "text.primary",
+                  color: 'text.primary',
                   fontWeight: 500,
                   mb: 1,
                   pl: 3.5,
@@ -437,19 +428,14 @@ export default function PodDiagnosisDialog({
                 {report.rootCause}
               </Typography>
               <Box sx={{ pl: 3.5 }}>
-                <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   Confidence Score
                 </Typography>
                 <ConfidenceGauge value={report.confidence} />
               </Box>
               {report.affectedContainers.length > 0 && (
-                <Box
-                  sx={{ pl: 3.5, display: "flex", gap: 0.5, flexWrap: "wrap" }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "text.secondary", mr: 0.5 }}
-                  >
+                <Box sx={{ pl: 3.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', mr: 0.5 }}>
                     Affected:
                   </Typography>
                   {report.affectedContainers.map((c) => (
@@ -458,7 +444,7 @@ export default function PodDiagnosisDialog({
                       label={c}
                       size="small"
                       variant="outlined"
-                      sx={{ fontSize: "0.65rem", height: 20 }}
+                      sx={{ fontSize: '0.65rem', height: 20 }}
                     />
                   ))}
                 </Box>
@@ -472,13 +458,13 @@ export default function PodDiagnosisDialog({
               <Box>
                 <Box
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: 1,
                     mb: 1,
                   }}
                 >
-                  <AccessTimeIcon sx={{ fontSize: 20, color: "info.main" }} />
+                  <AccessTimeIcon sx={{ fontSize: 20, color: 'info.main' }} />
                   <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                     Event Timeline
                   </Typography>
@@ -488,18 +474,18 @@ export default function PodDiagnosisDialog({
                     <Box
                       key={i}
                       sx={{
-                        display: "flex",
+                        display: 'flex',
                         gap: 1.5,
                         mb: 0.75,
-                        alignItems: "flex-start",
+                        alignItems: 'flex-start',
                       }}
                     >
                       <Typography
                         variant="caption"
                         sx={{
-                          color: "text.disabled",
-                          fontFamily: "monospace",
-                          fontSize: "0.7rem",
+                          color: 'text.disabled',
+                          fontFamily: 'monospace',
+                          fontSize: '0.7rem',
                           minWidth: 80,
                           flexShrink: 0,
                         }}
@@ -510,13 +496,13 @@ export default function PodDiagnosisDialog({
                         sx={{
                           width: 6,
                           height: 6,
-                          borderRadius: "50%",
-                          bgcolor: "primary.main",
+                          borderRadius: '50%',
+                          bgcolor: 'primary.main',
                           mt: 0.6,
                           flexShrink: 0,
                         }}
                       />
-                      <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
                         {t.event}
                       </Typography>
                     </Box>
@@ -529,17 +515,15 @@ export default function PodDiagnosisDialog({
 
             {/* Fixes */}
             <Box>
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
-              >
-                <BuildIcon sx={{ fontSize: 20, color: "warning.main" }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <BuildIcon sx={{ fontSize: 20, color: 'warning.main' }} />
                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                   Recommended Fixes
                 </Typography>
                 <Chip
                   label={`${report.fixes.length} fixes`}
                   size="small"
-                  sx={{ fontSize: "0.65rem", height: 20 }}
+                  sx={{ fontSize: '0.65rem', height: 20 }}
                 />
               </Box>
               {report.fixes.map((fix, i) => (
@@ -554,13 +538,13 @@ export default function PodDiagnosisDialog({
                 <Box>
                   <Box
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
+                      display: 'flex',
+                      alignItems: 'center',
                       gap: 1,
                       mb: 1,
                     }}
                   >
-                    <ShieldIcon sx={{ fontSize: 20, color: "success.main" }} />
+                    <ShieldIcon sx={{ fontSize: 20, color: 'success.main' }} />
                     <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                       Preventive Measures
                     </Typography>
@@ -571,10 +555,10 @@ export default function PodDiagnosisDialog({
                         key={i}
                         variant="body2"
                         sx={{
-                          fontSize: "0.8rem",
-                          color: "text.secondary",
+                          fontSize: '0.8rem',
+                          color: 'text.secondary',
                           mb: 0.5,
-                          "&::before": { content: '"• "' },
+                          '&::before': { content: '"• "' },
                         }}
                       >
                         {m}
@@ -592,16 +576,13 @@ export default function PodDiagnosisDialog({
                 <Accordion
                   disableGutters
                   sx={{
-                    bgcolor: "transparent",
-                    boxShadow: "none",
-                    "&::before": { display: "none" },
+                    bgcolor: 'transparent',
+                    boxShadow: 'none',
+                    '&::before': { display: 'none' },
                   }}
                 >
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography
-                      variant="caption"
-                      sx={{ color: "text.disabled" }}
-                    >
+                    <Typography variant="caption" sx={{ color: 'text.disabled' }}>
                       Raw Diagnostic Data
                     </Typography>
                   </AccordionSummary>
@@ -610,13 +591,13 @@ export default function PodDiagnosisDialog({
                     <Box
                       component="pre"
                       sx={{
-                        fontSize: "0.7rem",
-                        bgcolor: "rgba(0,0,0,0.3)",
+                        fontSize: '0.7rem',
+                        bgcolor: 'rgba(0,0,0,0.3)',
                         p: 2,
                         borderRadius: 1,
-                        overflow: "auto",
+                        overflow: 'auto',
                         maxHeight: 400,
-                        fontFamily: "monospace",
+                        fontFamily: 'monospace',
                       }}
                     >
                       {JSON.stringify(result.rawData, null, 2)}

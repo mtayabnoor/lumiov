@@ -1,6 +1,6 @@
 export interface Ingress {
-  apiVersion: "networking.k8s.io/v1";
-  kind: "Ingress";
+  apiVersion: 'networking.k8s.io/v1';
+  kind: 'Ingress';
   metadata: {
     name: string;
     namespace: string;
@@ -27,7 +27,7 @@ export interface Ingress {
       http?: {
         paths: Array<{
           path?: string;
-          pathType: "Prefix" | "Exact" | "ImplementationSpecific";
+          pathType: 'Prefix' | 'Exact' | 'ImplementationSpecific';
           backend: {
             service?: {
               name: string;

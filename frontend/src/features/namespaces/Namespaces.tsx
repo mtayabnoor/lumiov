@@ -1,43 +1,60 @@
-import { ResourceTableConfig } from "../../interfaces/common";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ResourceTable from "../../components/common/Table/ResourceTable";
-import { Namespace } from "../../interfaces/namespace";
-import { Box, CircularProgress, Alert } from "@mui/material";
-import ResourceLiveAge from "../../components/common/ResourceLiveAge/ResourceLiveAge";
-import PageLayout from "../../components/common/PageLayout/PageLayout";
-import { useResource } from "../../hooks/useResource";
+import type { ResourceTableConfig } from '../../interfaces/common';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ResourceTable from '../../components/common/Table/ResourceTable';
+import type { Namespace } from '../../interfaces/namespace';
+import { Box, CircularProgress, Alert } from '@mui/material';
+import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
+import PageLayout from '../../components/common/PageLayout/PageLayout';
+import { useResource } from '../../hooks/useResource';
+import { useDeleteResource } from '../../hooks/useResource';
+import ResourceDeleteConfirmDialog from '../../components/common/DeleteConfirmDialog/ResourceDeleteConfirmDialog';
+import { useState } from 'react';
 
 function Namespaces() {
-  const {
-    data: namespaces,
-    error,
-    loading,
-  } = useResource<Namespace>("namespaces");
+  const { data: namespaces, error, loading } = useResource<Namespace>('namespaces');
+  const { deleteResouce, isDeleting } = useDeleteResource();
+
+  const [selectedNamespace, setSelectedNamespace] = useState<Namespace | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const namespaceConfig: ResourceTableConfig = {
     columns: [
-      { key: "metadata.name", header: "NAME" },
+      { key: 'metadata.name', header: 'NAME' },
+      { key: 'status.phase', header: 'STATUS' },
       {
-        key: "age",
-        header: "AGE",
+        key: 'age',
+        header: 'AGE',
         accessor: (namespace: Namespace) => (
-          <ResourceLiveAge
-            creationTimestamp={namespace.metadata.creationTimestamp}
-          />
+          <ResourceLiveAge creationTimestamp={namespace.metadata.creationTimestamp} />
         ),
       },
     ],
-    actions: [{ id: "delete", label: "Delete", icon: DeleteIcon }],
+    actions: [{ id: 'delete', label: 'Delete', icon: DeleteIcon }],
+  };
+
+  const confirmDelete = () => {
+    if (selectedNamespace) {
+      deleteResouce({
+        apiVersion: 'v1',
+        kind: 'Namespace',
+        name: selectedNamespace.metadata.name,
+      });
+    }
+
+    setSelectedNamespace(null);
+    setDeleteDialogOpen(false);
   };
 
   const handleAction = (actionId: string, row: any) => {
-    console.log("Action triggered:", actionId, row);
-    // Add logic: e.g., navigate to logs, open delete dialog, etc.
+    setSelectedNamespace(row);
+    if (actionId === 'delete') {
+      setDeleteDialogOpen(true);
+    }
   };
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );
@@ -59,6 +76,16 @@ function Namespaces() {
         onAction={handleAction}
         resourceType="namespaces"
       />
+      {selectedNamespace && (
+        <ResourceDeleteConfirmDialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          onConfirm={confirmDelete}
+          resourceName={selectedNamespace.metadata.name}
+          resourceKind="Namespace"
+          isDeleting={isDeleting}
+        />
+      )}
     </PageLayout>
   );
 }

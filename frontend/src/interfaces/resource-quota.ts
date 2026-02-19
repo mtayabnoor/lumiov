@@ -1,6 +1,6 @@
 export interface ResourceQuota {
-  apiVersion: "v1";
-  kind: "ResourceQuota";
+  apiVersion: 'v1';
+  kind: 'ResourceQuota';
   metadata: {
     name: string;
     namespace: string;
