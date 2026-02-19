@@ -7,3 +7,5 @@ website
 test*
 .husky
 commands.txt
+.env
+kubernetes*
