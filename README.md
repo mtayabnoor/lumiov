@@ -19,13 +19,13 @@
     </tr>
 </table>
 
-### Demo
+### AI Demo
 
-#### Dark Theme
+#### Cluster Agent
 
 ![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-2.gif)
 
-#### Light Theme
+#### Pod Diagnosis
 
 ![Demo](https://raw.githubusercontent.com/mtayabnoor/lumiov/media/demo-lumiov-3.gif)
 
