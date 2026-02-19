@@ -1,12 +1,13 @@
 name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      release-branch:
-        description: 'Release branch to finalize (e.g. release/v2.13.0)'
-        required: true
-        type: string
+  push:
+    branches:
+      - main
+      - development
+
+permissions:
+  contents: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -15,134 +16,17 @@ concurrency:
 env:
   NODE_VERSION: '22'
 
-permissions:
-  contents: write
-
 jobs:
-  # ─── Finalize Version ──────────────────────────────────────────
-  finalize:
-    name: Finalize Version
+  release:
+    name: Semantic Release
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      tag: ${{ steps.version.outputs.tag }}
+
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.release-branch }}
-          fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - run: npm ci
-
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Merge release branch into main
-        run: |
-          git fetch origin main
-          git checkout main
-          git merge --no-ff "${{ inputs.release-branch }}" -m "chore: Merge ${{ inputs.release-branch }} into main"
-
-      - name: Bump final version & changelog
-        id: version
-        run: |
-          # commit-and-tag-version strips prerelease suffix and finalizes
-          npm run release
-
-          # Re-read version without RC suffix — strip it manually if commit-and-tag-version didn't
-          CURRENT=$(node -p "require('./package.json').version")
-          FINAL="${CURRENT%%-rc*}"
-
-          if [ "$CURRENT" != "$FINAL" ]; then
-            # Manually set the final version in all package.json files
-            npm version "$FINAL" --no-git-tag-version
-            for pkg in frontend/package.json backend/package.json electron/package.json; do
-              if [ -f "$pkg" ]; then
-                node -e "
-                  const fs = require('fs');
-                  const p = JSON.parse(fs.readFileSync('$pkg','utf8'));
-                  p.version = '$FINAL';
-                  fs.writeFileSync('$pkg', JSON.stringify(p, null, 2) + '\n');
-                "
-              fi
-            done
-            # Re-generate changelog for clean final version
-            npm run release
-          fi
-
-          VERSION="$FINAL"
-          TAG="v${VERSION}"
-
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-
-          git add -A
-          git commit -m "chore(release): Release ${TAG}" --allow-empty
-          git tag -a "${TAG}" -m "Release ${TAG}"
-          git push origin main --follow-tags
-
-  # ─── Build ─────────────────────────────────────────────────────
-  build:
-    name: Build
-    needs: finalize
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.finalize.outputs.tag }}
           fetch-depth: 0
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Install all dependencies
-        run: |
-          npm ci
-          cd frontend && npm ci
-          cd ../backend && npm ci
-          cd ../electron && npm ci
-
-      - name: Build frontend
-        run: npm run build:frontend
-
-      - name: Build backend
-        run: npm run build:backend
-
-      - name: Build Electron
-        run: npm run build:electron
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: build-artifacts
-          path: |
-            electron/dist
-            frontend/dist
-            backend/dist
-
-  # ─── Publish Release ───────────────────────────────────────────
-  publish:
-    name: Publish Release
-    needs: [finalize, build]
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.finalize.outputs.tag }}
-          fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}
-
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -150,70 +34,11 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          cd electron && npm ci
+          cd frontend && npm ci
+          cd ../backend && npm ci
+          cd ../electron && npm ci
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v7
-        with:
-          name: build-artifacts
-
-      - name: Package Electron
+      - name: Run Semantic Release
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-        run: cd electron && npm run package:publish
-
-      - name: Extract changelog entry
-        id: notes
-        shell: bash
-        run: |
-          VERSION="${{ needs.finalize.outputs.version }}"
-          ENTRY=$(awk "/^#+ \[${VERSION//./\\.}/ {flag=1; next} /^#+ \[/ {flag=0} flag" CHANGELOG.md)
-          if [ -z "$ENTRY" ]; then
-            ENTRY="Release ${{ needs.finalize.outputs.tag }}"
-          fi
-          echo "$ENTRY" > release-notes.md
-
-      - name: Create release
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        run: |
-          TAG="${{ needs.finalize.outputs.tag }}"
-          echo "🚀 Publishing ${TAG}"
-          gh release create "${TAG}" \
-            --title "🚀 Release ${TAG}" \
-            --notes-file release-notes.md \
-            2>/dev/null || \
-          gh release edit "${TAG}" \
-            --title "🚀 Release ${TAG}" \
-            --notes-file release-notes.md \
-            --draft=false \
-            --prerelease=false
-
-  # ─── Sync Development ──────────────────────────────────────────
-  sync-dev:
-    name: Sync Development
-    needs: [finalize, publish]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: development
-          fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}
-
-      - name: Merge main back into development
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git merge origin/main --no-ff --no-edit -m "chore: Merge main back into development after ${{ needs.finalize.outputs.tag }}"
-          git push origin development
-
-      - name: Clean up release branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        run: |
-          git push origin --delete "${{ inputs.release-branch }}" 2>/dev/null || true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
