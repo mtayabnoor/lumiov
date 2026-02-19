@@ -1,12 +1,4 @@
-import {
-  Box,
-  CssBaseline,
-  Toolbar,
-  AppBar,
-  Typography,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
+import { Box, Toolbar, AppBar, Typography, IconButton, Tooltip } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -26,8 +18,6 @@ function MainLayout() {
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <CssBaseline />
-
       <AppBar
         position="fixed"
         elevation={0}

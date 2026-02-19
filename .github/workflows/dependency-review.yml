@@ -2,7 +2,9 @@ name: Dependency Review
 
 on:
   pull_request:
-    branches: [development, main]
+    branches:
+      - main
+      - development
 
 permissions:
   contents: read

@@ -47,6 +47,7 @@
 - Fix namespace null metadata error ([ea8b984](https://github.com/mtayabnoor/lumiov/commit/ea8b9848ac711c5c63bf99cdb46fef6d6fb9cba9))
 - Fix Paper cmpnt borders thickness ([8ab48b9](https://github.com/mtayabnoor/lumiov/commit/8ab48b995b53a2e616c4db963aa93ec00d883f34))
 - Fix table rows divider color and icon for pod diagnosis dialog ([5c3a72f](https://github.com/mtayabnoor/lumiov/commit/5c3a72fa1ae830d07966be5e90c1309d2b4c251e))
+- Remove extra <CssBaseline /> ([69d1e9d](https://github.com/mtayabnoor/lumiov/commit/69d1e9d6e529ca09e6c2afac606cbc308872fe20))
 - Remove unused tscondifPaths() feature ([31a3b92](https://github.com/mtayabnoor/lumiov/commit/31a3b924b41a86f19f4576b04cdac7154bfbd78a))
 - Update dependency electron-builder to resolve security issue ([4874d9f](https://github.com/mtayabnoor/lumiov/commit/4874d9f85ed80eac00452d1183ae6c6573942420))
 

@@ -86,7 +86,7 @@ export default {
       {
         successComment: false,
         failComment: false,
-        assets: [{ path: 'electron/release/*.exe', label: 'Lumiov Setup(Windows x64)' }],
+        assets: [{ path: 'electron/release/*.exe', label: 'Lumiov Setup (Windows x64)' }],
       },
     ],
   ],
