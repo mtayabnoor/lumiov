@@ -1,4 +1,4 @@
-import { type PaletteMode, alpha } from '@mui/material';
+import { type PaletteMode } from '@mui/material';
 
 // ----------------------------------------------------------------------
 // 1. PRIMITIVES (The DNA)
@@ -9,9 +9,9 @@ const COLORS = {
     paper: '#212121',
     divider: '#383838ff',
     text: {
-      primary: '#dcdcdc',
-      secondary: '#dcdcdc',
-      disabled: '#dcdcdc',
+      primary: '#ffffffff',
+      secondary: '#ffffffff',
+      disabled: '#ffffffff',
     },
     action: {
       hover: '#313131ff',
@@ -99,7 +99,7 @@ const COLORS = {
   brand: {
     blue: '#0969da',
     green: '#1a7f37',
-    contrastText: '#fff',
+    contrastText: '#9b9b9bff',
   },
 };
 

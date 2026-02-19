@@ -967,7 +967,6 @@ export default function PodLogsDrawer({
                 variant="subtitle2"
                 sx={{
                   fontWeight: 600,
-                  color: DRAWER_STYLES.text.primary,
                   lineHeight: 1.2,
                 }}
               >
@@ -976,7 +975,7 @@ export default function PodLogsDrawer({
               <Typography
                 variant="caption"
                 sx={{
-                  color: DRAWER_STYLES.text.muted,
+                  color: 'primary.contrastText',
                   fontFamily: 'monospace',
                   fontSize: '0.7rem',
                 }}
@@ -991,12 +990,7 @@ export default function PodLogsDrawer({
             <>
               <Divider orientation="vertical" flexItem sx={DIVIDER_SX} />
               <Box display="flex" alignItems="center" gap={1}>
-                <Typography
-                  variant="caption"
-                  sx={{ color: DRAWER_STYLES.text.secondary, fontWeight: 500 }}
-                >
-                  Container:
-                </Typography>
+                <Typography variant="caption">Container:</Typography>
                 <FormControl size="small" sx={{ minWidth: 140 }}>
                   <Select
                     value={selectedContainer}
@@ -1006,8 +1000,6 @@ export default function PodLogsDrawer({
                     }}
                     displayEmpty
                     variant="outlined"
-                    sx={getSelectSx(theme.palette.primary.main)}
-                    MenuProps={getMenuProps()}
                   >
                     {/* All Containers option */}
                     <MenuItem value="all">
@@ -1057,9 +1049,7 @@ export default function PodLogsDrawer({
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon
-                      sx={{ color: DRAWER_STYLES.controls.icon, fontSize: 18 }}
-                    />
+                    <SearchIcon />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -1069,9 +1059,6 @@ export default function PodLogsDrawer({
                         size="small"
                         onClick={() => setIsRegex(!isRegex)}
                         sx={{
-                          color: isRegex
-                            ? theme.palette.primary.main
-                            : DRAWER_STYLES.controls.icon,
                           p: 0.5,
                         }}
                       >
@@ -1086,19 +1073,18 @@ export default function PodLogsDrawer({
               width: 220,
               '& .MuiOutlinedInput-root': {
                 height: 32,
-                color: DRAWER_STYLES.text.primary,
+
                 fontSize: '0.875rem',
-                bgcolor: DRAWER_STYLES.controls.inputBg,
+                bgcolor: 'transparent',
+                border: 'none',
                 '& fieldset': {
-                  borderColor: isRegex
-                    ? theme.palette.primary.main
-                    : DRAWER_STYLES.controls.inputBorder,
+                  borderColor: 'primary.contrastText',
                 },
                 '&:hover fieldset': {
-                  borderColor: DRAWER_STYLES.controls.inputBorderHover,
+                  borderColor: 'primary.main',
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: theme.palette.primary.main,
+                  borderColor: 'primary.main',
                 },
               },
             }}
@@ -1363,7 +1349,7 @@ export default function PodLogsDrawer({
           flex: 1,
           position: 'relative',
           minHeight: 0,
-          bgcolor: DRAWER_STYLES.paper.bodyBg,
+          bgcolor: 'black',
         }}
       >
         {error && (

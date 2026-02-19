@@ -58,20 +58,16 @@ export const DRAWER_STYLES = {
 // Common drawer paper props
 export const getDrawerPaperSx = (height: string) => ({
   height,
-  bgcolor: DRAWER_STYLES.paper.bgcolor,
   color: DRAWER_STYLES.text.primary,
   display: 'flex',
   flexDirection: 'column' as const,
   transition: 'height 0.3s ease-in-out',
-  borderTopLeftRadius: 12,
-  borderTopRightRadius: 12,
   borderTop: `1px solid ${DRAWER_STYLES.border.color}`,
 });
 
 // Common header styles
 export const DRAWER_HEADER_SX = {
   p: 1.5,
-  bgcolor: DRAWER_STYLES.paper.headerBg,
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
@@ -80,23 +76,10 @@ export const DRAWER_HEADER_SX = {
 };
 
 // Common select styles
-export const getSelectSx = (primaryColor: string) => ({
+export const getSelectSx = () => ({
   height: 32,
   color: DRAWER_STYLES.text.primary,
   fontSize: '0.875rem',
-  bgcolor: DRAWER_STYLES.controls.inputBg,
-  '.MuiOutlinedInput-notchedOutline': {
-    borderColor: DRAWER_STYLES.controls.inputBorder,
-  },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: DRAWER_STYLES.controls.inputBorderHover,
-  },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: primaryColor,
-  },
-  '.MuiSvgIcon-root': {
-    color: DRAWER_STYLES.controls.icon,
-  },
 });
 
 // Common menu props

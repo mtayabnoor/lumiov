@@ -20,11 +20,13 @@ export const InputComponents = (theme: Theme): Components => {
             borderColor: theme.palette.divider,
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: theme.palette.text.primary,
+            borderColor: theme.palette.action.hover,
+          },
+          '& .MuiMenuItem-root.Mui-selected': {
+            backgroundColor: theme.palette.action.selected,
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: theme.palette.primary.main,
-            boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
+            borderColor: theme.palette.action.selected,
           },
         },
         //input: { padding: '8px 12px' },

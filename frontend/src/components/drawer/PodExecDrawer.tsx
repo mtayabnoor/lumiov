@@ -121,7 +121,7 @@ export default function PodExecDrawer({
       const term = new Terminal({
         cursorBlink: true,
         theme: {
-          background: DRAWER_STYLES.paper.bodyBg,
+          background: 'black',
           foreground: '#e6e6e6',
           cursor: cursorColor,
         },
@@ -237,7 +237,6 @@ export default function PodExecDrawer({
                 variant="subtitle2"
                 sx={{
                   fontWeight: 600,
-                  color: DRAWER_STYLES.text.primary,
                   lineHeight: 1.2,
                 }}
               >
@@ -246,7 +245,7 @@ export default function PodExecDrawer({
               <Typography
                 variant="caption"
                 sx={{
-                  color: DRAWER_STYLES.text.muted,
+                  color: 'primary.contrastText',
                   fontFamily: 'monospace',
                   fontSize: '0.7rem',
                 }}
@@ -260,20 +259,22 @@ export default function PodExecDrawer({
             <>
               <Divider orientation="vertical" flexItem sx={DIVIDER_SX} />
               <Box display="flex" alignItems="center" gap={1}>
-                <Typography
-                  variant="caption"
-                  sx={{ color: DRAWER_STYLES.text.secondary, fontWeight: 500 }}
-                >
-                  Container:
-                </Typography>
-                <FormControl size="small" sx={{ minWidth: 140 }}>
+                <Typography variant="caption">Container:</Typography>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
                   <Select
                     value={selectedContainer}
                     onChange={(e) => setSelectedContainer(e.target.value)}
                     displayEmpty
                     variant="outlined"
-                    sx={getSelectSx(theme.palette.primary.main)}
-                    MenuProps={getMenuProps()}
+                    MenuProps={{
+                      sx: {
+                        '& .MuiPaper-root': {
+                          '& .MuiMenuItem-root.Mui-selected': {
+                            backgroundColor: 'action.selected',
+                          },
+                        },
+                      },
+                    }}
                   >
                     {containers.map((c) => (
                       <MenuItem key={c.name} value={c.name}>
@@ -317,7 +318,7 @@ export default function PodExecDrawer({
           position: 'relative',
           p: 1,
           minHeight: 0,
-          bgcolor: DRAWER_STYLES.paper.bodyBg,
+          bgcolor: 'black',
         }}
       >
         {error && (
