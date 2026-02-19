@@ -20,7 +20,8 @@ jobs:
   release:
     name: Release
     runs-on: windows-latest
-
+    outputs:
+      tag: ${{ steps.get_version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,6 +45,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: npx semantic-release --ci
 
+      - name: Get new version tag
+        id: get_version
+        shell: bash
+        run: |
+          git fetch --tags
+          echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+
   sync-dev:
     name: Sync Dev After Stable Release
     runs-on: ubuntu-latest
@@ -61,5 +69,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
-          git merge origin/main --no-ff --no-edit -m "chore: Merge main back into development after ${{ needs.finalize.outputs.tag }}"
+          git merge origin/main --no-ff --no-edit -m "chore: Merge main back into development after ${{ needs.release.outputs.tag }}"
           git push origin development
