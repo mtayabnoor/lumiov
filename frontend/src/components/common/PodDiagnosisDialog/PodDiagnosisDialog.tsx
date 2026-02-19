@@ -5,7 +5,7 @@
  * Shows root cause, confidence score, severity, timeline, fixes, and raw data.
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import BiotechIcon from '@mui/icons-material/Biotech';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -306,7 +306,7 @@ export default function PodDiagnosisDialog({
           pb: 1,
         }}
       >
-        <BiotechIcon sx={{ color: 'primary.main' }} />
+        <SmartToyIcon sx={{ color: '#b42323ff' }} />
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>
             Pod Diagnosis

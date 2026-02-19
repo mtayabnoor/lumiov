@@ -53,7 +53,7 @@ const COLORS = {
   light: {
     background: '#ffffff',
     paper: '#ffffff',
-    divider: '#f3f3f3',
+    divider: '#acaaaaff',
     text: {
       primary: '#000000',
       secondary: '#000000',
