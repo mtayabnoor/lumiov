@@ -37,8 +37,8 @@
     "type-check:all": "npm run type-check:frontend && npm run type-check:backend && npm run type-check:electron"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.4.1",
-    "@commitlint/config-conventional": "^20.4.1",
+    "@commitlint/cli": "^20.4.2",
+    "@commitlint/config-conventional": "^20.4.2",
     "commit-and-tag-version": "12.6.1",
     "concurrently": "^8.2.0",
     "husky": "^9.0.0",
