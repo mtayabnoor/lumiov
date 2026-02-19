@@ -7,7 +7,7 @@ export const SurfaceComponents = (theme: Theme): Components => {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          //border: `1px solid ${theme.palette.divider}`,
+          border: `1px solid ${theme.palette.divider}`,
           borderRadius: 0,
           color: theme.palette.background.paper,
         },
