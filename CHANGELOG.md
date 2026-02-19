@@ -1,3 +1,9 @@
+## [1.3.0-rc.1](https://github.com/mtayabnoor/lumiov/compare/v1.2.0...v1.3.0-rc.1) (2026-02-19)
+
+### ✨ Features
+
+- Improved ui of a pod analysis dialog ([59933b5](https://github.com/mtayabnoor/lumiov/commit/59933b5eda4050efeeb1a50dc5710cc1b77028ed))
+
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
