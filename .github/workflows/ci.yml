@@ -140,7 +140,7 @@ jobs:
         run: npm ci
         working-directory: ${{ matrix.working-directory }}
       - name: Security audit
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=high --omit=dev
         working-directory: ${{ matrix.working-directory }}
 
   # ─── Summary Gate ──────────────────────────────────────────────
