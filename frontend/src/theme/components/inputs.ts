@@ -8,14 +8,14 @@ export const InputComponents = (theme: Theme): Components => {
         root: {
           textTransform: 'none',
           fontWeight: 500,
-          borderRadius: 4,
+          borderRadius: 0,
         },
       },
     },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: 4,
+          borderRadius: 0,
           '& .MuiOutlinedInput-notchedOutline': {
             borderColor: theme.palette.divider,
           },

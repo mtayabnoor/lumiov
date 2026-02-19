@@ -11,7 +11,7 @@ export const getAppTheme = (mode: PaletteMode): Theme => {
   const baseTheme = createTheme({
     palette,
     typography,
-    shape: { borderRadius: 4 },
+    shape: { borderRadius: 0 },
   });
 
   // 2. Inject Components (Now they rely 100% on baseTheme variables)

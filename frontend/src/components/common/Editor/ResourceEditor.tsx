@@ -254,7 +254,6 @@ function ResourceEditor({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          bgcolor: isDark ? alpha('#000', 0.2) : alpha('#000', 0.03),
         }}
       >
         <Box>

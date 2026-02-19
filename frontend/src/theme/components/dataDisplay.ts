@@ -11,8 +11,8 @@ export const DataDisplayComponents = (theme: Theme): Components => {
         head: {
           fontWeight: 600,
           // Using our custom semantic token
-          backgroundColor: theme.palette.neutral.main,
-          color: theme.palette.text.secondary,
+          backgroundColor: theme.palette.components.table.cell.headerBackgroundColor,
+          color: theme.palette.components.table.cell.headerColor,
         },
       },
     },

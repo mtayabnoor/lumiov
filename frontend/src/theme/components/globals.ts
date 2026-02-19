@@ -5,19 +5,18 @@ export const GlobalComponents = (theme: Theme): Components => {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          scrollbarColor: `${theme.palette.scrollbar.thumb} ${theme.palette.scrollbar.track}`,
+          scrollbarColor: `${theme.palette.components.common.scrollbar.thumb} ${theme.palette.components.common.scrollbar.track}`,
           '&::-webkit-scrollbar': { width: 10, height: 10 },
           '&::-webkit-scrollbar-thumb': {
-            borderRadius: 4,
-            backgroundColor: theme.palette.scrollbar.thumb,
-            border: `2px solid ${theme.palette.background.default}`, // Creates padding effect
+            backgroundColor: theme.palette.components.common.scrollbar.thumb,
+            border: `2px solid ${theme.palette.components.common.border.color}`,
             backgroundClip: 'content-box',
             '&:hover': {
-              backgroundColor: theme.palette.scrollbar.thumbHover,
+              backgroundColor: theme.palette.components.common.scrollbar.thumbHover,
             },
           },
           '&::-webkit-scrollbar-track': {
-            backgroundColor: theme.palette.scrollbar.track,
+            backgroundColor: theme.palette.components.common.scrollbar.track,
           },
         },
       },

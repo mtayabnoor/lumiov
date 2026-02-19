@@ -4,27 +4,102 @@ import { type PaletteMode, alpha } from '@mui/material';
 // 1. PRIMITIVES (The DNA)
 // ----------------------------------------------------------------------
 const COLORS = {
-  slate: {
-    50: '#f8fafc', // Very subtle grey (Paper)
-    100: '#f1f5f9', // App Background
-    200: '#e2e8f0', // Borders
-    300: '#cbd5e1', // Disabled
-    400: '#94a3b8',
-    500: '#64748b', // Icons
-    600: '#475569',
-    700: '#334155', // Text Primary
-    800: '#1e293b', // Tooltips
-    900: '#0f172a',
-  },
   dark: {
-    bg: '#1e1e1e', // VS Code Main
-    paper: '#252526', // VS Code Sidebar
-    border: '#333333',
-    text: '#cccccc',
+    background: '#212121',
+    paper: '#212121',
+    divider: '#383838ff',
+    text: {
+      primary: '#dcdcdc',
+      secondary: '#dcdcdc',
+      disabled: '#dcdcdc',
+    },
+    action: {
+      hover: '#313131ff',
+      selected: '#494949ff',
+    },
+    components: {
+      common: {
+        border: {
+          color: '#383838ff',
+        },
+        scrollbar: {
+          thumb: '#7e7e7eff',
+          track: '#131313',
+          thumbHover: '#7e7e7eff',
+        },
+        tooltip: {
+          background: '#131313',
+          color: '#dcdcdc',
+        },
+        menu: {
+          background: '#131313',
+          color: '#dcdcdc',
+          border: '#131313',
+        },
+      },
+      appbar: { background: '#131313', border: '#131313' },
+      drawer: { background: '#131313', border: '#131313' },
+      table: {
+        cell: {
+          headerBackgroundColor: '#131313',
+          headerColor: '#dcdcdc',
+        },
+        row: {
+          hoverBackgroundColor: '#303030',
+        },
+      },
+    },
+  },
+  light: {
+    background: '#ffffff',
+    paper: '#ffffff',
+    divider: '#f3f3f3',
+    text: {
+      primary: '#000000',
+      secondary: '#000000',
+      disabled: '#000000',
+    },
+    action: {
+      hover: '#c7c7c7ff',
+      selected: '#ccccccff',
+    },
+    components: {
+      common: {
+        border: {
+          color: '#f3f3f3',
+        },
+        scrollbar: {
+          thumb: '#aeaeae',
+          track: '#f3f3f3',
+          thumbHover: '#919191ff',
+        },
+        tooltip: {
+          background: '#f3f3f3',
+          color: '#0e0e0eff',
+        },
+        menu: {
+          background: '#f3f3f3',
+          color: '#0e0e0eff',
+          border: '#f3f3f3',
+        },
+      },
+      appbar: { background: '#f3f3f3', border: '#f3f3f3' },
+      drawer: { background: '#f3f3f3', border: '#f3f3f3' },
+      table: {
+        cell: {
+          headerBackgroundColor: '#f3f3f3',
+          headerColor: '#0e0e0eff',
+        },
+        row: {
+          hoverBackgroundColor: '#dfdfdf',
+        },
+      },
+    },
   },
   brand: {
     blue: '#0969da',
     green: '#1a7f37',
+    contrastText: '#fff',
   },
 };
 
@@ -34,65 +109,119 @@ const COLORS = {
 
 const getLightPalette = () => ({
   // Standard MUI
-  primary: { main: COLORS.brand.blue, contrastText: '#fff' },
-  secondary: { main: COLORS.brand.green, contrastText: '#fff' },
+  primary: { main: COLORS.brand.blue, contrastText: COLORS.brand.contrastText },
+  secondary: { main: COLORS.brand.green, contrastText: COLORS.brand.contrastText },
   background: {
-    default: COLORS.slate[100], // Light Grey Canvas
-    paper: '#ffffff', // Pure White Cards
+    default: COLORS.light.background,
+    paper: COLORS.light.paper,
   },
   text: {
-    primary: COLORS.slate[900],
-    secondary: COLORS.slate[500],
-    disabled: COLORS.slate[300],
+    primary: COLORS.light.text.primary,
+    secondary: COLORS.light.text.secondary,
+    disabled: COLORS.light.text.disabled,
   },
-  divider: COLORS.slate[200],
+  divider: COLORS.light.divider,
   action: {
-    hover: alpha(COLORS.slate[500], 0.08),
-    selected: alpha(COLORS.slate[500], 0.16),
+    hover: COLORS.light.action.hover,
+    selected: COLORS.light.action.selected,
   },
 
-  // Custom Semantic Tokens
-  neutral: { main: COLORS.slate[200], dark: COLORS.slate[200], light: COLORS.slate[50] },
-  sidebar: {
-    background: COLORS.slate[50], // Slightly off-white for sidebar
-    border: COLORS.slate[200],
-  },
-  scrollbar: {
-    thumb: COLORS.slate[300],
-    thumbHover: COLORS.slate[400],
-    track: 'transparent',
+  components: {
+    common: {
+      border: {
+        color: COLORS.light.components.common.border.color,
+      },
+      scrollbar: {
+        thumb: COLORS.light.components.common.scrollbar.thumb,
+        track: COLORS.light.components.common.scrollbar.track,
+        thumbHover: COLORS.light.components.common.scrollbar.thumbHover,
+      },
+      tooltip: {
+        background: COLORS.light.components.common.tooltip.background,
+        color: COLORS.light.components.common.tooltip.color,
+      },
+      menu: {
+        background: COLORS.light.components.common.menu.background,
+        color: COLORS.light.components.common.menu.color,
+        border: COLORS.light.components.common.menu.border,
+      },
+    },
+    appbar: {
+      background: COLORS.light.components.appbar.background,
+      border: COLORS.light.components.appbar.border,
+    },
+    drawer: {
+      background: COLORS.light.components.drawer.background,
+      border: COLORS.light.components.drawer.border,
+    },
+    table: {
+      cell: {
+        headerBackgroundColor: COLORS.light.components.table.cell.headerBackgroundColor,
+        headerColor: COLORS.light.components.table.cell.headerColor,
+      },
+      row: {
+        hoverBackgroundColor: COLORS.light.components.table.row.hoverBackgroundColor,
+      },
+    },
   },
 });
 
 const getDarkPalette = () => ({
   // Standard MUI
-  primary: { main: '#007acc', contrastText: '#fff' }, // VS Code Blue
-  secondary: { main: COLORS.brand.green, contrastText: '#fff' },
+  primary: { main: COLORS.brand.blue, contrastText: COLORS.brand.contrastText },
+  secondary: { main: COLORS.brand.green, contrastText: COLORS.brand.contrastText },
   background: {
-    default: COLORS.dark.bg,
-    paper: COLORS.dark.bg, // In dark mode, paper blends more
+    default: COLORS.dark.background,
+    paper: COLORS.dark.paper,
   },
   text: {
-    primary: COLORS.dark.text,
-    secondary: alpha(COLORS.dark.text, 0.7),
-    disabled: alpha(COLORS.dark.text, 0.5),
+    primary: COLORS.dark.text.primary,
+    secondary: COLORS.dark.text.secondary,
+    disabled: COLORS.dark.text.disabled,
   },
-  divider: COLORS.dark.border,
+  divider: COLORS.dark.divider,
   action: {
-    hover: alpha('#fff', 0.04),
-    selected: alpha('#fff', 0.08),
+    hover: COLORS.dark.action.hover,
+    selected: COLORS.dark.action.selected,
   },
 
-  // Custom Semantic Tokens
-  neutral: { main: COLORS.dark.paper, dark: '#000', light: '#333' },
-  sidebar: {
-    background: COLORS.dark.paper,
-    border: COLORS.dark.border,
-  },
-  scrollbar: {
-    thumb: '#424242',
-    thumbHover: '#585858',
-    track: 'transparent',
+  components: {
+    common: {
+      border: {
+        color: COLORS.dark.components.common.border.color,
+      },
+      scrollbar: {
+        thumb: COLORS.dark.components.common.scrollbar.thumb,
+        track: COLORS.dark.components.common.scrollbar.track,
+        thumbHover: COLORS.dark.components.common.scrollbar.thumbHover,
+      },
+      tooltip: {
+        background: COLORS.dark.components.common.tooltip.background,
+        color: COLORS.dark.components.common.tooltip.color,
+      },
+      menu: {
+        background: COLORS.dark.components.common.menu.background,
+        color: COLORS.dark.components.common.menu.color,
+        border: COLORS.dark.components.common.menu.border,
+      },
+    },
+    appbar: {
+      background: COLORS.dark.components.appbar.background,
+      border: COLORS.dark.components.appbar.border,
+    },
+    drawer: {
+      background: COLORS.dark.components.drawer.background,
+      border: COLORS.dark.components.drawer.border,
+    },
+    table: {
+      cell: {
+        headerBackgroundColor: COLORS.dark.components.table.cell.headerBackgroundColor,
+        headerColor: COLORS.dark.components.table.cell.headerColor,
+      },
+      row: {
+        hoverBackgroundColor: COLORS.dark.components.table.row.hoverBackgroundColor,
+      },
+    },
   },
 });
 

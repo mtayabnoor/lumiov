@@ -52,8 +52,9 @@ function Sidebar() {
                 <ListItemButton
                   onClick={() => handleToggle(group.title)}
                   sx={{
-                    bgcolor: isChildActive ? 'action.selected' : 'inherit',
+                    bgcolor: isChildActive ? 'background.paper' : 'inherit',
                     fontWeight: isChildActive ? 600 : 400,
+                    color: 'grey',
                   }}
                 >
                   <ListItemIcon>{iconMapping[group.icon] || <DnsIcon />}</ListItemIcon>
@@ -68,9 +69,9 @@ function Sidebar() {
                     disablePadding
                     sx={{
                       ml: 2,
-                      borderLeft: '1px solid',
+                      //borderLeft: '5px solid',
                       borderColor: 'divider',
-                      bgcolor: 'action.hover',
+                      bgcolor: 'background.paper',
                       py: 0.5,
                     }}
                   >
@@ -85,14 +86,14 @@ function Sidebar() {
                           borderRadius: 1,
                           mx: 1,
                           '&.Mui-selected': {
-                            bgcolor: 'primary.main',
+                            bgcolor: 'action.selected',
                             color: 'primary.contrastText',
                             '& .MuiListItemIcon-root': {
                               color: 'primary.contrastText',
                             },
                           },
                           '&:hover': {
-                            bgcolor: 'action.selected',
+                            bgcolor: 'action.hover',
                           },
                         }}
                       >
