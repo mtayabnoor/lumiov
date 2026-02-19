@@ -34,7 +34,11 @@
     "type-check:frontend": "cd frontend && npm run type-check",
     "type-check:backend": "cd backend && npm run type-check",
     "type-check:electron": "cd electron && npm run type-check",
-    "type-check:all": "npm run type-check:frontend && npm run type-check:backend && npm run type-check:electron"
+    "type-check:all": "npm run type-check:frontend && npm run type-check:backend && npm run type-check:electron",
+    "audit:frontend": "cd frontend && npm audit --omit=dev",
+    "audit:backend": "cd backend && npm audit --omit=dev",
+    "audit:electron": "cd electron && npm audit --omit=dev",
+    "audit:all": "npm audit --omit=dev && npm run audit:frontend && npm run audit:backend && npm run audit:electron"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.4.2",
