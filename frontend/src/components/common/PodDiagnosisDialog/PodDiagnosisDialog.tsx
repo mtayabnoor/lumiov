@@ -306,12 +306,10 @@ export default function PodDiagnosisDialog({
           pb: 1,
         }}
       >
-        <SmartToyIcon sx={{ color: '#b42323ff' }} />
+        <SmartToyIcon sx={{ fontSize: 32, color: '#b42323ff' }} />
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>
-            Pod Diagnosis
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Typography variant="h4">Pod Diagnosis</Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             {namespace}/{podName}
           </Typography>
         </Box>
@@ -336,13 +334,12 @@ export default function PodDiagnosisDialog({
             }}
           >
             <CircularProgress size={48} />
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <Typography variant="body2">
               Collecting pod data and running AI analysis...
             </Typography>
             <Typography
               variant="caption"
               sx={{
-                color: 'text.disabled',
                 maxWidth: 400,
                 textAlign: 'center',
               }}
@@ -382,7 +379,7 @@ export default function PodDiagnosisDialog({
                     fontSize: 20,
                   }}
                 />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, flexGrow: 1 }}>
+                <Typography variant="h4" sx={{ flexGrow: 1 }}>
                   Summary
                 </Typography>
                 <Chip
@@ -412,25 +409,13 @@ export default function PodDiagnosisDialog({
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                 <CheckCircleOutlineIcon sx={{ fontSize: 20, color: 'primary.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                  Root Cause
-                </Typography>
+                <Typography variant="h4">Root Cause</Typography>
               </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'text.primary',
-                  fontWeight: 500,
-                  mb: 1,
-                  pl: 3.5,
-                }}
-              >
+              <Typography variant="body2" sx={{ mb: 1, pl: 3.5 }}>
                 {report.rootCause}
               </Typography>
               <Box sx={{ pl: 3.5 }}>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                  Confidence Score
-                </Typography>
+                <Typography variant="h5">Confidence Score</Typography>
                 <ConfidenceGauge value={report.confidence} />
               </Box>
               {report.affectedContainers.length > 0 && (
@@ -465,9 +450,7 @@ export default function PodDiagnosisDialog({
                   }}
                 >
                   <AccessTimeIcon sx={{ fontSize: 20, color: 'info.main' }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                    Event Timeline
-                  </Typography>
+                  <Typography variant="h4">Event Timeline</Typography>
                 </Box>
                 <Box sx={{ pl: 3.5 }}>
                   {report.timeline.map((t, i) => (
@@ -475,18 +458,16 @@ export default function PodDiagnosisDialog({
                       key={i}
                       sx={{
                         display: 'flex',
-                        gap: 1.5,
-                        mb: 0.75,
+                        gap: 2,
+
                         alignItems: 'flex-start',
                       }}
                     >
                       <Typography
-                        variant="caption"
+                        variant="body2"
                         sx={{
-                          color: 'text.disabled',
                           fontFamily: 'monospace',
-                          fontSize: '0.7rem',
-                          minWidth: 80,
+                          minWidth: 100,
                           flexShrink: 0,
                         }}
                       >
@@ -498,11 +479,11 @@ export default function PodDiagnosisDialog({
                           height: 6,
                           borderRadius: '50%',
                           bgcolor: 'primary.main',
-                          mt: 0.6,
+                          mt: 0.9,
                           flexShrink: 0,
                         }}
                       />
-                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
                         {t.event}
                       </Typography>
                     </Box>
@@ -517,9 +498,7 @@ export default function PodDiagnosisDialog({
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <BuildIcon sx={{ fontSize: 20, color: 'warning.main' }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                  Recommended Fixes
-                </Typography>
+                <Typography variant="h4">Recommended Fixes</Typography>
                 <Chip
                   label={`${report.fixes.length} fixes`}
                   size="small"
@@ -545,9 +524,7 @@ export default function PodDiagnosisDialog({
                     }}
                   >
                     <ShieldIcon sx={{ fontSize: 20, color: 'success.main' }} />
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                      Preventive Measures
-                    </Typography>
+                    <Typography variant="h4">Preventive Measures</Typography>
                   </Box>
                   <Box sx={{ pl: 3.5 }}>
                     {report.preventiveMeasures.map((m, i) => (
@@ -582,9 +559,7 @@ export default function PodDiagnosisDialog({
                   }}
                 >
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-                      Raw Diagnostic Data
-                    </Typography>
+                    <Typography variant="h6">Raw Diagnostic Data</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     {/* Raw Data View */}

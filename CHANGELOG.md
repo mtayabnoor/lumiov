@@ -1,19 +1,14 @@
-# Changelog
+## [1.2.0-rc.1](https://github.com/mtayabnoor/lumiov/compare/v1.1.1...v1.2.0-rc.1) (2026-02-19)
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
-
-## [1.2.0](https://github.com/mtayabnoor/lumiov/compare/v1.2.0-rc.0...v1.2.0) (2026-02-19)
-
-## [1.2.0-rc.0](https://github.com/mtayabnoor/lumiov/compare/v1.1.1...v1.2.0-rc.0) (2026-02-19)
-
-### Features
+### ✨ Features
 
 - Added delete confirmation dialog ([98db620](https://github.com/mtayabnoor/lumiov/commit/98db620e8e3e98ca06764c3cd5990bd3d614adf2))
 - Implement centralized core application layout and MUI theming with light and dark modes ([0a12d62](https://github.com/mtayabnoor/lumiov/commit/0a12d62fb17e01914c3ac456fe8448be6455a264))
 - Improved code for centralized core app layout and MUI theming ([f81d5a7](https://github.com/mtayabnoor/lumiov/commit/f81d5a793f754099554eebeefcaaf8b3858b8120))
 - Improved code for centralized theming and enhanced colors ([ea6649b](https://github.com/mtayabnoor/lumiov/commit/ea6649b24f7fc12aaaf82208f62805b3dab69226))
+- Improved ui of a pod analysis dialog ([59933b5](https://github.com/mtayabnoor/lumiov/commit/59933b5eda4050efeeb1a50dc5710cc1b77028ed))
 
-### Bug Fixes
+### 🐞 Bug Fixes
 
 - Add explicit type imports for verbatimModuleSyntax ([30bd197](https://github.com/mtayabnoor/lumiov/commit/30bd197d901d38949390550d6c101c324dbae301))
 - Fix agent panel css and update deprecated PaperProps ([5c8b99f](https://github.com/mtayabnoor/lumiov/commit/5c8b99f6423ba1d19030114721e6f62c327eb2fc))
@@ -27,14 +22,6 @@ All notable changes to this project will be documented in this file. See [standa
 - Remove unused tscondifPaths() feature ([31a3b92](https://github.com/mtayabnoor/lumiov/commit/31a3b924b41a86f19f4576b04cdac7154bfbd78a))
 - Update dependency electron-builder to resolve security issue ([4874d9f](https://github.com/mtayabnoor/lumiov/commit/4874d9f85ed80eac00452d1183ae6c6573942420))
 
-### Performance Improvements
+### ⚡ Performance Improvements
 
 - Consolidate state management and remove redundant hooks ([b9f8920](https://github.com/mtayabnoor/lumiov/commit/b9f8920939b7fe9b5c6b476b015098174cc05826))
-
-### [1.1.1](https://github.com/mtayabnoor/lumiov/compare/v1.1.1-rc.0...v1.1.1) (2026-02-16)
-
-### [1.1.1-rc.0](https://github.com/mtayabnoor/lumiov/compare/v1.1.0...v1.1.1-rc.0) (2026-02-16)
-
-### Bug Fixes
-
-- Update text and icon's color for agent panel and config modal according to theme ([d63b17d](https://github.com/mtayabnoor/lumiov/commit/d63b17da42e80dd13d96271248269ce40850edb1))

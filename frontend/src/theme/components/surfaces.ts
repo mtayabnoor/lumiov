@@ -9,7 +9,7 @@ export const SurfaceComponents = (theme: Theme): Components => {
           backgroundImage: 'none',
           border: `1px solid ${theme.palette.divider}`,
           borderRadius: 0,
-          color: theme.palette.background.paper,
+          color: theme.palette.text.primary,
         },
       },
     },
