@@ -36,7 +36,7 @@ export default {
         presetConfig: {
           types: [
             { type: 'feat', section: '✨ Features', hidden: false },
-            { type: 'fix', section: '🐛 Bug Fixes', hidden: false },
+            { type: 'fix', section: '🐞 Bug Fixes', hidden: false },
             { type: 'perf', section: '⚡ Performance Improvements', hidden: false },
 
             // hide unwanted types
@@ -67,7 +67,6 @@ export default {
     [
       '@semantic-release/git',
       {
-        successComment: false,
         assets: [
           'package.json',
           'package-lock.json',
@@ -86,7 +85,9 @@ export default {
     [
       '@semantic-release/github',
       {
-        assets: [{ path: 'electron/release/*.exe', label: 'Windows Installer' }],
+        successComment: false,
+        failComment: false,
+        assets: [{ path: 'electron/release/*.exe', label: 'Lumiov Setup(Windows x64)' }],
       },
     ],
   ],
