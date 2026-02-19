@@ -59,7 +59,8 @@ export default {
     [
       '@semantic-release/exec',
       {
-        prepareCmd: 'node scripts/update-versions.js ${nextRelease.version}',
+        prepareCmd:
+          'node scripts/update-versions.js ${nextRelease.version} && npm run build && npm run package',
       },
     ],
 
@@ -69,16 +70,23 @@ export default {
         assets: [
           'package.json',
           'package-lock.json',
-          'CHANGELOG.md',
           'frontend/package.json',
+          'frontend/package-lock.json',
           'backend/package.json',
+          'backend/package-lock.json',
           'electron/package.json',
+          'electron/package-lock.json',
+          'CHANGELOG.md',
         ],
-        message:
-          'chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
+        message: 'chore(release): ${nextRelease.version} [skip ci]',
       },
     ],
 
-    '@semantic-release/github',
+    [
+      '@semantic-release/github',
+      {
+        assets: [{ path: 'electron/release/*.exe', label: 'Windows Installer' }],
+      },
+    ],
   ],
 };
