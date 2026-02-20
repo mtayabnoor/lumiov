@@ -9,6 +9,7 @@ export const InputComponents = (theme: Theme): Components => {
           textTransform: 'none',
           fontWeight: 500,
           borderRadius: 0,
+          color: 'white',
         },
       },
     },
