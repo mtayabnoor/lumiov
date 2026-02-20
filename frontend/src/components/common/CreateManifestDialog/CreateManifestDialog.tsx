@@ -326,18 +326,16 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-            Create & Apply Manifest
-          </Typography>
+          <Typography variant="h3">Create / Apply</Typography>
 
           {/* Template Selector */}
           <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel sx={{ fontSize: '13px' }}>Template</InputLabel>
+            <InputLabel sx={{ fontSize: '14px' }}>Template</InputLabel>
             <Select
               value={template}
               label="Template"
               onChange={(e) => handleTemplateChange(e.target.value)}
-              sx={{ fontSize: '13px', height: 34 }}
+              sx={{ fontSize: '16px', height: 34 }}
             >
               {Object.entries(TEMPLATES).map(([key, tmpl]) => (
                 <MenuItem key={key} value={key} sx={{ fontSize: '13px' }}>
@@ -389,28 +387,16 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
 
           {/* Apply Button */}
           <Button
-            startIcon={
-              applying ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : (
-                <RocketLaunchIcon />
-              )
-            }
+            startIcon={applying ? <CircularProgress size={16} color="inherit" /> : ''}
             variant="contained"
             size="small"
             disabled={applying}
             onClick={handleApply}
             sx={{
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 2.5,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              '&:hover': {
-                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
-              },
+              width: 150,
             }}
           >
-            {applying ? 'Applying...' : 'Apply to Cluster'}
+            {applying ? 'Applying...' : 'Apply'}
           </Button>
 
           <IconButton
@@ -524,10 +510,7 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography
-            variant="caption"
-            sx={{ color: 'primary.contrastText', fontSize: '11px' }}
-          >
+          <Typography variant="caption" sx={{ color: 'white', fontSize: '11px' }}>
             YAML · New Manifest
           </Typography>
           <Chip
@@ -536,15 +519,12 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
             sx={{
               height: 18,
               fontSize: '10px',
-              color: 'primary.contrastText',
+              color: 'white',
               bgcolor: alpha('#fff', 0.15),
             }}
           />
         </Box>
-        <Typography
-          variant="caption"
-          sx={{ color: 'primary.contrastText', fontSize: '11px' }}
-        >
+        <Typography variant="caption" sx={{ color: 'white', fontSize: '11px' }}>
           {content.split('\n').length} lines · UTF-8
         </Typography>
       </Box>
