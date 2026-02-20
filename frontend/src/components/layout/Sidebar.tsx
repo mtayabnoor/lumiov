@@ -53,7 +53,6 @@ function Sidebar() {
                   onClick={() => handleToggle(group.title)}
                   sx={{
                     //bgcolor: isChildActive ? 'background.paper' : 'inherit',
-                    fontWeight: isChildActive ? 600 : 400,
                     color: 'grey',
                   }}
                 >
@@ -105,15 +104,7 @@ function Sidebar() {
                         >
                           {iconMapping[subItem.icon] || <DashboardIcon />}
                         </ListItemIcon>
-                        <ListItemText
-                          primary={subItem.label}
-                          slotProps={{
-                            primary: {
-                              fontSize: '0.85rem',
-                              fontWeight: 400,
-                            },
-                          }}
-                        />
+                        <ListItemText primary={subItem.label} />
                       </ListItemButton>
                     ))}
                   </List>
