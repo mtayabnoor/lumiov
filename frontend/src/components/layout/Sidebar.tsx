@@ -52,7 +52,7 @@ function Sidebar() {
                 <ListItemButton
                   onClick={() => handleToggle(group.title)}
                   sx={{
-                    bgcolor: isChildActive ? 'background.paper' : 'inherit',
+                    //bgcolor: isChildActive ? 'background.paper' : 'inherit',
                     fontWeight: isChildActive ? 600 : 400,
                     color: 'grey',
                   }}
@@ -71,7 +71,7 @@ function Sidebar() {
                       ml: 2,
                       //borderLeft: '5px solid',
                       borderColor: 'divider',
-                      bgcolor: 'background.paper',
+                      bgcolor: 'drawer.background',
                       py: 0.5,
                     }}
                   >
