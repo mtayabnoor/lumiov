@@ -1,6 +1,7 @@
 import express from 'express';
 import { k8sService } from '../services/kubernetes.service';
 import { diagnosePod } from '../agent/diagnosis.service';
+import { analyzeYaml } from '../agent/yaml-analysis.service';
 
 const router = express.Router();
 
@@ -113,6 +114,50 @@ router.post('/diagnose', async (req, res) => {
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Diagnosis failed' });
+  }
+});
+
+// ─── YAML AI ANALYSIS ──────────────────────────────────────────
+
+router.post('/analyze-yaml', async (req, res) => {
+  const { yaml: yamlContent, apiKey } = req.body;
+
+  if (!yamlContent || !apiKey) {
+    res.status(400).json({ error: 'Missing yaml content or apiKey' });
+    return;
+  }
+
+  try {
+    const result = await analyzeYaml({ yaml: yamlContent, apiKey });
+
+    if (result.error) {
+      res.status(422).json({ error: result.error });
+      return;
+    }
+
+    res.json(result.response);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'YAML analysis failed' });
+  }
+});
+
+// ─── CREATE / APPLY RESOURCE ───────────────────────────────────
+
+router.post('/resource/apply', async (req, res) => {
+  const yamlBody = req.body;
+
+  if (!yamlBody) {
+    res.status(400).json({ error: 'Missing YAML request body' });
+    return;
+  }
+
+  try {
+    const result = await k8sService.createResourceGeneric(
+      typeof yamlBody === 'string' ? yamlBody : JSON.stringify(yamlBody),
+    );
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to apply resource' });
   }
 });
 

@@ -588,6 +588,43 @@ export class K8sService {
     }
   }
 
+  // CREATE RESOURCE (from raw YAML)
+  public async createResourceGeneric(yamlString: string): Promise<any> {
+    this.checkInit();
+
+    if (!this.objectApi && this.kc) {
+      this.objectApi = k8s.KubernetesObjectApi.makeApiClient(this.kc);
+    }
+
+    try {
+      let spec: any = yaml.load(yamlString);
+      if (typeof spec === 'string') spec = yaml.load(spec);
+
+      if (!spec || !spec.kind || !spec.apiVersion || !spec.metadata?.name) {
+        throw new Error('Invalid YAML: Missing kind, apiVersion, or metadata.name');
+      }
+
+      // Remove status if present (it's read-only)
+      delete spec.status;
+
+      console.log(
+        `🆕 [K8S] Creating resource: kind=${spec.kind} name=${spec.metadata.name} ns=${spec.metadata.namespace || 'CLUSTER-SCOPE'}`,
+      );
+
+      const response = await this.objectApi!.create(spec);
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.body?.message || err.message;
+      console.error(`❌ Create Error: ${errorMessage}`);
+
+      if (errorMessage.includes('already exists')) {
+        throw new Error(`Resource already exists. Use the editor to update it instead.`);
+      }
+
+      throw new Error(errorMessage);
+    }
+  }
+
   public async scaleDeployment(
     name: string,
     namespace: string,
