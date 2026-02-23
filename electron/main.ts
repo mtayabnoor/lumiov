@@ -6,8 +6,6 @@ import updater from 'electron-updater';
 import { UpdateDownloadedEvent } from 'electron-updater';
 import { launchBackend, stopBackend } from './backend-launcher.js';
 
-app.disableHardwareAcceleration();
-
 const { autoUpdater } = updater;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -222,6 +220,7 @@ autoUpdater.on('download-progress', (progress) => {
 });
 
 // Step 3: Download complete → ask to restart
+// Step 3: Download complete → ask to restart
 autoUpdater.on('update-downloaded', (info: UpdateDownloadedEvent) => {
   if (!mainWindow) return;
 
@@ -229,22 +228,13 @@ autoUpdater.on('update-downloaded', (info: UpdateDownloadedEvent) => {
   mainWindow.setTitle('Lumiov');
   mainWindow.setProgressBar(-1); // Remove progress bar
 
-  const releaseNotes =
-    typeof info.releaseNotes === 'string'
-      ? info.releaseNotes
-      : 'New features and bug fixes.';
-
   dialog
     .showMessageBox(mainWindow, {
       type: 'info',
       title: 'Update Ready',
       message: `Version ${info.version} has been downloaded.`,
-      detail: releaseNotes
-        .replace(/<h\d[^>]*>/g, '\n\n')
-        .replace(/<li[^>]*>/g, '\n• ')
-        .replace(/<br[^>]*>/g, '\n')
-        .replace(/<[^>]+>/g, '')
-        .trim(),
+      detail:
+        'A restart is required to apply the new update. Would you like to restart now?',
       buttons: ['Restart Now', 'Later'],
       defaultId: 0,
       cancelId: 1,
