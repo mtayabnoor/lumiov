@@ -1,3 +1,43 @@
+## [1.3.0](https://github.com/mtayabnoor/lumiov/compare/v1.2.0...v1.3.0) (2026-02-23)
+
+### ✨ Features
+
+- Add component for create and apply manifest ([1c93363](https://github.com/mtayabnoor/lumiov/commit/1c933636a4888dbd602383a9d86a90ec5aa1da04))
+- Add Pre-Launch Checks & Kubernetes Resilience ([c18cfa0](https://github.com/mtayabnoor/lumiov/commit/c18cfa0d2ae54e149f21197a57f86784de98a92c))
+- AI anylysis feature added for create / apply yaml ([cd9312f](https://github.com/mtayabnoor/lumiov/commit/cd9312fca3f557062b5eed779b6802c8ab2aa0e8))
+- Frontend: Implement ai analysis components and required resources ([5f92286](https://github.com/mtayabnoor/lumiov/commit/5f92286384864f50095e0711c83ebb4ed07cf7a5))
+- Implement functiontlity for k8s apply manifest and ai analysis in the backend ([34a26cc](https://github.com/mtayabnoor/lumiov/commit/34a26cc918cb3096015b1e8f64709ee042fbebe9))
+- Improve splash ui ([7c6c1e5](https://github.com/mtayabnoor/lumiov/commit/7c6c1e5844297b9578986fd142314fcf737c6f99))
+- Improved sidebar items text color ([418f5ba](https://github.com/mtayabnoor/lumiov/commit/418f5ba8bc5052e5d8a64f8659459985ce4eb38f))
+- Update sidebar list item colors ([d6e357c](https://github.com/mtayabnoor/lumiov/commit/d6e357c538e22c2cc1864033e61986a1bd322545))
+
+### 🐞 Bug Fixes
+
+- Fix file-path collision! ([0ff7496](https://github.com/mtayabnoor/lumiov/commit/0ff7496948fe4aff26500e372d4339fd377caddf))
+- Fix spacing issue between time and event messages n pod diagnosis component ([caa5e88](https://github.com/mtayabnoor/lumiov/commit/caa5e88a525d3053f7356ff31dea21b7c8941cb0))
+- Frontend: Update text and css of createManifestDialog ([31b7b60](https://github.com/mtayabnoor/lumiov/commit/31b7b605f10898ae96e285595733f469f4347a73))
+- Remove whole .agent folder from gitignore and add specific folders ([1b0c017](https://github.com/mtayabnoor/lumiov/commit/1b0c017db8fb6c18c37b809338407d1a594eb3aa))
+
+## [1.3.0-rc.1](https://github.com/mtayabnoor/lumiov/compare/v1.2.0...v1.3.0-rc.1) (2026-02-23)
+
+### ✨ Features
+
+- Add component for create and apply manifest ([1c93363](https://github.com/mtayabnoor/lumiov/commit/1c933636a4888dbd602383a9d86a90ec5aa1da04))
+- Add Pre-Launch Checks & Kubernetes Resilience ([c18cfa0](https://github.com/mtayabnoor/lumiov/commit/c18cfa0d2ae54e149f21197a57f86784de98a92c))
+- AI anylysis feature added for create / apply yaml ([cd9312f](https://github.com/mtayabnoor/lumiov/commit/cd9312fca3f557062b5eed779b6802c8ab2aa0e8))
+- Frontend: Implement ai analysis components and required resources ([5f92286](https://github.com/mtayabnoor/lumiov/commit/5f92286384864f50095e0711c83ebb4ed07cf7a5))
+- Implement functiontlity for k8s apply manifest and ai analysis in the backend ([34a26cc](https://github.com/mtayabnoor/lumiov/commit/34a26cc918cb3096015b1e8f64709ee042fbebe9))
+- Improve splash ui ([7c6c1e5](https://github.com/mtayabnoor/lumiov/commit/7c6c1e5844297b9578986fd142314fcf737c6f99))
+- Improved sidebar items text color ([418f5ba](https://github.com/mtayabnoor/lumiov/commit/418f5ba8bc5052e5d8a64f8659459985ce4eb38f))
+- Update sidebar list item colors ([d6e357c](https://github.com/mtayabnoor/lumiov/commit/d6e357c538e22c2cc1864033e61986a1bd322545))
+
+### 🐞 Bug Fixes
+
+- Fix file-path collision! ([0ff7496](https://github.com/mtayabnoor/lumiov/commit/0ff7496948fe4aff26500e372d4339fd377caddf))
+- Fix spacing issue between time and event messages n pod diagnosis component ([caa5e88](https://github.com/mtayabnoor/lumiov/commit/caa5e88a525d3053f7356ff31dea21b7c8941cb0))
+- Frontend: Update text and css of createManifestDialog ([31b7b60](https://github.com/mtayabnoor/lumiov/commit/31b7b605f10898ae96e285595733f469f4347a73))
+- Remove whole .agent folder from gitignore and add specific folders ([1b0c017](https://github.com/mtayabnoor/lumiov/commit/1b0c017db8fb6c18c37b809338407d1a594eb3aa))
+
 ## [1.2.0](https://github.com/mtayabnoor/lumiov/compare/v1.1.1...v1.2.0) (2026-02-19)
 
 ### ✨ Features
