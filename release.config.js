@@ -88,9 +88,9 @@ export default {
         successComment: false,
         failComment: false,
         assets: [
-          { path: 'electron/release/*.exe', label: 'Lumiov Setup (Windows x64)' },
-          { path: 'electron/release/latest.yml', label: 'Auto-update Manifest' },
-          { path: 'electron/release/*.blockmap', label: 'Update Blockmap' },
+          { path: 'electron/release/*.exe' },
+          { path: 'electron/release/latest.yml' },
+          { path: 'electron/release/*.blockmap' },
         ],
       },
     ],

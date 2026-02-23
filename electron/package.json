@@ -15,6 +15,7 @@
   "build": {
     "appId": "com.lumiov.app",
     "productName": "Lumiov",
+    "artifactName": "${productName}-Setup-${version}-${os}-${arch}.${ext}",
     "publish": [
       {
         "provider": "github",
@@ -31,9 +32,12 @@
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": false,
-      "runAfterFinish": true,
+      "perMachine": true,
+      "allowElevation": true,
       "allowToChangeInstallationDirectory": true,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
       "deleteAppDataOnUninstall": true
     },
     "files": [
