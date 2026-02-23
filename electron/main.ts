@@ -76,7 +76,9 @@ async function runPreLaunchChecks() {
     if (isDev) {
       splashWindow.loadFile(path.join(appRoot, 'frontend', 'public', 'splash.html'));
     } else {
-      splashWindow.loadFile(path.join(process.resourcesPath, 'frontend', 'splash.html'));
+      splashWindow.loadFile(
+        path.join(process.resourcesPath, 'frontend', 'public', 'splash.html'),
+      );
     }
 
     let retryInterval: NodeJS.Timeout;
@@ -154,7 +156,7 @@ function createWindow() {
   if (isDev) {
     iconPath = path.join(appRoot, 'frontend', 'public', 'lumiov.ico');
   } else {
-    iconPath = path.join(process.resourcesPath, 'lumiov.ico');
+    iconPath = path.join(process.resourcesPath, 'frontend', 'public', 'lumiov.ico');
   }
 
   mainWindow = new BrowserWindow({
@@ -179,7 +181,9 @@ function createWindow() {
     mainWindow.loadFile(path.join(appRoot, 'frontend', 'dist', 'index.html'));
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(process.resourcesPath, 'frontend', 'index.html'));
+    mainWindow.loadFile(
+      path.join(process.resourcesPath, 'frontend', 'dist', 'index.html'),
+    );
   }
 }
 
