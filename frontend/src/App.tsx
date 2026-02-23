@@ -3,6 +3,7 @@ import { initSocket, closeSocket } from './services/bootstrap';
 import { AppRoutes } from './routes';
 import { ThemeProvider } from './context/ThemeContext';
 import { AgentProvider } from './context/AgentContext';
+import { ErrorProvider } from './context/ErrorContext';
 
 function App() {
   useEffect(() => {
@@ -12,9 +13,11 @@ function App() {
 
   return (
     <ThemeProvider>
-      <AgentProvider>
-        <AppRoutes />
-      </AgentProvider>
+      <ErrorProvider>
+        <AgentProvider>
+          <AppRoutes />
+        </AgentProvider>
+      </ErrorProvider>
     </ThemeProvider>
   );
 }

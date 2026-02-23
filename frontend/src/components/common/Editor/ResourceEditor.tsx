@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Drawer,
   Box,
@@ -20,8 +20,11 @@ import WrapTextIcon from '@mui/icons-material/WrapText';
 import MapIcon from '@mui/icons-material/Map';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import Editor from '@monaco-editor/react';
 import yaml from 'js-yaml';
+import AiSuggestionsPanel from '../AiSuggestionsPanel/AiSuggestionsPanel';
+import { useYamlAnalysis } from '../../../hooks/useYamlAnalysis';
 
 interface ResourceEditorProps {
   open: boolean;
@@ -32,69 +35,52 @@ interface ResourceEditorProps {
   name: string;
 }
 
-const HEADER_HEIGHT = 50; // Match AppBar height
+const HEADER_HEIGHT = 50;
 
-// 1. Metadata Fields (System Managed) - Hide these from metadata
-// 1. Metadata Fields (System Managed) - Hide these from metadata
+// Metadata Fields (System Managed) - Hide these from metadata
 const SYSTEM_METADATA_FIELDS = [
-  'managedFields', // Noise
-  'resourceVersion', // Optimistic locking
-  'generation', // Update ID
-  'uid', // Immutable ID
-  'creationTimestamp', // Immutable
-  'deletionTimestamp', // Lifecycle
+  'managedFields',
+  'resourceVersion',
+  'generation',
+  'uid',
+  'creationTimestamp',
+  'deletionTimestamp',
   'deletionGracePeriodSeconds',
-  'selfLink', // Deprecated
-  'generateName', // Lifecycle
-  'ownerReferences', // Relationship
-  'finalizers', // Lifecycle (Moved here from Spec list as it lives in metadata)
+  'selfLink',
+  'generateName',
+  'ownerReferences',
+  'finalizers',
 ];
 
-// 2. Spec Fields (System Assigned / Defaults) - Hide these from Spec
+// Spec Fields (System Assigned / Defaults) - Hide these from Spec
 const SYSTEM_SPEC_FIELDS = [
-  'nodeName', // Assigned by Scheduler
-  'clusterIP', // Assigned by K8s
-  'clusterIPs', // Assigned by K8s
-  'serviceAccount', // Deprecated (serviceAccountName is used instead)
-  'priority', // Calculated from priorityClassName
+  'nodeName',
+  'clusterIP',
+  'clusterIPs',
+  'serviceAccount',
+  'priority',
 ];
 
 const stripSystemFields = (obj: any): any => {
   if (!obj || typeof obj !== 'object') return obj;
 
-  // 1. Deep clone to avoid mutating the original data
   const clone = JSON.parse(JSON.stringify(obj));
-
-  // ---------------------------------------------------------
-  // A. REMOVE ROOT-LEVEL STATE
-  // ---------------------------------------------------------
   delete clone.status;
 
-  // ---------------------------------------------------------
-  // B. REMOVE METADATA NOISE (Dynamic Loop)
-  // ---------------------------------------------------------
   if (clone.metadata) {
-    // Loop through the list and delete each field
     SYSTEM_METADATA_FIELDS.forEach((field) => delete clone.metadata[field]);
 
-    // Handle the specific "Last Applied" annotation separately
     if (clone.metadata.annotations) {
       delete clone.metadata.annotations[
         'kubectl.kubernetes.io/last-applied-configuration'
       ];
-
-      // Cleanup empty annotations object
       if (Object.keys(clone.metadata.annotations).length === 0) {
         delete clone.metadata.annotations;
       }
     }
   }
 
-  // ---------------------------------------------------------
-  // C. REMOVE SPEC NOISE (Dynamic Loop)
-  // ---------------------------------------------------------
   if (clone.spec) {
-    // Loop through the list and delete each field
     SYSTEM_SPEC_FIELDS.forEach((field) => delete clone.spec[field]);
   }
 
@@ -125,6 +111,10 @@ function ResourceEditor({
   const [minimap, setMinimap] = useState(false);
   const [showManagedFields, setShowManagedFields] = useState(false);
 
+  // AI Analysis
+  const [showAiPanel, setShowAiPanel] = useState(false);
+  const analysis = useYamlAnalysis();
+
   // Reset state when closed
   useEffect(() => {
     if (open && namespace && name) {
@@ -135,6 +125,8 @@ function ResourceEditor({
       setSuccess(null);
       setFullResource(null);
       setContent('');
+      setShowAiPanel(false);
+      analysis.reset();
     }
   }, [open, namespace, name]);
 
@@ -184,7 +176,7 @@ function ResourceEditor({
     setSuccess(null);
     try {
       try {
-        yaml.load(content); // Validate YAML
+        yaml.load(content);
       } catch (e: any) {
         throw new Error(`Invalid YAML: ${e.message}`);
       }
@@ -215,6 +207,45 @@ function ResourceEditor({
     setTimeout(() => setSuccess(null), 2000);
   };
 
+  // ─── AI Analysis Handlers ─────────────────────────────────────
+
+  const handleAnalyze = useCallback(() => {
+    if (!content.trim()) {
+      setError('Editor is empty. Nothing to analyze.');
+      return;
+    }
+    setShowAiPanel(true);
+    analysis.analyzeYaml(content);
+  }, [content, analysis]);
+
+  const handleAcceptSuggestion = useCallback(
+    (id: string) => {
+      const accepted = analysis.acceptSuggestion(id);
+      if (accepted) {
+        setContent((prev) => prev.replace(accepted.originalCode, accepted.suggestedCode));
+      }
+    },
+    [analysis],
+  );
+
+  const handleAcceptAll = useCallback(() => {
+    const all = analysis.acceptAll();
+    // Apply in reverse line order to avoid offset issues
+    const sorted = [...all].sort((a, b) => b.lineStart - a.lineStart);
+    setContent((prev) => {
+      let result = prev;
+      for (const s of sorted) {
+        result = result.replace(s.originalCode, s.suggestedCode);
+      }
+      return result;
+    });
+  }, [analysis]);
+
+  const handleCloseAiPanel = useCallback(() => {
+    setShowAiPanel(false);
+    analysis.reset();
+  }, [analysis]);
+
   // Toolbar icon button style helper
   const iconButtonSx = (active: boolean = false) => ({
     color: active ? theme.palette.primary.main : theme.palette.text.secondary,
@@ -229,9 +260,9 @@ function ResourceEditor({
       slotProps={{
         paper: {
           sx: {
-            width: { xs: '100vw', md: '55vw' },
+            width: { xs: '100vw', md: showAiPanel ? '80vw' : '55vw' },
             minWidth: { md: '700px' },
-            maxWidth: '1000px',
+            maxWidth: showAiPanel ? '1400px' : '1000px',
             display: 'flex',
             flexDirection: 'column',
             bgcolor: 'background.paper',
@@ -239,6 +270,7 @@ function ResourceEditor({
             height: `calc(100vh - ${HEADER_HEIGHT}px)`,
             borderLeft: 1,
             borderColor: 'divider',
+            transition: 'width 0.3s ease, max-width 0.3s ease',
           },
         },
         backdrop: { sx: { marginTop: `${HEADER_HEIGHT}px` } },
@@ -286,6 +318,35 @@ function ResourceEditor({
 
         {/* Toolbar */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {/* AI Analyze Button */}
+          {/* <Tooltip title="AI Analysis — Lint, Security & Best Practices">
+            <Button
+              size="small"
+              startIcon={
+                analysis.loading ? (
+                  <CircularProgress size={14} color="inherit" />
+                ) : (
+                  <AutoFixHighIcon sx={{ fontSize: 16 }} />
+                )
+              }
+              onClick={handleAnalyze}
+              disabled={loading || analysis.loading}
+              variant={showAiPanel ? 'contained' : 'outlined'}
+              color="secondary"
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '12px',
+                px: 1.5,
+                mr: 0.5,
+                borderRadius: 1.5,
+                minHeight: 30,
+              }}
+            >
+              {analysis.loading ? 'Analyzing…' : '✨ Analyze'}
+            </Button>
+          </Tooltip> */}
+
           <Tooltip
             title={showManagedFields ? 'Hide Managed Fields' : 'Show Managed Fields'}
           >
@@ -390,53 +451,82 @@ function ResourceEditor({
         </Box>
       )}
 
-      {/* Editor */}
+      {/* Main Content: Editor + AI Panel */}
       <Box
         sx={{
           flex: 1,
           position: 'relative',
           overflow: 'hidden',
-          bgcolor: 'background.default',
+          display: 'flex',
         }}
       >
-        {loading ? (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
-            }}
-          >
-            <CircularProgress size={32} />
+        {/* Editor */}
+        <Box
+          sx={{
+            flex: showAiPanel ? '0 0 60%' : '1 1 100%',
+            position: 'relative',
+            overflow: 'hidden',
+            bgcolor: 'background.default',
+            transition: 'flex 0.3s ease',
+          }}
+        >
+          {loading ? (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+              }}
+            >
+              <CircularProgress size={32} />
+            </Box>
+          ) : (
+            <Editor
+              height="100%"
+              defaultLanguage="yaml"
+              value={content}
+              onChange={(val) => setContent(val || '')}
+              theme={isDark ? 'vs-dark' : 'light'}
+              options={{
+                minimap: { enabled: minimap },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                fontFamily: '"Consolas", "Monaco", monospace',
+                lineNumbers: 'on',
+                wordWrap,
+                renderWhitespace: 'selection',
+                tabSize: 2,
+                automaticLayout: true,
+                padding: { top: 12, bottom: 12 },
+                smoothScrolling: true,
+                cursorBlinking: 'smooth',
+                cursorSmoothCaretAnimation: 'on',
+                folding: true,
+                showFoldingControls: 'mouseover',
+                bracketPairColorization: { enabled: true },
+                guides: { indentation: true, bracketPairs: true },
+              }}
+            />
+          )}
+        </Box>
+
+        {/* AI Suggestions Panel */}
+        {showAiPanel && (
+          <Box sx={{ flex: '0 0 40%', minWidth: 300 }}>
+            <AiSuggestionsPanel
+              suggestions={analysis.suggestions}
+              overallScore={analysis.overallScore}
+              summary={analysis.summary}
+              loading={analysis.loading}
+              error={analysis.error}
+              onAccept={handleAcceptSuggestion}
+              onReject={analysis.rejectSuggestion}
+              onAcceptAll={handleAcceptAll}
+              onRejectAll={analysis.rejectAll}
+              onClose={handleCloseAiPanel}
+            />
           </Box>
-        ) : (
-          <Editor
-            height="100%"
-            defaultLanguage="yaml"
-            value={content}
-            onChange={(val) => setContent(val || '')}
-            theme={isDark ? 'vs-dark' : 'light'}
-            options={{
-              minimap: { enabled: minimap },
-              scrollBeyondLastLine: false,
-              fontSize: 13,
-              fontFamily: '"Consolas", "Monaco", monospace',
-              lineNumbers: 'on',
-              wordWrap,
-              renderWhitespace: 'selection',
-              tabSize: 2,
-              automaticLayout: true,
-              padding: { top: 12, bottom: 12 },
-              smoothScrolling: true,
-              cursorBlinking: 'smooth',
-              cursorSmoothCaretAnimation: 'on',
-              folding: true,
-              showFoldingControls: 'mouseover',
-              bracketPairColorization: { enabled: true },
-              guides: { indentation: true, bracketPairs: true },
-            }}
-          />
         )}
       </Box>
 
@@ -467,6 +557,14 @@ function ResourceEditor({
               sx={{ color: alpha('#fff', 0.7), fontSize: '11px' }}
             >
               (Managed fields hidden)
+            </Typography>
+          )}
+          {showAiPanel && analysis.suggestions.length > 0 && (
+            <Typography
+              variant="caption"
+              sx={{ color: alpha('#fff', 0.7), fontSize: '11px' }}
+            >
+              ✨ {analysis.suggestions.length} suggestions pending
             </Typography>
           )}
         </Box>

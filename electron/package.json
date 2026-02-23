@@ -42,11 +42,15 @@
     "extraResources": [
       {
         "from": "../frontend/dist",
-        "to": "frontend"
+        "to": "frontend/dist"
+      },
+      {
+        "from": "../frontend/public/splash.html",
+        "to": "frontend/public/splash.html"
       },
       {
         "from": "../frontend/public/lumiov.ico",
-        "to": "lumiov.ico"
+        "to": "frontend/public/lumiov.ico"
       },
       {
         "from": "../backend/dist",

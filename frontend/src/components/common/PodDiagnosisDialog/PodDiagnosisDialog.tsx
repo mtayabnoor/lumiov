@@ -467,7 +467,7 @@ export default function PodDiagnosisDialog({
                         variant="body2"
                         sx={{
                           fontFamily: 'monospace',
-                          minWidth: 100,
+                          minWidth: 200,
                           flexShrink: 0,
                         }}
                       >

@@ -37,3 +37,14 @@ yarn-debug.log*
 # --- Personal Scripts ---
 commands.txt
 kubernetes_yaml_files/*
+
+# --- Google Antigravity - Ignore dynamic agent artifacts ---
+.agent/artifacts/
+.agent/browser_recordings/
+.agent/screenshots/
+.agent/logs/
+.agent/execution_logs/
+.agent/cache/
+.agent/task_lists/
+.agent/plans/
+*.local.md  # Ignore any private/local rule overrides

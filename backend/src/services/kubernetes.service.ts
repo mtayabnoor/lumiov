@@ -40,12 +40,27 @@ export class K8sService {
   private objectApi: KubernetesObjectApi | null = null;
 
   public isInitialized = false;
+  public k8sState = 'INITIALIZING';
+  public lastError: string | null = null;
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
+    this.k8sState = 'INITIALIZING';
+    this.lastError = null;
+
     try {
       this.kc = loadKubeConfig(); // Ensure this returns a KubeConfig instance
+      const cluster = this.kc?.getCurrentCluster();
+
+      // The Kubernetes client creates a dummy localhost:8080 cluster when no config file is found
+      const isDefaultFallback =
+        cluster?.name === 'cluster' && cluster?.server === 'http://localhost:8080';
+
+      if (!this.kc || !cluster || isDefaultFallback) {
+        throw new Error('CONFIG_MISSING: No valid cluster found in KubeConfig');
+      }
+
       this.watch = new Watch(this.kc);
       this.exec = new Exec(this.kc);
       this.log = new Log(this.kc);
@@ -62,17 +77,75 @@ export class K8sService {
       // ⚠️ THE FIX: Use the static factory method for the generic object API
       this.objectApi = KubernetesObjectApi.makeApiClient(this.kc);
 
+      // Ping to verify cluster is actually reachable
+      try {
+        await this.coreApi.getAPIResources();
+      } catch (pingErr: any) {
+        throw new Error(`CLUSTER_UNREACHABLE: ${pingErr.message}`);
+      }
+
       this.isInitialized = true;
+      this.k8sState = 'CONNECTED';
       console.log('✅ K8s Service Initialized');
-    } catch (err) {
-      console.error('❌ K8s Init Failed:', err);
+    } catch (err: any) {
+      if (
+        err.message.includes('CONFIG_MISSING') ||
+        err.message.includes('Could not load KubeConfig')
+      ) {
+        this.k8sState = 'CONFIG_MISSING';
+        this.lastError = 'No kubeconfig file found or kubeconfig is invalid.';
+      } else if (
+        err.message.includes('CLUSTER_UNREACHABLE') ||
+        err.code === 'ECONNREFUSED' ||
+        err.code === 'ETIMEDOUT'
+      ) {
+        this.k8sState = 'CLUSTER_UNREACHABLE';
+        this.lastError =
+          'Kubernetes cluster is unreachable. Please ensure it is running.';
+      } else {
+        this.k8sState = 'ERROR';
+        this.lastError = err.message || 'Unknown Kubernetes error';
+      }
+      console.error(`❌ K8s Init Failed: [${this.k8sState}]`, err.message);
+      this.isInitialized = false;
       throw err; // Re-throw so the server knows it failed
     }
   }
 
+  public async retryInitialization(): Promise<void> {
+    this.isInitialized = false;
+    await this.initialize();
+  }
+
+  // Enterprise-grade exponential backoff for read operations
+  private async withRetry<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
+    let attempt = 0;
+    while (attempt < maxRetries) {
+      try {
+        return await operation();
+      } catch (err: any) {
+        attempt++;
+        const isNetworkError =
+          err.code === 'ECONNREFUSED' ||
+          err.code === 'ETIMEDOUT' ||
+          err.code === 'ECONNRESET';
+        if (!isNetworkError || attempt >= maxRetries) {
+          throw err;
+        }
+        const delay = Math.pow(2, attempt) * 500; // 1s, 2s, 4s...
+        console.log(
+          `⚠️ Network error occurred. Retrying in ${delay}ms... (Attempt ${attempt}/${maxRetries})`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    throw new Error('Operation failed after retries');
+  }
+
   // Helper check
   private checkInit() {
-    if (!this.isInitialized) throw new Error('K8s Service not ready');
+    if (!this.isInitialized)
+      throw new Error('K8s Service not ready - State: ' + this.k8sState);
   }
 
   // Get full list once (Snapshot)
@@ -80,81 +153,84 @@ export class K8sService {
     this.checkInit();
 
     try {
-      switch (resource) {
-        // ─── Cluster ───
-        case 'namespaces':
-          return (await this.coreApi!.listNamespace()).items;
-        case 'nodes':
-          return (await this.coreApi!.listNode()).items;
+      return await this.withRetry(async () => {
+        switch (resource) {
+          // ─── Cluster ───
+          case 'namespaces':
+            return (await this.coreApi!.listNamespace()).items;
+          case 'nodes':
+            return (await this.coreApi!.listNode()).items;
 
-        // ─── Workloads ───
-        case 'pods':
-          return (await this.coreApi!.listPodForAllNamespaces()).items;
-        case 'deployments':
-          return (await this.appsApi!.listDeploymentForAllNamespaces()).items;
-        case 'statefulsets':
-          return (await this.appsApi!.listStatefulSetForAllNamespaces()).items;
-        case 'daemonsets':
-          return (await this.appsApi!.listDaemonSetForAllNamespaces()).items;
-        case 'replicasets':
-          return (await this.appsApi!.listReplicaSetForAllNamespaces()).items;
-        case 'jobs':
-          return (await this.batchApi!.listJobForAllNamespaces()).items;
-        case 'cronjobs':
-          return (await this.batchApi!.listCronJobForAllNamespaces()).items;
+          // ─── Workloads ───
+          case 'pods':
+            return (await this.coreApi!.listPodForAllNamespaces()).items;
+          case 'deployments':
+            return (await this.appsApi!.listDeploymentForAllNamespaces()).items;
+          case 'statefulsets':
+            return (await this.appsApi!.listStatefulSetForAllNamespaces()).items;
+          case 'daemonsets':
+            return (await this.appsApi!.listDaemonSetForAllNamespaces()).items;
+          case 'replicasets':
+            return (await this.appsApi!.listReplicaSetForAllNamespaces()).items;
+          case 'jobs':
+            return (await this.batchApi!.listJobForAllNamespaces()).items;
+          case 'cronjobs':
+            return (await this.batchApi!.listCronJobForAllNamespaces()).items;
 
-        // ─── Storage ───
-        case 'persistentvolumeclaims':
-          return (await this.coreApi!.listPersistentVolumeClaimForAllNamespaces()).items;
-        case 'persistentvolumes':
-          return (await this.coreApi!.listPersistentVolume()).items;
-        case 'storageclasses':
-          return (await this.storageApi!.listStorageClass()).items;
+          // ─── Storage ───
+          case 'persistentvolumeclaims':
+            return (await this.coreApi!.listPersistentVolumeClaimForAllNamespaces())
+              .items;
+          case 'persistentvolumes':
+            return (await this.coreApi!.listPersistentVolume()).items;
+          case 'storageclasses':
+            return (await this.storageApi!.listStorageClass()).items;
 
-        // ─── Network ───
-        case 'services':
-          return (await this.coreApi!.listServiceForAllNamespaces()).items;
-        case 'ingresses':
-          return (await this.networkingApi!.listIngressForAllNamespaces()).items;
-        case 'networkpolicies':
-          return (await this.networkingApi!.listNetworkPolicyForAllNamespaces()).items;
-        case 'endpoints':
-          return (await this.coreApi!.listEndpointsForAllNamespaces()).items;
+          // ─── Network ───
+          case 'services':
+            return (await this.coreApi!.listServiceForAllNamespaces()).items;
+          case 'ingresses':
+            return (await this.networkingApi!.listIngressForAllNamespaces()).items;
+          case 'networkpolicies':
+            return (await this.networkingApi!.listNetworkPolicyForAllNamespaces()).items;
+          case 'endpoints':
+            return (await this.coreApi!.listEndpointsForAllNamespaces()).items;
 
-        // ─── Configuration ───
-        case 'configmaps':
-          return (await this.coreApi!.listConfigMapForAllNamespaces()).items;
-        case 'secrets':
-          return (await this.coreApi!.listSecretForAllNamespaces()).items;
-        case 'resourcequotas':
-          return (await this.coreApi!.listResourceQuotaForAllNamespaces()).items;
-        case 'limitranges':
-          return (await this.coreApi!.listLimitRangeForAllNamespaces()).items;
-        case 'horizontalpodautoscalers':
-          return (
-            await this.autoscalingApi!.listHorizontalPodAutoscalerForAllNamespaces()
-          ).items;
+          // ─── Configuration ───
+          case 'configmaps':
+            return (await this.coreApi!.listConfigMapForAllNamespaces()).items;
+          case 'secrets':
+            return (await this.coreApi!.listSecretForAllNamespaces()).items;
+          case 'resourcequotas':
+            return (await this.coreApi!.listResourceQuotaForAllNamespaces()).items;
+          case 'limitranges':
+            return (await this.coreApi!.listLimitRangeForAllNamespaces()).items;
+          case 'horizontalpodautoscalers':
+            return (
+              await this.autoscalingApi!.listHorizontalPodAutoscalerForAllNamespaces()
+            ).items;
 
-        // ─── Access Control ───
-        case 'serviceaccounts':
-          return (await this.coreApi!.listServiceAccountForAllNamespaces()).items;
-        case 'roles':
-          return (await this.rbacApi!.listRoleForAllNamespaces()).items;
-        case 'rolebindings':
-          return (await this.rbacApi!.listRoleBindingForAllNamespaces()).items;
-        case 'clusterroles':
-          return (await this.rbacApi!.listClusterRole()).items;
-        case 'clusterrolebindings':
-          return (await this.rbacApi!.listClusterRoleBinding()).items;
+          // ─── Access Control ───
+          case 'serviceaccounts':
+            return (await this.coreApi!.listServiceAccountForAllNamespaces()).items;
+          case 'roles':
+            return (await this.rbacApi!.listRoleForAllNamespaces()).items;
+          case 'rolebindings':
+            return (await this.rbacApi!.listRoleBindingForAllNamespaces()).items;
+          case 'clusterroles':
+            return (await this.rbacApi!.listClusterRole()).items;
+          case 'clusterrolebindings':
+            return (await this.rbacApi!.listClusterRoleBinding()).items;
 
-        // ─── Custom Resources ───
-        case 'customresourcedefinitions':
-          return (await this.apiExtensionsApi!.listCustomResourceDefinition()).items;
+          // ─── Custom Resources ───
+          case 'customresourcedefinitions':
+            return (await this.apiExtensionsApi!.listCustomResourceDefinition()).items;
 
-        default:
-          console.warn(`Unknown resource type: ${resource}`);
-          return [];
-      }
+          default:
+            console.warn(`Unknown resource type: ${resource}`);
+            return [];
+        }
+      });
     } catch (err) {
       console.error(`Error listing ${resource}:`, err);
       return [];
@@ -425,17 +501,16 @@ export class K8sService {
   ): Promise<string> {
     this.checkInit();
     try {
-      // Use the pre-initialized objectApi
-      const response = await this.objectApi!.read({
-        apiVersion,
-        kind,
-        metadata: { name, namespace },
+      return await this.withRetry(async () => {
+        // Use the pre-initialized objectApi
+        const response = await this.objectApi!.read({
+          apiVersion,
+          kind,
+          metadata: { name, namespace },
+        });
+
+        return yaml.dump(response, { indent: 2 });
       });
-
-      //const body = response as any;
-      //if (body.metadata?.managedFields) delete body.metadata.managedFields;
-
-      return yaml.dump(response, { indent: 2 });
     } catch (err: any) {
       throw new Error(err.response?.body?.message || err.message);
     }
@@ -588,6 +663,43 @@ export class K8sService {
     }
   }
 
+  // CREATE RESOURCE (from raw YAML)
+  public async createResourceGeneric(yamlString: string): Promise<any> {
+    this.checkInit();
+
+    if (!this.objectApi && this.kc) {
+      this.objectApi = k8s.KubernetesObjectApi.makeApiClient(this.kc);
+    }
+
+    try {
+      let spec: any = yaml.load(yamlString);
+      if (typeof spec === 'string') spec = yaml.load(spec);
+
+      if (!spec || !spec.kind || !spec.apiVersion || !spec.metadata?.name) {
+        throw new Error('Invalid YAML: Missing kind, apiVersion, or metadata.name');
+      }
+
+      // Remove status if present (it's read-only)
+      delete spec.status;
+
+      console.log(
+        `🆕 [K8S] Creating resource: kind=${spec.kind} name=${spec.metadata.name} ns=${spec.metadata.namespace || 'CLUSTER-SCOPE'}`,
+      );
+
+      const response = await this.objectApi!.create(spec);
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.body?.message || err.message;
+      console.error(`❌ Create Error: ${errorMessage}`);
+
+      if (errorMessage.includes('already exists')) {
+        throw new Error(`Resource already exists. Use the editor to update it instead.`);
+      }
+
+      throw new Error(errorMessage);
+    }
+  }
+
   public async scaleDeployment(
     name: string,
     namespace: string,
@@ -636,19 +748,21 @@ export class K8sService {
   public async getPodEvents(namespace: string, podName: string): Promise<any[]> {
     this.checkInit();
     try {
-      const events = await this.coreApi!.listNamespacedEvent({
-        namespace,
-        fieldSelector: `involvedObject.name=${podName}`,
+      return await this.withRetry(async () => {
+        const events = await this.coreApi!.listNamespacedEvent({
+          namespace,
+          fieldSelector: `involvedObject.name=${podName}`,
+        });
+        return events.items.map((e: any) => ({
+          type: e.type,
+          reason: e.reason,
+          message: e.message,
+          count: e.count,
+          firstTimestamp: e.firstTimestamp,
+          lastTimestamp: e.lastTimestamp,
+          source: e.source?.component,
+        }));
       });
-      return events.items.map((e: any) => ({
-        type: e.type,
-        reason: e.reason,
-        message: e.message,
-        count: e.count,
-        firstTimestamp: e.firstTimestamp,
-        lastTimestamp: e.lastTimestamp,
-        source: e.source?.component,
-      }));
     } catch (err: any) {
       console.error(`❌ Error fetching events for ${podName}:`, err.message);
       return [];
@@ -668,14 +782,16 @@ export class K8sService {
   ): Promise<string> {
     this.checkInit();
     try {
-      const result = await this.coreApi!.readNamespacedPodLog({
-        namespace,
-        name: podName,
-        container,
-        tailLines,
-        previous,
+      return await this.withRetry(async () => {
+        const result = await this.coreApi!.readNamespacedPodLog({
+          namespace,
+          name: podName,
+          container,
+          tailLines,
+          previous,
+        });
+        return typeof result === 'string' ? result : String(result ?? '');
       });
-      return typeof result === 'string' ? result : String(result ?? '');
     } catch (err: any) {
       const msg = err.message || 'Failed to fetch logs';
       // Previous container logs may not exist

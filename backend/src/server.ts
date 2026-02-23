@@ -75,8 +75,22 @@ app.get('/health', (_req, res) => {
     status: 'ok',
     environment: NODE_ENV,
     k8sConnected: k8sService.isInitialized,
+    k8sState: k8sService.k8sState,
+    k8sError: k8sService.lastError,
     timestamp: new Date().toISOString(),
   });
+});
+
+// Manual Retry Endpoint
+app.post('/api/k8s/retry', async (_req, res) => {
+  try {
+    await k8sService.retryInitialization();
+    res.json({ success: true, state: k8sService.k8sState });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ success: false, state: k8sService.k8sState, error: err.message });
+  }
 });
 
 // 6. Socket.io Event Registration
