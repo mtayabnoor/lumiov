@@ -20,8 +20,13 @@ updates:
       include: 'scope'
     target-branch: 'development'
     groups:
-      minor-patch:
-        update-types: ['minor', 'patch']
+      non-breaking:
+        update-types:
+          - 'minor'
+          - 'patch'
+      major:
+        update-types:
+          - 'major'
 
   # Frontend package.json (React app)
   - package-ecosystem: 'npm'
@@ -42,8 +47,13 @@ updates:
       include: 'scope'
     target-branch: 'development'
     groups:
-      minor-patch:
-        update-types: ['minor', 'patch']
+      non-breaking:
+        update-types:
+          - 'minor'
+          - 'patch'
+      major:
+        update-types:
+          - 'major'
 
   # Backend package.json (Express app)
   - package-ecosystem: 'npm'
@@ -64,8 +74,13 @@ updates:
       include: 'scope'
     target-branch: 'development'
     groups:
-      minor-patch:
-        update-types: ['minor', 'patch']
+      non-breaking:
+        update-types:
+          - 'minor'
+          - 'patch'
+      major:
+        update-types:
+          - 'major'
 
   # GitHub Actions workflows
   - package-ecosystem: 'github-actions'
@@ -86,4 +101,5 @@ updates:
     target-branch: 'development'
     groups:
       actions:
-        patterns: ['*']
+        patterns:
+          - '*'
