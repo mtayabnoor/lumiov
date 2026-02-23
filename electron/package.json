@@ -31,14 +31,12 @@
       "icon": "../frontend/public/lumiov.ico"
     },
     "nsis": {
-      "oneClick": false,
-      "perMachine": true,
-      "allowElevation": true,
-      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": true,
       "runAfterFinish": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "deleteAppDataOnUninstall": true
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
     },
     "files": [
       "dist/electron/**/*"
