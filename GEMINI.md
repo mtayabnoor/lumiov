@@ -25,3 +25,8 @@
 
 - Priority: Efficient, straightforward, and highly structured code. Let the architecture reflect the domain clearly.
 - Separation of Concerns: Keep API logic, Business Logic, and UI rendering cleanly separated.
+
+## 6. Execution Rules
+
+- **No Auto-Execute for Destructive Actions:** NEVER auto-execute potentially destructive terminal commands (e.g., `rm`, `kubectl delete`, `kill`) without explicit, in-line confirmation from me first.
+- **Safe Coding:** Ensure all implementations follow enterprise-grade, highly structured coding techniques.
