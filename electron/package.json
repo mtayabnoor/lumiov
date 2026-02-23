@@ -45,6 +45,10 @@
         "to": "frontend"
       },
       {
+        "from": "../frontend/public/splash.html",
+        "to": "frontend"
+      },
+      {
         "from": "../frontend/public/lumiov.ico",
         "to": "lumiov.ico"
       },

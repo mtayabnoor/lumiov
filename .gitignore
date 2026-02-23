@@ -37,3 +37,4 @@ yarn-debug.log*
 # --- Personal Scripts ---
 commands.txt
 kubernetes_yaml_files/*
+.agent

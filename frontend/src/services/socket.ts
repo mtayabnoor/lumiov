@@ -21,10 +21,19 @@ export const getSocket = (): Socket<ServerToClientEvents, ClientToServerEvents> 
 
     socket.on('disconnect', (reason) => {
       console.warn('❌ Socket disconnected:', reason);
+      if (reason === 'io server disconnect' || reason === 'transport close') {
+        window.dispatchEvent(
+          new CustomEvent('global-error', { detail: `Backend disconnected: ${reason}` }),
+        );
+      }
     });
 
     socket.on('connect_error', (err) => {
       console.error('⚠️ Socket connect error:', err);
+      // Wait for 3 seconds of connection error before notifying, as reconnects are fast
+      window.dispatchEvent(
+        new CustomEvent('global-error', { detail: `Connection error: ${err.message}` }),
+      );
     });
   }
   return socket;

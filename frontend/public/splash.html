@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lumiov - Starting</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap');
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #121212;
+        color: #ffffff;
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+        user-select: none;
+        -webkit-app-region: drag;
+      }
+
+      .logo {
+        font-size: 48px;
+        font-weight: 600;
+        letter-spacing: -1px;
+        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+        background-clip: text;
+      -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 24px;
+        animation: pulse 2s infinite ease-in-out;
+      }
+
+      .status-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 80%;
+        -webkit-app-region: no-drag;
+      }
+
+      .loader {
+        width: 40px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        position: relative;
+      }
+
+      .loader::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 50%;
+        background: #4facfe;
+        border-radius: 4px;
+        animation: slide 1.5s infinite ease-in-out;
+      }
+
+      .main-text {
+        font-size: 16px;
+        font-weight: 500;
+        color: #e0e0e0;
+        margin-bottom: 8px;
+      }
+
+      .sub-text {
+        font-size: 13px;
+        color: #a0a0a0;
+        margin-bottom: 24px;
+        min-height: 40px;
+      }
+
+      .error-state .loader {
+        display: none;
+      }
+
+      .error-state .logo {
+        animation: none;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
+        background-clip: text;
+      -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .retry-btn {
+        display: none;
+        background: #4facfe;
+        color: #fff;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: 'Outfit', sans-serif;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+      }
+
+      .retry-btn:hover {
+        background: #00f2fe;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(0, 242, 254, 0.4);
+      }
+
+      .retry-btn:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+      }
+
+      .error-state .retry-btn {
+        display: inline-block;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.8;
+          transform: scale(0.98);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0.8;
+          transform: scale(0.98);
+        }
+      }
+
+      @keyframes slide {
+        0% {
+          transform: translateX(-100%);
+        }
+        50% {
+          transform: translateX(100%);
+        }
+        100% {
+          transform: translateX(-100%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo">lumiov</div>
+
+    <div class="status-container" id="statusContainer">
+      <div class="loader"></div>
+      <div class="main-text" id="mainText">Initializing...</div>
+      <div class="sub-text" id="subText">Connecting to services</div>
+      <button class="retry-btn" id="retryBtn">Retry Connection</button>
+    </div>
+
+    <script>
+      const container = document.getElementById('statusContainer');
+      const mainText = document.getElementById('mainText');
+      const subText = document.getElementById('subText');
+      const retryBtn = document.getElementById('retryBtn');
+
+      if (window.electronAPI) {
+        window.electronAPI.onSplashStatus((status, errorMsg) => {
+          if (status === 'CONNECTED') {
+            mainText.innerText = 'Connected!';
+            subText.innerText = 'Starting application...';
+            container.classList.remove('error-state');
+          } else if (status === 'INITIALIZING') {
+            mainText.innerText = 'Initializing...';
+            subText.innerText = errorMsg || 'Connecting to Kubernetes cluster';
+            container.classList.remove('error-state');
+          } else {
+            // Error states
+            container.classList.add('error-state');
+            if (status === 'CONFIG_MISSING') {
+              mainText.innerText = 'Configuration Missing';
+              subText.innerText =
+                errorMsg ||
+                'No Kubeconfig found. Please run "az aks get-credentials" or ensure your config exists.';
+            } else if (status === 'CLUSTER_UNREACHABLE') {
+              mainText.innerText = 'Cluster Unreachable';
+              subText.innerText =
+                errorMsg ||
+                'Cannot connect to the Kubernetes cluster. Ensure it is running.';
+            } else {
+              mainText.innerText = 'Connection Error';
+              subText.innerText =
+                errorMsg || 'An unknown error occurred connecting to Kubernetes.';
+            }
+          }
+        });
+
+        retryBtn.addEventListener('click', () => {
+          window.electronAPI.retryInit();
+        });
+      }
+    </script>
+  </body>
+</html>
