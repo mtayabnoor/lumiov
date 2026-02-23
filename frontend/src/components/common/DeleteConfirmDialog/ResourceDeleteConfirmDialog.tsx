@@ -70,7 +70,11 @@ function ResourceDeleteConfirmDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} disabled={isDeleting} color="inherit">
+        <Button
+          onClick={onClose}
+          disabled={isDeleting}
+          sx={{ color: 'text.primary', backgroundColor: 'background.default' }}
+        >
           Cancel
         </Button>
         <Button
