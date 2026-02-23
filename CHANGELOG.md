@@ -1,3 +1,17 @@
+## [1.3.3](https://github.com/mtayabnoor/lumiov/compare/v1.3.2...v1.3.3) (2026-02-23)
+
+### 🐞 Bug Fixes
+
+- Fix electron-update config and settings ([ee57e85](https://github.com/mtayabnoor/lumiov/commit/ee57e851650fe9dee613bdcb5e6229dbd3728f8b))
+- Frontend: Fix cancel button color for delete component ([d30144c](https://github.com/mtayabnoor/lumiov/commit/d30144c9a59cf7e07268c7415bc6d3edd5cea024))
+
+## [1.3.3-rc.1](https://github.com/mtayabnoor/lumiov/compare/v1.3.2...v1.3.3-rc.1) (2026-02-23)
+
+### 🐞 Bug Fixes
+
+- Fix electron-update config and settings ([ee57e85](https://github.com/mtayabnoor/lumiov/commit/ee57e851650fe9dee613bdcb5e6229dbd3728f8b))
+- Frontend: Fix cancel button color for delete component ([d30144c](https://github.com/mtayabnoor/lumiov/commit/d30144c9a59cf7e07268c7415bc6d3edd5cea024))
+
 ## [1.3.2](https://github.com/mtayabnoor/lumiov/compare/v1.3.1...v1.3.2) (2026-02-23)
 
 ### 🐞 Bug Fixes
