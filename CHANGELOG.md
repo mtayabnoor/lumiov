@@ -1,3 +1,9 @@
+## [1.3.1-rc.1](https://github.com/mtayabnoor/lumiov/compare/v1.3.0...v1.3.1-rc.1) (2026-02-23)
+
+### 🐞 Bug Fixes
+
+- Add latest.yml and blockmap to github release assets ([cae4c25](https://github.com/mtayabnoor/lumiov/commit/cae4c25dce5df6d5a1487b8abda0599987210114))
+
 ## [1.3.0](https://github.com/mtayabnoor/lumiov/compare/v1.2.0...v1.3.0) (2026-02-23)
 
 ### ✨ Features
