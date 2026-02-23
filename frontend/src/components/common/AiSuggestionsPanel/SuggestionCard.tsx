@@ -27,7 +27,7 @@ import type {
   YamlSuggestion,
   SuggestionType,
   SuggestionSeverity,
-} from '../../../../interfaces/yaml-analysis';
+} from '../../../interfaces/yaml-analysis';
 import DiffViewer from './DiffViewer';
 
 interface SuggestionCardProps {

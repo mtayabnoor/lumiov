@@ -55,9 +55,7 @@ export function useYamlAnalysis(): UseYamlAnalysisReturn {
 
     if (!apiKey) {
       setIsApiKeyMissing(true);
-      setError(
-        'AI not configured. Click the brain icon (🧠) in the header to set your API key.',
-      );
+      setError('No OpenAI API key configured.');
       return;
     }
 

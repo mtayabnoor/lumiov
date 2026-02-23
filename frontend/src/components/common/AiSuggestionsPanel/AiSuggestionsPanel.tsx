@@ -24,7 +24,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
-import type { YamlSuggestion } from '../../../../interfaces/yaml-analysis';
+import type { YamlSuggestion } from '../../../interfaces/yaml-analysis';
 import SuggestionCard from './SuggestionCard';
 
 interface AiSuggestionsPanelProps {
@@ -97,7 +97,7 @@ function AiSuggestionsPanel({
             variant="subtitle2"
             sx={{ fontSize: '13px', fontWeight: 700, color: 'text.primary' }}
           >
-            ✨ AI Analysis
+            AI Analysis
           </Typography>
           {suggestions.length > 0 && (
             <Chip

@@ -6,7 +6,7 @@
  * AI analysis, and "Apply to Cluster" functionality.
  */
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Dialog,
   Box,
@@ -21,16 +21,16 @@ import {
   CircularProgress,
   Tooltip,
   Chip,
-  useTheme,
   alpha,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Editor from '@monaco-editor/react';
-import AiSuggestionsPanel from '../Editor/AiSuggestionsPanel/AiSuggestionsPanel';
+import AiSuggestionsPanel from '../AiSuggestionsPanel/AiSuggestionsPanel';
 import { useYamlAnalysis } from '../../../hooks/useYamlAnalysis';
+import { useTheme } from '@mui/material/styles';
+import { useAgent } from '../../../context/AgentContext';
 
 // ─── Templates ─────────────────────────────────────────────────
 
@@ -188,8 +188,9 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
-  const [template, setTemplate] = useState('deployment');
-  const [content, setContent] = useState(TEMPLATES.deployment.yaml);
+  const [template, setTemplate] = useState('blank');
+  const { isConfigured } = useAgent();
+  const [content, setContent] = useState(TEMPLATES.blank.yaml);
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -349,30 +350,17 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {/* AI Analyze Button */}
           <Tooltip title="AI Analysis">
-            <Button
-              size="small"
-              startIcon={
-                analysis.loading ? (
-                  <CircularProgress size={14} color="inherit" />
-                ) : (
-                  <AutoFixHighIcon sx={{ fontSize: 16 }} />
-                )
-              }
-              onClick={handleAnalyze}
-              disabled={analysis.loading}
-              variant={showAiPanel ? 'contained' : 'outlined'}
-              color="secondary"
-              sx={{
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: '12px',
-                px: 1.5,
-                borderRadius: 1.5,
-                minHeight: 30,
-              }}
-            >
-              {analysis.loading ? 'Analyzing…' : '✨ AI Assist'}
-            </Button>
+            <IconButton size="small" onClick={handleAnalyze}>
+              <SmartToyIcon
+                sx={{
+                  color: isConfigured ? '#b42323ff' : 'text.primary',
+                  filter: isConfigured
+                    ? 'drop-shadow(0 0 0.8px text.primary) drop-shadow(0 0 1px text.primary)'
+                    : 'none',
+                  transition: 'all 0.3s ease',
+                }}
+              />
+            </IconButton>
           </Tooltip>
 
           <Tooltip title="Copy YAML">

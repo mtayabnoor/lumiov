@@ -23,7 +23,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import Editor from '@monaco-editor/react';
 import yaml from 'js-yaml';
-import AiSuggestionsPanel from './AiSuggestionsPanel/AiSuggestionsPanel';
+import AiSuggestionsPanel from '../AiSuggestionsPanel/AiSuggestionsPanel';
 import { useYamlAnalysis } from '../../../hooks/useYamlAnalysis';
 
 interface ResourceEditorProps {
@@ -319,7 +319,7 @@ function ResourceEditor({
         {/* Toolbar */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {/* AI Analyze Button */}
-          <Tooltip title="AI Analysis — Lint, Security & Best Practices">
+          {/* <Tooltip title="AI Analysis — Lint, Security & Best Practices">
             <Button
               size="small"
               startIcon={
@@ -345,7 +345,7 @@ function ResourceEditor({
             >
               {analysis.loading ? 'Analyzing…' : '✨ Analyze'}
             </Button>
-          </Tooltip>
+          </Tooltip> */}
 
           <Tooltip
             title={showManagedFields ? 'Hide Managed Fields' : 'Show Managed Fields'}
