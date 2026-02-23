@@ -59,7 +59,8 @@ export default {
     [
       '@semantic-release/exec',
       {
-        prepareCmd: 'npm run build && npm run package',
+        prepareCmd:
+          'node scripts/update-versions.js ${nextRelease.version} && npm run build && npm run package',
       },
     ],
 
