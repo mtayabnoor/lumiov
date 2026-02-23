@@ -11,7 +11,7 @@
         padding: 0;
         background-color: #121212;
         color: #ffffff;
-        font-family: 'Outfit', sans-serif;
+        font-family: "Segoe WPC", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -26,7 +26,7 @@
         font-size: 48px;
         font-weight: 600;
         letter-spacing: -1px;
-        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+        background: white;
         background-clip: text;
       -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -47,7 +47,6 @@
         width: 40px;
         height: 4px;
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
         overflow: hidden;
         margin-bottom: 16px;
         position: relative;
@@ -61,7 +60,6 @@
         height: 100%;
         width: 50%;
         background: #4facfe;
-        border-radius: 4px;
         animation: slide 1.5s infinite ease-in-out;
       }
 
@@ -93,28 +91,17 @@
 
       .retry-btn {
         display: none;
-        background: #4facfe;
+        background: #0969da;
         color: #fff;
         border: none;
         padding: 10px 24px;
-        border-radius: 8px;
         font-size: 14px;
         font-weight: 500;
         cursor: pointer;
-        font-family: 'Outfit', sans-serif;
-        transition: all 0.2s ease;
-        box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
       }
 
       .retry-btn:hover {
-        background: #00f2fe;
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(0, 242, 254, 0.4);
-      }
-
-      .retry-btn:active {
-        transform: translateY(1px);
-        box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+        background: #757575;
       }
 
       .error-state .retry-btn {
@@ -147,10 +134,36 @@
           transform: translateX(-100%);
         }
       }
+
+      .close-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        background: transparent;
+        border: none;
+        color: #a0a0a0;
+        font-size: 24px;
+        cursor: pointer;
+        -webkit-app-region: no-drag;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        line-height: 1;
+      }
+
+      .close-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+      }
     </style>
   </head>
   <body>
-    <div class="logo">lumiov</div>
+    <button class="close-btn" id="closeBtn" aria-label="Close">&times;</button>
+    <div class="logo">Lumiov</div>
 
     <div class="status-container" id="statusContainer">
       <div class="loader"></div>
@@ -198,6 +211,11 @@
 
         retryBtn.addEventListener('click', () => {
           window.electronAPI.retryInit();
+        });
+
+        const closeBtn = document.getElementById('closeBtn');
+        closeBtn.addEventListener('click', () => {
+          window.electronAPI.closeApp();
         });
       }
     </script>

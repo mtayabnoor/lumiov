@@ -12,4 +12,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
       callback(status, errorMsg),
     ),
   retryInit: () => ipcRenderer.send('splash-retry'),
+  closeApp: () => ipcRenderer.send('splash-close'),
 });

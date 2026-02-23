@@ -138,6 +138,10 @@ async function runPreLaunchChecks() {
       req.end();
     });
 
+    ipcMain.on('splash-close', () => {
+      app.quit();
+    });
+
     retryInterval = setInterval(checkHealth, 2000);
     setTimeout(checkHealth, 500); // Initial fast check
   });

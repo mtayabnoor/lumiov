@@ -51,7 +51,13 @@ export class K8sService {
 
     try {
       this.kc = loadKubeConfig(); // Ensure this returns a KubeConfig instance
-      if (!this.kc || !this.kc.getCurrentCluster()) {
+      const cluster = this.kc?.getCurrentCluster();
+
+      // The Kubernetes client creates a dummy localhost:8080 cluster when no config file is found
+      const isDefaultFallback =
+        cluster?.name === 'cluster' && cluster?.server === 'http://localhost:8080';
+
+      if (!this.kc || !cluster || isDefaultFallback) {
         throw new Error('CONFIG_MISSING: No valid cluster found in KubeConfig');
       }
 
