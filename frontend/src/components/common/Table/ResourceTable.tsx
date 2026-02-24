@@ -210,7 +210,11 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
                           label={(val as any).label}
                           color={(val as any).cssClass}
                           size="small"
-                          variant="outlined"
+                          variant="filled"
+                          sx={{
+                            fontFamily: '"Montserrat", sans-serif',
+                            fontWeight: 600,
+                          }}
                         />
                       ) : (
                         val
