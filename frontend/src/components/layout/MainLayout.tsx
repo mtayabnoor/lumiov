@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import Sidebar from './Sidebar';
+import ContextSwitcher from './ContextSwitcher';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAgent } from '../../context/AgentContext';
 import AgentChatPanel from '../agent/AgentChatPanel';
@@ -57,6 +58,9 @@ function MainLayout() {
               Lumiov
             </Typography>
           </Box>
+
+          {/* Context Switcher */}
+          <ContextSwitcher />
 
           {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />

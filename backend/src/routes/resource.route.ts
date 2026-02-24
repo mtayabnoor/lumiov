@@ -5,7 +5,41 @@ import { analyzeYaml } from '../agent/yaml-analysis.service';
 
 const router = express.Router();
 
-// GET Resource (YAML/JSON)
+// ─── CONTEXT MANAGEMENT ────────────────────────────────────────
+
+router.get('/contexts', (_req, res) => {
+  try {
+    const result = k8sService.getContexts();
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to list contexts' });
+  }
+});
+
+router.post('/contexts/switch', async (req, res) => {
+  const { context } = req.body;
+
+  if (!context || typeof context !== 'string') {
+    res.status(400).json({ error: 'Missing or invalid "context" in request body' });
+    return;
+  }
+
+  try {
+    await k8sService.switchContext(context);
+    res.json({
+      success: true,
+      context,
+      state: k8sService.k8sState,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      error: err.message || 'Failed to switch context',
+      state: k8sService.k8sState,
+    });
+  }
+});
+
 router.get('/resource/yaml', async (req, res) => {
   const { apiVersion, kind, namespace, name } = req.query;
 
