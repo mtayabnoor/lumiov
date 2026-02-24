@@ -1,14 +1,18 @@
+import { useState } from 'react';
 import { Box, Toolbar, AppBar, Typography, IconButton, Tooltip } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import Sidebar from './Sidebar';
 import ContextSwitcher from './ContextSwitcher';
+import SettingsDialog from '../common/SettingsDialog';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAgent } from '../../context/AgentContext';
 import AgentChatPanel from '../agent/AgentChatPanel';
 import AgentConfigModal from '../agent/AgentConfigModal';
 import PsychologyIcon from '@mui/icons-material/Psychology';
+import Divider from '@mui/material/Divider';
 
 const LOGO_SRC = 'lumiov.png';
 const HEADER_HEIGHT = '50px';
@@ -16,6 +20,7 @@ const HEADER_HEIGHT = '50px';
 function MainLayout() {
   const { mode, toggleTheme } = useThemeMode();
   const { isConfigured, toggleChat } = useAgent();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -105,6 +110,21 @@ function MainLayout() {
               {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
           </Tooltip>
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ bgcolor: 'grey', mx: 1, height: 24, alignSelf: 'center' }}
+          />
+          {/* Settings */}
+          <Tooltip title="Settings">
+            <IconButton
+              onClick={() => setSettingsOpen(true)}
+              size="small"
+              sx={{ color: 'text.primary' }}
+            >
+              <SettingsRoundedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
 
@@ -126,6 +146,7 @@ function MainLayout() {
       {/* Agent Components */}
       <AgentChatPanel />
       <AgentConfigModal />
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </Box>
   );
 }

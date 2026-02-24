@@ -4,6 +4,7 @@ import { AppRoutes } from './routes';
 import { ThemeProvider } from './context/ThemeContext';
 import { AgentProvider } from './context/AgentContext';
 import { ErrorProvider } from './context/ErrorContext';
+import { SettingsProvider } from './context/SettingsContext';
 
 function App() {
   useEffect(() => {
@@ -14,9 +15,11 @@ function App() {
   return (
     <ThemeProvider>
       <ErrorProvider>
-        <AgentProvider>
-          <AppRoutes />
-        </AgentProvider>
+        <SettingsProvider>
+          <AgentProvider>
+            <AppRoutes />
+          </AgentProvider>
+        </SettingsProvider>
       </ErrorProvider>
     </ThemeProvider>
   );
