@@ -13,6 +13,7 @@ import AgentChatPanel from '../agent/AgentChatPanel';
 import AgentConfigModal from '../agent/AgentConfigModal';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import Divider from '@mui/material/Divider';
+import { useSettings } from '../../context/SettingsContext';
 
 const LOGO_SRC = 'lumiov.png';
 const HEADER_HEIGHT = '50px';
@@ -21,6 +22,7 @@ function MainLayout() {
   const { mode, toggleTheme } = useThemeMode();
   const { isConfigured, toggleChat } = useAgent();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { changeClusterContextEnabed } = useSettings();
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -65,7 +67,7 @@ function MainLayout() {
           </Box>
 
           {/* Context Switcher */}
-          <ContextSwitcher />
+          {changeClusterContextEnabed && <ContextSwitcher />}
 
           {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />

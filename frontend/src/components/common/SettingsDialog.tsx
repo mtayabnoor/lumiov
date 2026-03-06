@@ -21,6 +21,7 @@ interface SettingsDialogProps {
 
 export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const { deleteEnabled, setDeleteEnabled } = useSettings();
+  const { changeClusterContextEnabed, setChangeClusterContextEnabed } = useSettings();
 
   return (
     <Dialog
@@ -60,6 +61,57 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
       <Divider />
 
       <DialogContent sx={{ pt: 2.5, pb: 3 }}>
+        {/* Enable Change Cluster Context */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: 2,
+            mb: 2,
+            borderRadius: '8px',
+            border: '1px solid',
+            borderColor: (theme) =>
+              changeClusterContextEnabed
+                ? alpha(theme.palette.primary.main, 0.4)
+                : alpha(theme.palette.divider, 0.3),
+            bgcolor: (theme) =>
+              changeClusterContextEnabed
+                ? alpha(theme.palette.primary.main, 0.04)
+                : 'transparent',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.25 }}>
+              Enable Change Cluster Context
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: 'text.secondary', lineHeight: 1.3 }}
+            >
+              Allow changing cluster context from the dropdown.
+              {changeClusterContextEnabed
+                ? ' Active — be careful.'
+                : ' Currently disabled.'}
+              <br />
+              <div style={{ marginTop: '0.5rem', color: 'orange' }}>
+                <b>Note:</b>{' '}
+                <p style={{ margin: 0 }}>
+                  This change applies only to the application session. Your local
+                  kubeconfig and terminal context will remain unchanged.
+                </p>
+              </div>
+            </Typography>
+          </Box>
+          <Switch
+            checked={changeClusterContextEnabed}
+            onChange={(e) => setChangeClusterContextEnabed(e.target.checked)}
+            color="primary"
+            size="small"
+          />
+        </Box>
+
         {/* ─── Danger Zone ─────────────────────────────────────── */}
         <Typography
           variant="overline"
@@ -78,6 +130,7 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
           Danger Zone
         </Typography>
 
+        {/* Delete Enabled */}
         <Box
           sx={{
             display: 'flex',
