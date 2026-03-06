@@ -9,6 +9,8 @@ import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiv
 import PageLayout from '../../components/common/PageLayout/PageLayout';
 import ResourceEditor from '../../components/common/Editor/ResourceEditor';
 import { useState } from 'react';
+import { useDeleteResource } from '../../hooks/useResource';
+import ResourceDeleteConfirmDialog from '../../components/common/DeleteConfirmDialog/ResourceDeleteConfirmDialog';
 
 const getDeploymentReadyStatus = (event: Deployment) => {
   const desired = event?.status?.replicas ?? 0;
@@ -18,12 +20,11 @@ const getDeploymentReadyStatus = (event: Deployment) => {
 
 function Deployments() {
   const { data: deployments, error, loading } = useResource<Deployment>('deployments');
+  const { deleteResouce, isDeleting } = useDeleteResource();
 
+  const [selectedDeployment, setSelectedDeployment] = useState<Deployment | null>(null);
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
-  const [editingDeployment, setEditingDeployment] = useState<{
-    namespace: string;
-    deploymentName: string;
-  } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const deploymentConfig: ResourceTableConfig = {
     columns: [
@@ -50,13 +51,28 @@ function Deployments() {
     ],
   };
 
+  const confirmDelete = () => {
+    if (selectedDeployment) {
+      deleteResouce({
+        apiVersion: 'apps/v1',
+        kind: 'Deployment',
+        name: selectedDeployment.metadata.name,
+        namespace: selectedDeployment.metadata.namespace,
+      });
+    }
+
+    setSelectedDeployment(null);
+    setDeleteDialogOpen(false);
+  };
+
   const handleAction = (actionId: string, deployment: Deployment) => {
-    const namespace = deployment.metadata.namespace;
-    const deploymentName = deployment.metadata.name;
+    setSelectedDeployment(deployment);
 
     if (actionId === 'edit') {
-      setEditingDeployment({ namespace, deploymentName });
       setEditDrawerOpen(true);
+    }
+    if (actionId === 'delete') {
+      setDeleteDialogOpen(true);
     }
   };
 
@@ -83,17 +99,27 @@ function Deployments() {
         data={deployments}
         onAction={handleAction}
       />
-      {editingDeployment && (
+      {selectedDeployment && (
         <ResourceEditor
           open={editDrawerOpen}
           onClose={() => {
             setEditDrawerOpen(false);
-            setEditingDeployment(null);
+            setSelectedDeployment(null);
           }}
           apiVersion="apps/v1"
           kind="Deployment"
-          namespace={editingDeployment.namespace}
-          name={editingDeployment.deploymentName}
+          namespace={selectedDeployment.metadata.namespace}
+          name={selectedDeployment.metadata.name}
+        />
+      )}
+      {selectedDeployment && (
+        <ResourceDeleteConfirmDialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          onConfirm={confirmDelete}
+          resourceName={selectedDeployment.metadata.name}
+          resourceKind="Deployment"
+          isDeleting={isDeleting}
         />
       )}
     </PageLayout>

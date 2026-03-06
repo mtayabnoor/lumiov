@@ -47,8 +47,6 @@ import {
   DRAWER_STYLES,
   getDrawerPaperSx,
   DRAWER_HEADER_SX,
-  getSelectSx,
-  getMenuProps,
   ICON_BUTTON_SX,
   CONNECTED_CHIP_SX,
   PULSE_DOT_SX,

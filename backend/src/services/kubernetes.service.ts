@@ -805,6 +805,129 @@ export class K8sService {
       return `[Error fetching logs: ${msg}]`;
     }
   }
+
+  // ─── CONTEXT MANAGEMENT ─────────────────────────────────────
+
+  /**
+   * List all available kubeconfig contexts and identify the current one.
+   * This creates a fresh KubeConfig read so it always reflects the latest file state.
+   */
+  public getContexts(): {
+    contexts: { name: string; cluster: string; user: string }[];
+    current: string;
+  } {
+    const freshKc = loadKubeConfig();
+    const rawContexts = freshKc.getContexts();
+
+    // If the service is running an active in-memory context (due to switching),
+    // use it. Otherwise, fallback to whatever is set in the kubeconfig file.
+    const current = this.kc ? this.kc.getCurrentContext() : freshKc.getCurrentContext();
+
+    const contexts = rawContexts.map((ctx) => ({
+      name: ctx.name,
+      cluster: ctx.cluster,
+      user: ctx.user,
+    }));
+
+    return { contexts, current };
+  }
+
+  /**
+   * Switch to a different kubeconfig context.
+   * This resets all API clients and re-initializes against the new cluster.
+   */
+  public async switchContext(contextName: string): Promise<void> {
+    // 1. Load a fresh kubeconfig and validate the target context exists
+    const freshKc = loadKubeConfig();
+    const available = freshKc.getContexts().map((c) => c.name);
+
+    if (!available.includes(contextName)) {
+      throw new Error(
+        `Context "${contextName}" not found. Available: ${available.join(', ')}`,
+      );
+    }
+
+    // 2. Set the new context
+    freshKc.setCurrentContext(contextName);
+
+    // 3. Tear down current state
+    this.kc = null;
+    this.watch = null;
+    this.exec = null;
+    this.log = null;
+    this.coreApi = null;
+    this.appsApi = null;
+    this.batchApi = null;
+    this.networkingApi = null;
+    this.storageApi = null;
+    this.autoscalingApi = null;
+    this.rbacApi = null;
+    this.apiExtensionsApi = null;
+    this.objectApi = null;
+    this.isInitialized = false;
+    this.k8sState = 'INITIALIZING';
+    this.lastError = null;
+
+    // 4. Re-initialize with the pre-configured KubeConfig
+    //    (bypass loadKubeConfig in initialize() by assigning kc directly)
+    this.kc = freshKc;
+
+    try {
+      const cluster = this.kc.getCurrentCluster();
+      const isDefaultFallback =
+        cluster?.name === 'cluster' && cluster?.server === 'http://localhost:8080';
+
+      if (!cluster || isDefaultFallback) {
+        throw new Error('CONFIG_MISSING: No valid cluster found for context');
+      }
+
+      this.watch = new Watch(this.kc);
+      this.exec = new Exec(this.kc);
+      this.log = new Log(this.kc);
+
+      this.coreApi = this.kc.makeApiClient(CoreV1Api);
+      this.appsApi = this.kc.makeApiClient(AppsV1Api);
+      this.batchApi = this.kc.makeApiClient(BatchV1Api);
+      this.networkingApi = this.kc.makeApiClient(NetworkingV1Api);
+      this.storageApi = this.kc.makeApiClient(StorageV1Api);
+      this.autoscalingApi = this.kc.makeApiClient(AutoscalingV1Api);
+      this.rbacApi = this.kc.makeApiClient(RbacAuthorizationV1Api);
+      this.apiExtensionsApi = this.kc.makeApiClient(ApiextensionsV1Api);
+      this.objectApi = KubernetesObjectApi.makeApiClient(this.kc);
+
+      // Ping to verify new cluster is reachable
+      try {
+        await this.coreApi.getAPIResources();
+      } catch (pingErr: any) {
+        throw new Error(`CLUSTER_UNREACHABLE: ${pingErr.message}`);
+      }
+
+      this.isInitialized = true;
+      this.k8sState = 'CONNECTED';
+      console.log(`✅ Context switched to "${contextName}" successfully`);
+    } catch (err: any) {
+      if (
+        err.message.includes('CONFIG_MISSING') ||
+        err.message.includes('Could not load KubeConfig')
+      ) {
+        this.k8sState = 'CONFIG_MISSING';
+        this.lastError = 'No valid cluster found for the selected context.';
+      } else if (
+        err.message.includes('CLUSTER_UNREACHABLE') ||
+        err.code === 'ECONNREFUSED' ||
+        err.code === 'ETIMEDOUT'
+      ) {
+        this.k8sState = 'CLUSTER_UNREACHABLE';
+        this.lastError = 'Target cluster is unreachable. Please ensure it is running.';
+      } else {
+        this.k8sState = 'ERROR';
+        this.lastError = err.message || 'Unknown error during context switch';
+      }
+      console.error(`❌ Context switch failed: [${this.k8sState}]`, err.message);
+      this.isInitialized = false;
+      throw err;
+    }
+  }
 }
 
 export const k8sService = new K8sService();

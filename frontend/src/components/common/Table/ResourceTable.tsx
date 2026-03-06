@@ -21,6 +21,7 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import type { ColumnDef, ResourceTableProps } from '../../../interfaces/common';
+import { useSettings } from '../../../context/SettingsContext';
 
 // --- Helper Functions ---
 
@@ -54,7 +55,8 @@ function getValue(row: any, col: ColumnDef): React.ReactNode {
 
 function ResourceTable({ config, data, onAction, resourceType }: ResourceTableProps) {
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
-
+  const { deleteEnabled } = useSettings();
+  console.log(config);
   // State for Action Menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [activeRow, setActiveRow] = useState<any | null>(null);
@@ -210,7 +212,11 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
                           label={(val as any).label}
                           color={(val as any).cssClass}
                           size="small"
-                          variant="outlined"
+                          variant="filled"
+                          sx={{
+                            fontFamily: '"Montserrat", sans-serif',
+                            fontWeight: 600,
+                          }}
                         />
                       ) : (
                         val
@@ -246,12 +252,35 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
         onClose={handleMenuClose}
         onClick={(e) => e.stopPropagation()}
       >
-        {(config.actions ?? []).map((action) => (
-          <MenuItem key={action.id} onClick={() => handleActionClick(action.id)}>
-            {action.icon && <action.icon sx={{ mr: 1, fontSize: 20 }} />}
-            {action.label}
-          </MenuItem>
-        ))}
+        {(config.actions ?? []).map((action) => {
+          const isDelete = action.id === 'delete';
+          const isDisabled = isDelete && !deleteEnabled;
+
+          return (
+            <MenuItem
+              key={action.id}
+              onClick={() => !isDisabled && handleActionClick(action.id)}
+              disabled={isDisabled}
+              sx={{
+                color: isDelete ? 'error.main' : 'inherit',
+                '&.Mui-disabled': {
+                  opacity: 0.45,
+                },
+              }}
+            >
+              {action.icon && (
+                <action.icon
+                  sx={{
+                    mr: 1,
+                    fontSize: 20,
+                    color: isDelete ? 'error.main' : 'inherit',
+                  }}
+                />
+              )}
+              {action.label}
+            </MenuItem>
+          );
+        })}
       </Menu>
     </Box>
   );

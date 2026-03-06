@@ -1,3 +1,16 @@
+## [1.4.0-rc.1](https://github.com/mtayabnoor/lumiov/compare/v1.3.3...v1.4.0-rc.1) (2026-03-06)
+
+### ✨ Features
+
+- Add delete action safety toggle in settings ([ff84b2d](https://github.com/mtayabnoor/lumiov/commit/ff84b2d0cc9fd76cfea666ddb527a7aeb5f787a6))
+- Add delete deployment feature ([e5294c0](https://github.com/mtayabnoor/lumiov/commit/e5294c0c5bbed867b749a573adcf4afe979686f1))
+- Add general settings component ([883fad0](https://github.com/mtayabnoor/lumiov/commit/883fad04cd1a264868edd55ca35d18cd8f5bb226))
+- Add kubernetes context switcher to appbar ([5ddb02d](https://github.com/mtayabnoor/lumiov/commit/5ddb02db4b1407cfdf42fce88e57ee3a68b085ca))
+
+### 🐞 Bug Fixes
+
+- Fix object status chip color and text ([1fc8b29](https://github.com/mtayabnoor/lumiov/commit/1fc8b29e054e6cd46eab34f5adb29745ed18c85f))
+
 ## [1.3.3](https://github.com/mtayabnoor/lumiov/compare/v1.3.2...v1.3.3) (2026-02-23)
 
 ### 🐞 Bug Fixes
