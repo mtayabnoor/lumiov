@@ -1,3 +1,9 @@
+## [1.5.0-rc.1](https://github.com/mtayabnoor/lumiov/compare/v1.4.0...v1.5.0-rc.1) (2026-03-09)
+
+### ✨ Features
+
+- Add button for enabling/disabling cluster context change ([0a9f59f](https://github.com/mtayabnoor/lumiov/commit/0a9f59f15fee9540fd05c6425c02d17c2cd29fa9))
+
 ## [1.4.0](https://github.com/mtayabnoor/lumiov/compare/v1.3.3...v1.4.0) (2026-03-06)
 
 ### ✨ Features
