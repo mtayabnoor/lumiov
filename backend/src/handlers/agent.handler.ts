@@ -51,12 +51,14 @@ export const registerAgentHandlers = (socket: Socket) => {
   socket.on(
     'agent:chat',
     async (
-      message: string,
+      payload: { message: string; allowWrite: boolean },
       callback: (result: { response?: string; error?: string }) => void,
     ) => {
-      console.log(`💬 Agent chat from ${socket.id}: "${message.substring(0, 50)}..."`);
+      console.log(
+        `💬 Agent chat from ${socket.id}: "${payload.message.substring(0, 50)}..." (allowWrite: ${payload.allowWrite})`,
+      );
 
-      const result = await chat(socket.id, message);
+      const result = await chat(socket.id, payload.message, payload.allowWrite);
 
       if (result.error) {
         callback({ error: result.error });

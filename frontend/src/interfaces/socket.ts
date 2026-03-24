@@ -117,7 +117,7 @@ export interface ClientToServerEvents {
     callback: (response: AgentConfigureResponse) => void,
   ) => void;
   [SocketEvent.AGENT_CHAT]: (
-    message: string,
+    payload: { message: string; allowWrite: boolean },
     callback: (response: AgentChatResponse) => void,
   ) => void;
   [SocketEvent.AGENT_CLEAR]: (callback: () => void) => void;

@@ -1,21 +1,40 @@
+/**
+ * Delete Pod Tool
+ *
+ * Allows the agent to delete a specific pod in the Kubernetes cluster.
+ * ONLY available if write permissions are enabled.
+ */
+
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { k8sService } from '../../services/kubernetes.service.js';
 
 export function createDeletePodTool(): DynamicStructuredTool {
   return new DynamicStructuredTool({
-    name: 'delete-pod',
-    description: 'Delete a pod in a namespace',
+    name: 'delete_pod',
+    description:
+      'Delete a specific pod in the Kubernetes cluster. Use this ONLY when the user explicitly asks to delete a pod. Requires name and namespace.',
     schema: z.object({
-      namespace: z.string().describe('The namespace of the pod'),
-      name: z.string().describe('The name of the pod'),
+      name: z.string().describe('The strict name of the pod to delete.'),
+      namespace: z.string().describe('The exact namespace the pod resides in.'),
     }),
-    func: async ({ namespace, name }) => {
+    func: async ({ name, namespace }) => {
       try {
-        await k8sService.deleteResourceGeneric('v1', 'Pod', name, namespace);
-        return `Pod ${name} deleted successfully`;
-      } catch (err: any) {
-        return `Error deleting pod: ${err.message}`;
+        const result = await k8sService.deleteResourceGeneric(
+          'v1',
+          'Pod',
+          name,
+          namespace,
+        );
+        return JSON.stringify({
+          success: true,
+          message: result,
+        });
+      } catch (error: any) {
+        return JSON.stringify({
+          success: false,
+          error: error.message || `Failed to delete pod ${name}`,
+        });
       }
     },
   });

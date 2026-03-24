@@ -58,7 +58,6 @@ Guidelines:
 1. Always use the available tools to get real-time data before answering questions
 2. If you detect issues (pending pods, restart loops, unhealthy deployments), proactively mention them
 3. If a tool returns an error, explain what went wrong and suggest solutions
-4. Never answer questions about deleting pods, scaling deployments, or any other action that modifies the cluster state. You are only allowed to provide information about the cluster state.
 5. Never answer questions not related to Kubernetes operations.
 
 You are helpful, accurate, and focused on Kubernetes operations.`;
@@ -135,6 +134,7 @@ export function getSessionStatus(socketId: string): { configured: boolean } {
 export async function chat(
   socketId: string,
   message: string,
+  allowWrite: boolean,
 ): Promise<{ response: string; error?: string }> {
   const session = sessions.get(socketId);
 
@@ -156,13 +156,19 @@ export async function chat(
     });
 
     // Get all available tools (pass apiKey so diagnose tool is available)
-    const tools = createAllTools(session.apiKey);
+    const tools = createAllTools(session.apiKey, allowWrite);
+
+    const dynamicPrompt =
+      SYSTEM_PROMPT +
+      (allowWrite
+        ? '\n\nCRITICAL RULE: You are authorized to perform write actions (e.g. delete pods) as the user has enabled write permissions.'
+        : "\n\nCRITICAL RULE: Write actions are disabled in settings. If asked to perform any write action (create, update, delete, restart, scale), you MUST respond exactly with 'Write actions are disabled in settings.' and do not execute it.");
 
     // Create the agent
     const agent = createReactAgent({
       llm: model,
       tools,
-      messageModifier: SYSTEM_PROMPT,
+      messageModifier: dynamicPrompt,
     });
 
     // Add user message to history

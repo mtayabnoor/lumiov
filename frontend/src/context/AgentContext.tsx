@@ -7,6 +7,7 @@
 
 import { createContext, useContext, useState, type ReactNode, useEffect } from 'react';
 import { useSocket } from '../hooks/useSocket';
+import { useSettings } from './SettingsContext';
 
 // Message types for the chat
 export interface ChatMessage {
@@ -62,6 +63,7 @@ interface AgentProviderProps {
 
 export function AgentProvider({ children }: AgentProviderProps) {
   const socket = useSocket();
+  const { enableAgentWritePermission } = useSettings();
 
   // Configuration state
   const [isConfigured, setIsConfigured] = useState(false);
@@ -160,7 +162,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
 
     socket.emit(
       'agent:chat',
-      content.trim(),
+      { message: content.trim(), allowWrite: enableAgentWritePermission },
       (result: { response?: string; error?: string }) => {
         setIsLoading(false);
 
