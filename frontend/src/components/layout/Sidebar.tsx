@@ -81,7 +81,6 @@ function Sidebar() {
                       sx={{
                         ml: 2,
                         borderColor: 'divider',
-                        bgcolor: 'drawer.background',
                         py: 0.5,
                       }}
                     >
