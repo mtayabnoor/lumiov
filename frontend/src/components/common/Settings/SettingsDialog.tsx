@@ -12,7 +12,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-import { useSettings } from '../../context/SettingsContext';
+import { useSettings } from '../../../context/SettingsContext';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -22,6 +22,7 @@ interface SettingsDialogProps {
 export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const { deleteEnabled, setDeleteEnabled } = useSettings();
   const { changeClusterContextEnabed, setChangeClusterContextEnabed } = useSettings();
+  const { enableAgentWritePermission, setEnableAgentWritePermission } = useSettings();
 
   return (
     <Dialog
@@ -136,7 +137,7 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            p: 2,
+            p: 1,
             borderRadius: '8px',
             border: '1px solid',
             borderColor: (theme) =>
@@ -163,6 +164,49 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
           <Switch
             checked={deleteEnabled}
             onChange={(e) => setDeleteEnabled(e.target.checked)}
+            color="error"
+            size="small"
+          />
+        </Box>
+
+        {/* Enable Agent Write Permission */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: 1,
+            mt: 1,
+            borderRadius: '8px',
+            border: '1px solid',
+            borderColor: (theme) =>
+              enableAgentWritePermission
+                ? alpha(theme.palette.error.main, 0.4)
+                : alpha(theme.palette.divider, 0.3),
+            bgcolor: (theme) =>
+              enableAgentWritePermission
+                ? alpha(theme.palette.error.main, 0.04)
+                : 'transparent',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.25 }}>
+              Enable Agent Write Permission
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: 'text.secondary', lineHeight: 1.3 }}
+            >
+              Allow agent to write resources to the cluster.
+              {enableAgentWritePermission
+                ? ' Active — be careful.'
+                : ' Currently disabled.'}
+            </Typography>
+          </Box>
+          <Switch
+            checked={enableAgentWritePermission}
+            onChange={(e) => setEnableAgentWritePermission(e.target.checked)}
             color="error"
             size="small"
           />

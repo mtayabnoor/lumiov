@@ -6,7 +6,7 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import Sidebar from './Sidebar';
 import ContextSwitcher from './ContextSwitcher';
-import SettingsDialog from '../common/SettingsDialog';
+import SettingsDialog from '../common/Settings/SettingsDialog';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAgent } from '../../context/AgentContext';
 import AgentChatPanel from '../agent/AgentChatPanel';

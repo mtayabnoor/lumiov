@@ -3,11 +3,13 @@ import { createContext, useContext, useState, useCallback, type ReactNode } from
 interface AppSettings {
   deleteEnabled: boolean;
   changeClusterContextEnabed: boolean;
+  enableAgentWritePermission: boolean;
 }
 
 interface SettingsContextType extends AppSettings {
   setDeleteEnabled: (enabled: boolean) => void;
   setChangeClusterContextEnabed: (enabled: boolean) => void;
+  setEnableAgentWritePermission: (enabled: boolean) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -27,12 +29,21 @@ function loadSettings(): AppSettings {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      return { deleteEnabled: false, changeClusterContextEnabed: false, ...parsed };
+      return {
+        deleteEnabled: false,
+        changeClusterContextEnabed: false,
+        enableAgentWritePermission: false,
+        ...parsed,
+      };
     }
   } catch {
     // Corrupted storage — fall back to defaults
   }
-  return { deleteEnabled: false, changeClusterContextEnabed: false };
+  return {
+    deleteEnabled: false,
+    changeClusterContextEnabed: false,
+    enableAgentWritePermission: false,
+  };
 }
 
 function saveSettings(settings: AppSettings) {
@@ -58,12 +69,21 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const setEnableAgentWritePermission = useCallback((enabled: boolean) => {
+    setSettings((prev) => {
+      const next = { ...prev, enableAgentWritePermission: enabled };
+      saveSettings(next);
+      return next;
+    });
+  }, []);
+
   return (
     <SettingsContext.Provider
       value={{
         ...settings,
         setDeleteEnabled,
         setChangeClusterContextEnabed,
+        setEnableAgentWritePermission,
       }}
     >
       {children}
