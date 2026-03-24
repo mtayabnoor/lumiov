@@ -22,18 +22,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import '@xterm/xterm/css/xterm.css';
 
-import {
-  DRAWER_STYLES,
-  getDrawerPaperSx,
-  DRAWER_HEADER_SX,
-  getSelectSx,
-  getMenuProps,
-  ICON_BUTTON_SX,
-  CONNECTED_CHIP_SX,
-  PULSE_DOT_SX,
-  DIVIDER_SX,
-} from './drawerStyles';
-
 interface Container {
   name: string;
 }
@@ -224,11 +212,28 @@ export default function PodExecDrawer({
       open={open}
       onClose={handleClose}
       slotProps={{
-        paper: { sx: getDrawerPaperSx(height) },
+        paper: {
+          sx: {
+            height,
+            display: 'flex',
+            flexDirection: 'column' as const,
+            transition: 'height 0.3s ease-in-out',
+            borderTop: `1px solid ${theme.palette.divider}`,
+          },
+        },
       }}
     >
       {/* HEADER */}
-      <Box sx={DRAWER_HEADER_SX}>
+      <Box
+        sx={{
+          p: 1.5,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          flexShrink: 0,
+        }}
+      >
         <Box display="flex" alignItems="center" gap={2}>
           <Box display="flex" alignItems="center" gap={1}>
             <TerminalIcon sx={{ color: theme.palette.primary.main, fontSize: 20 }} />
@@ -257,7 +262,11 @@ export default function PodExecDrawer({
 
           {containers.length > 1 && (
             <>
-              <Divider orientation="vertical" flexItem sx={DIVIDER_SX} />
+              <Divider
+                orientation="vertical"
+                flexItem
+                sx={{ mx: 1, height: 24, alignSelf: 'center' }}
+              />
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography variant="caption">Container:</Typography>
                 <FormControl size="small" sx={{ minWidth: 200 }}>
@@ -293,18 +302,51 @@ export default function PodExecDrawer({
             <Chip
               size="small"
               label="Connected"
-              sx={CONNECTED_CHIP_SX}
-              icon={<Box sx={PULSE_DOT_SX} />}
+              sx={{
+                bgcolor: 'rgba(52, 211, 153, 0.15)',
+                color: 'success.main',
+                fontSize: '0.75rem',
+                height: 24,
+                fontWeight: 500,
+              }}
+              icon={
+                <Box
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: 'success.main',
+                    ml: 1,
+                    animation: 'pulse 2s ease-in-out infinite',
+                    '@keyframes pulse': {
+                      '0%, 100%': { opacity: 1 },
+                      '50%': { opacity: 0.4 },
+                    },
+                  }}
+                />
+              }
             />
           )}
-          <Divider orientation="vertical" flexItem sx={{ ...DIVIDER_SX, mx: 0.5 }} />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ mx: 0.5, height: 24, alignSelf: 'center' }}
+          />
           <Tooltip title={height === '50vh' ? 'Expand' : 'Collapse'}>
-            <IconButton onClick={toggleHeight} size="small" sx={ICON_BUTTON_SX}>
+            <IconButton
+              onClick={toggleHeight}
+              size="small"
+              sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
+            >
               {height === '50vh' ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
           </Tooltip>
           <Tooltip title="Close">
-            <IconButton onClick={handleClose} size="small" sx={ICON_BUTTON_SX}>
+            <IconButton
+              onClick={handleClose}
+              size="small"
+              sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
+            >
               <CloseIcon />
             </IconButton>
           </Tooltip>
@@ -330,9 +372,9 @@ export default function PodExecDrawer({
               left: 10,
               right: 10,
               zIndex: 10,
-              bgcolor: DRAWER_STYLES.status.error.bg,
-              color: DRAWER_STYLES.status.error.text,
-              '& .MuiAlert-icon': { color: DRAWER_STYLES.status.error.text },
+              bgcolor: 'rgba(248, 113, 113, 0.15)',
+              color: 'error.main',
+              '& .MuiAlert-icon': { color: 'error.main' },
             }}
           >
             {error}

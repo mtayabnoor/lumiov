@@ -13,7 +13,7 @@ export const typography: ThemeOptions['typography'] = {
   fontFamily: FONT_PRIMARY,
   fontSize: 13,
   htmlFontSize: 16,
-  fontWeightRegular: 50,
+  fontWeightRegular: 400,
   fontWeightMedium: 500,
   fontWeightBold: 500,
   h1: { fontWeight: 500, fontSize: '2rem', lineHeight: 1.2 },
