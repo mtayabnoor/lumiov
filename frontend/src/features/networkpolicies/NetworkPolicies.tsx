@@ -11,11 +11,7 @@ import ResourceEditor from '../../components/common/Editor/ResourceEditor';
 import { useState } from 'react';
 
 function NetworkPolicies() {
-  const {
-    data: policies,
-    error,
-    loading,
-  } = useResource<NetworkPolicy>('networkpolicies');
+  const { data: policies, error, loading } = useResource<NetworkPolicy>('networkpolicies');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -46,9 +42,7 @@ function NetworkPolicies() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: NetworkPolicy) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: NetworkPolicy) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -81,10 +75,7 @@ function NetworkPolicies() {
     );
 
   return (
-    <PageLayout
-      title="Network Policies"
-      description="Real-time monitoring dashboard for network policies"
-    >
+    <PageLayout title="Network Policies" description="Real-time monitoring dashboard for network policies">
       <ResourceTable config={config} data={policies} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

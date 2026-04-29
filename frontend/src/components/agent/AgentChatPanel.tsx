@@ -5,17 +5,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import {
-  Drawer,
-  Box,
-  Typography,
-  TextField,
-  IconButton,
-  Tooltip,
-  Divider,
-  Paper,
-  CircularProgress,
-} from '@mui/material';
+import { Drawer, Box, Typography, TextField, IconButton, Tooltip, Divider, Paper, CircularProgress } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -64,9 +54,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             fontSize="medium"
             sx={{
               color: isConfigured ? '#b42323ff' : 'text.primary',
-              filter: isConfigured
-                ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
-                : 'none',
+              filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
               transition: 'all 0.3s ease',
             }}
           />
@@ -94,11 +82,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             fontSize: '0.875rem',
           }}
         >
-          {isUser ? (
-            <Typography variant="body2">{message.content}</Typography>
-          ) : (
-            <FormattedMessage content={message.content} />
-          )}
+          {isUser ? <Typography variant="body2">{message.content}</Typography> : <FormattedMessage content={message.content} />}
         </Box>
         <Typography
           variant="caption"
@@ -137,11 +121,7 @@ function FormattedMessage({ content }: { content: string }) {
         // Bold header (e.g., **Healthy:**)
         if (trimmed.startsWith('**') && trimmed.endsWith(':**')) {
           return (
-            <Typography
-              key={i}
-              variant="subtitle2"
-              sx={{ fontWeight: 600, mt: i > 0 ? 1 : 0, mb: 0.5 }}
-            >
+            <Typography key={i} variant="subtitle2" sx={{ fontWeight: 600, mt: i > 0 ? 1 : 0, mb: 0.5 }}>
               {trimmed.replace(/\*\*/g, '').replace(/:$/, '')}
             </Typography>
           );
@@ -213,9 +193,7 @@ function TypingIndicator() {
           fontSize="medium"
           sx={{
             color: isConfigured ? '#b42323ff' : 'text.primary',
-            filter: isConfigured
-              ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
-              : 'none',
+            filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
             transition: 'all 0.3s ease',
           }}
         />
@@ -243,15 +221,7 @@ function TypingIndicator() {
 }
 
 export default function AgentChatPanel() {
-  const {
-    isChatOpen,
-    closeChat,
-    messages,
-    isLoading,
-    sendMessage,
-    clearHistory,
-    openConfigModal,
-  } = useAgent();
+  const { isChatOpen, closeChat, messages, isLoading, sendMessage, clearHistory, openConfigModal } = useAgent();
 
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -325,19 +295,13 @@ export default function AgentChatPanel() {
               fontSize="medium"
               sx={{
                 color: isConfigured ? '#b42323ff' : 'text.primary',
-                filter: isConfigured
-                  ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
-                  : 'none',
+                filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
                 transition: 'all 0.3s ease',
               }}
             />
           </Box>
           <Box>
-            <Typography
-              variant="subtitle1"
-              fontWeight={600}
-              sx={{ color: 'text.primary' }}
-            >
+            <Typography variant="subtitle1" fontWeight={600} sx={{ color: 'text.primary' }}>
               Lumiov AI
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.primary' }}>
@@ -348,20 +312,12 @@ export default function AgentChatPanel() {
 
         <Box>
           <Tooltip title="Settings">
-            <IconButton
-              size="small"
-              onClick={openConfigModal}
-              sx={{ color: 'text.primary' }}
-            >
+            <IconButton size="small" onClick={openConfigModal} sx={{ color: 'text.primary' }}>
               <SettingsIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Clear history">
-            <IconButton
-              size="small"
-              onClick={clearHistory}
-              sx={{ color: 'text.primary' }}
-            >
+            <IconButton size="small" onClick={clearHistory} sx={{ color: 'text.primary' }}>
               <DeleteOutlineIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -400,9 +356,7 @@ export default function AgentChatPanel() {
               fontSize="medium"
               sx={{
                 color: isConfigured ? '#b42323ff' : 'text.primary',
-                filter: isConfigured
-                  ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
-                  : 'none',
+                filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
                 transition: 'all 0.3s ease',
               }}
             />

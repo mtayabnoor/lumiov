@@ -36,9 +36,7 @@ function RoleBindings() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: RoleBinding) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: RoleBinding) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -71,10 +69,7 @@ function RoleBindings() {
     );
 
   return (
-    <PageLayout
-      title="Role Bindings"
-      description="Real-time monitoring dashboard for role bindings"
-    >
+    <PageLayout title="Role Bindings" description="Real-time monitoring dashboard for role bindings">
       <ResourceTable config={config} data={bindings} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

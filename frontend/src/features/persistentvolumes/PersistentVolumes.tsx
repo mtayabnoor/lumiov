@@ -27,11 +27,7 @@ const getPvStatus = (pv: PersistentVolume) => {
 };
 
 function PersistentVolumes() {
-  const {
-    data: pvs,
-    error,
-    loading,
-  } = useResource<PersistentVolume>('persistentvolumes');
+  const { data: pvs, error, loading } = useResource<PersistentVolume>('persistentvolumes');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -54,8 +50,7 @@ function PersistentVolumes() {
       {
         key: 'reclaimPolicy',
         header: 'RECLAIM POLICY',
-        accessor: (row: PersistentVolume) =>
-          row.spec?.persistentVolumeReclaimPolicy ?? '-',
+        accessor: (row: PersistentVolume) => row.spec?.persistentVolumeReclaimPolicy ?? '-',
       },
       {
         key: 'status',
@@ -75,9 +70,7 @@ function PersistentVolumes() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: PersistentVolume) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: PersistentVolume) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -107,10 +100,7 @@ function PersistentVolumes() {
     );
 
   return (
-    <PageLayout
-      title="Persistent Volumes"
-      description="Real-time monitoring dashboard for persistent volumes"
-    >
+    <PageLayout title="Persistent Volumes" description="Real-time monitoring dashboard for persistent volumes">
       <ResourceTable config={config} data={pvs} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

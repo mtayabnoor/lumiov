@@ -9,8 +9,8 @@ import { useState, useCallback, useRef } from 'react';
 import type { YamlSuggestion, YamlAnalysisResponse } from '../interfaces/yaml-analysis';
 
 import { API_PATH } from '../config/api';
+import { secureRetrieveKey } from '../services/secureStorage';
 const API_BASE = API_PATH;
-const API_KEY_STORAGE_KEY = 'lumiov-agent-api-key';
 
 interface UseYamlAnalysisReturn {
   /** Trigger AI analysis of the given YAML content */
@@ -47,12 +47,8 @@ export function useYamlAnalysis(): UseYamlAnalysisReturn {
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const getApiKey = (): string | null => {
-    return localStorage.getItem(API_KEY_STORAGE_KEY);
-  };
-
   const analyzeYaml = useCallback(async (content: string) => {
-    const apiKey = getApiKey();
+    const apiKey = await secureRetrieveKey();
 
     if (!apiKey) {
       setIsApiKeyMissing(true);
@@ -85,9 +81,7 @@ export function useYamlAnalysis(): UseYamlAnalysisReturn {
       });
 
       if (!res.ok) {
-        const errData = await res
-          .json()
-          .catch(() => ({ error: 'Analysis request failed' }));
+        const errData = await res.json().catch(() => ({ error: 'Analysis request failed' }));
         throw new Error(errData.error || `Server error: ${res.status}`);
       }
 

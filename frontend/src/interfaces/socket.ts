@@ -112,13 +112,7 @@ export interface ClientToServerEvents {
   [SocketEvent.UNSUBSCRIBE]: (resource: ResourceType) => void;
   // Agent events with callbacks
   [SocketEvent.AGENT_STATUS]: (callback: (response: AgentStatusResponse) => void) => void;
-  [SocketEvent.AGENT_CONFIGURE]: (
-    apiKey: string,
-    callback: (response: AgentConfigureResponse) => void,
-  ) => void;
-  [SocketEvent.AGENT_CHAT]: (
-    payload: { message: string; allowWrite: boolean },
-    callback: (response: AgentChatResponse) => void,
-  ) => void;
+  [SocketEvent.AGENT_CONFIGURE]: (apiKey: string, callback: (response: AgentConfigureResponse) => void) => void;
+  [SocketEvent.AGENT_CHAT]: (payload: { message: string; allowWrite: boolean }, callback: (response: AgentChatResponse) => void) => void;
   [SocketEvent.AGENT_CLEAR]: (callback: () => void) => void;
 }

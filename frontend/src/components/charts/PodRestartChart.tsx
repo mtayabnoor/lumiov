@@ -1,13 +1,4 @@
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useTheme } from '@mui/material/styles';
 import { Box, Typography, Paper } from '@mui/material';
 import type { Pod } from '../../interfaces/pod';
@@ -18,28 +9,17 @@ interface PodRestartChartProps {
   maxPods?: number;
 }
 
-function PodRestartChart({
-  pods,
-  title = 'Pod Restart Counts',
-  maxPods = 10,
-}: PodRestartChartProps) {
+function PodRestartChart({ pods, title = 'Pod Restart Counts', maxPods = 10 }: PodRestartChartProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
   const podsWithRestarts = pods
     .map((pod) => {
       // 1. We calculate total restarts across all containers in the pod
-      const totalRestarts =
-        pod.status?.containerStatuses?.reduce(
-          (sum, cs) => sum + (cs.restartCount || 0),
-          0,
-        ) || 0;
+      const totalRestarts = pod.status?.containerStatuses?.reduce((sum, cs) => sum + (cs.restartCount || 0), 0) || 0;
 
       return {
-        name:
-          pod.metadata.name.length > 15
-            ? `${pod.metadata.name.slice(0, 15)}...`
-            : pod.metadata.name,
+        name: pod.metadata.name.length > 15 ? `${pod.metadata.name.slice(0, 15)}...` : pod.metadata.name,
         fullName: pod.metadata.name,
         restarts: totalRestarts,
         namespace: pod.metadata.namespace,
@@ -110,32 +90,10 @@ function PodRestartChart({
 
       <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            layout="vertical"
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              horizontal={true}
-              vertical={false}
-              stroke={isDark ? '#374151' : '#e5e7eb'}
-            />
-            <XAxis
-              type="number"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
-              allowDecimals={false}
-            />
-            <YAxis
-              type="category"
-              dataKey="name"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 11, fill: theme.palette.text.secondary }}
-              width={120}
-            />
+          <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={isDark ? '#374151' : '#e5e7eb'} />
+            <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: theme.palette.text.secondary }} allowDecimals={false} />
+            <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: theme.palette.text.secondary }} width={120} />
             <Tooltip
               contentStyle={{
                 backgroundColor: theme.palette.background.paper,

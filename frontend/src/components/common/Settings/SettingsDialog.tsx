@@ -1,14 +1,4 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Box,
-  Typography,
-  IconButton,
-  Switch,
-  Divider,
-  alpha,
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Box, Typography, IconButton, Switch, Divider, alpha } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
@@ -72,14 +62,8 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             mb: 2,
             borderRadius: '8px',
             border: '1px solid',
-            borderColor: (theme) =>
-              changeClusterContextEnabed
-                ? alpha(theme.palette.primary.main, 0.4)
-                : alpha(theme.palette.divider, 0.3),
-            bgcolor: (theme) =>
-              changeClusterContextEnabed
-                ? alpha(theme.palette.primary.main, 0.04)
-                : 'transparent',
+            borderColor: (theme) => (changeClusterContextEnabed ? alpha(theme.palette.primary.main, 0.4) : alpha(theme.palette.divider, 0.3)),
+            bgcolor: (theme) => (changeClusterContextEnabed ? alpha(theme.palette.primary.main, 0.04) : 'transparent'),
             transition: 'all 0.2s ease',
           }}
         >
@@ -87,30 +71,19 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.25 }}>
               Enable Change Cluster Context
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: 'text.secondary', lineHeight: 1.3 }}
-            >
+            <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.3 }}>
               Allow changing cluster context from the dropdown.
-              {changeClusterContextEnabed
-                ? ' Active — be careful.'
-                : ' Currently disabled.'}
+              {changeClusterContextEnabed ? ' Active — be careful.' : ' Currently disabled.'}
               <br />
               <Box sx={{ mt: 1, color: 'warning.main' }}>
                 <b>Note:</b>{' '}
                 <Box component="p" sx={{ m: 0 }}>
-                  This change applies only to the application session. Your local
-                  kubeconfig and terminal context will remain unchanged.
+                  This change applies only to the application session. Your local kubeconfig and terminal context will remain unchanged.
                 </Box>
               </Box>
             </Typography>
           </Box>
-          <Switch
-            checked={changeClusterContextEnabed}
-            onChange={(e) => setChangeClusterContextEnabed(e.target.checked)}
-            color="primary"
-            size="small"
-          />
+          <Switch checked={changeClusterContextEnabed} onChange={(e) => setChangeClusterContextEnabed(e.target.checked)} color="primary" size="small" />
         </Box>
 
         {/* ─── Danger Zone ─────────────────────────────────────── */}
@@ -140,12 +113,8 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             p: 1,
             borderRadius: '8px',
             border: '1px solid',
-            borderColor: (theme) =>
-              deleteEnabled
-                ? alpha(theme.palette.error.main, 0.4)
-                : alpha(theme.palette.divider, 0.3),
-            bgcolor: (theme) =>
-              deleteEnabled ? alpha(theme.palette.error.main, 0.04) : 'transparent',
+            borderColor: (theme) => (deleteEnabled ? alpha(theme.palette.error.main, 0.4) : alpha(theme.palette.divider, 0.3)),
+            bgcolor: (theme) => (deleteEnabled ? alpha(theme.palette.error.main, 0.04) : 'transparent'),
             transition: 'all 0.2s ease',
           }}
         >
@@ -153,20 +122,12 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.25 }}>
               Enable Delete Actions
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: 'text.secondary', lineHeight: 1.3 }}
-            >
+            <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.3 }}>
               Allow deleting resources from context menus.
               {deleteEnabled ? ' Active — be careful.' : ' Currently disabled.'}
             </Typography>
           </Box>
-          <Switch
-            checked={deleteEnabled}
-            onChange={(e) => setDeleteEnabled(e.target.checked)}
-            color="error"
-            size="small"
-          />
+          <Switch checked={deleteEnabled} onChange={(e) => setDeleteEnabled(e.target.checked)} color="error" size="small" />
         </Box>
 
         {/* Enable Agent Write Permission */}
@@ -179,14 +140,8 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             mt: 1,
             borderRadius: '8px',
             border: '1px solid',
-            borderColor: (theme) =>
-              enableAgentWritePermission
-                ? alpha(theme.palette.error.main, 0.4)
-                : alpha(theme.palette.divider, 0.3),
-            bgcolor: (theme) =>
-              enableAgentWritePermission
-                ? alpha(theme.palette.error.main, 0.04)
-                : 'transparent',
+            borderColor: (theme) => (enableAgentWritePermission ? alpha(theme.palette.error.main, 0.4) : alpha(theme.palette.divider, 0.3)),
+            bgcolor: (theme) => (enableAgentWritePermission ? alpha(theme.palette.error.main, 0.04) : 'transparent'),
             transition: 'all 0.2s ease',
           }}
         >
@@ -194,30 +149,17 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.25 }}>
               Enable Agent Write Permission
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: 'text.secondary', lineHeight: 1.3 }}
-            >
+            <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.3 }}>
               Allow agent to write resources to the cluster.
-              {enableAgentWritePermission
-                ? ' Active — be careful.'
-                : ' Currently disabled.'}
+              {enableAgentWritePermission ? ' Active — be careful.' : ' Currently disabled.'}
             </Typography>
           </Box>
-          <Switch
-            checked={enableAgentWritePermission}
-            onChange={(e) => setEnableAgentWritePermission(e.target.checked)}
-            color="error"
-            size="small"
-          />
+          <Switch checked={enableAgentWritePermission} onChange={(e) => setEnableAgentWritePermission(e.target.checked)} color="error" size="small" />
         </Box>
 
         {/* Future settings sections */}
         <Box sx={{ mt: 3 }}>
-          <Typography
-            variant="caption"
-            sx={{ color: 'text.disabled', fontStyle: 'italic' }}
-          >
+          <Typography variant="caption" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>
             More settings coming soon.
           </Typography>
         </Box>

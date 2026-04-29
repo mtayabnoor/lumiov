@@ -15,9 +15,7 @@ if (!version) {
 
 // Validate semver format before using in any command (prevents shell injection)
 if (!/^\d+\.\d+\.\d+(-[\w.]+)?(\+[\w.]+)?$/.test(version)) {
-  console.error(
-    `❌ Invalid version format: "${version}". Expected semver (e.g. 1.2.3 or 1.2.3-rc.1).`,
-  );
+  console.error(`❌ Invalid version format: "${version}". Expected semver (e.g. 1.2.3 or 1.2.3-rc.1).`);
   process.exit(1);
 }
 

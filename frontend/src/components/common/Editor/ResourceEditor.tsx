@@ -1,18 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { API_BASE } from '../../../config/api';
-import {
-  Drawer,
-  Box,
-  Typography,
-  IconButton,
-  Button,
-  CircularProgress,
-  Alert,
-  Tooltip,
-  Chip,
-  useTheme,
-  alpha,
-} from '@mui/material';
+import { Drawer, Box, Typography, IconButton, Button, CircularProgress, Alert, Tooltip, Chip, useTheme, alpha } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -54,13 +42,7 @@ const SYSTEM_METADATA_FIELDS = [
 ];
 
 // Spec Fields (System Assigned / Defaults) - Hide these from Spec
-const SYSTEM_SPEC_FIELDS = [
-  'nodeName',
-  'clusterIP',
-  'clusterIPs',
-  'serviceAccount',
-  'priority',
-];
+const SYSTEM_SPEC_FIELDS = ['nodeName', 'clusterIP', 'clusterIPs', 'serviceAccount', 'priority'];
 
 const stripSystemFields = (obj: any): any => {
   if (!obj || typeof obj !== 'object') return obj;
@@ -72,9 +54,7 @@ const stripSystemFields = (obj: any): any => {
     SYSTEM_METADATA_FIELDS.forEach((field) => delete clone.metadata[field]);
 
     if (clone.metadata.annotations) {
-      delete clone.metadata.annotations[
-        'kubectl.kubernetes.io/last-applied-configuration'
-      ];
+      delete clone.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'];
       if (Object.keys(clone.metadata.annotations).length === 0) {
         delete clone.metadata.annotations;
       }
@@ -88,14 +68,7 @@ const stripSystemFields = (obj: any): any => {
   return clone;
 };
 
-function ResourceEditor({
-  open,
-  onClose,
-  apiVersion,
-  kind,
-  namespace,
-  name,
-}: ResourceEditorProps) {
+function ResourceEditor({ open, onClose, apiVersion, kind, namespace, name }: ResourceEditorProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -134,9 +107,7 @@ function ResourceEditor({
   // Regenerate content when toggle or fullResource changes
   useEffect(() => {
     if (fullResource) {
-      const objToShow = showManagedFields
-        ? fullResource
-        : stripSystemFields(fullResource);
+      const objToShow = showManagedFields ? fullResource : stripSystemFields(fullResource);
       setContent(yaml.dump(objToShow, { indent: 2, lineWidth: -1 }));
     }
   }, [showManagedFields, fullResource]);
@@ -301,18 +272,9 @@ function ResourceEditor({
             >
               {name}
             </Typography>
-            <Chip
-              label={kind}
-              size="small"
-              color="primary"
-              variant="outlined"
-              sx={{ height: 20, fontSize: '11px' }}
-            />
+            <Chip label={kind} size="small" color="primary" variant="outlined" sx={{ height: 20, fontSize: '11px' }} />
           </Box>
-          <Typography
-            variant="caption"
-            sx={{ color: 'text.secondary', fontFamily: 'monospace' }}
-          >
+          <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
             {namespace} · {apiVersion}
           </Typography>
         </Box>
@@ -348,38 +310,20 @@ function ResourceEditor({
             </Button>
           </Tooltip> */}
 
-          <Tooltip
-            title={showManagedFields ? 'Hide Managed Fields' : 'Show Managed Fields'}
-          >
-            <IconButton
-              size="small"
-              onClick={() => setShowManagedFields((v) => !v)}
-              sx={iconButtonSx(showManagedFields)}
-            >
-              {showManagedFields ? (
-                <VisibilityIcon fontSize="small" />
-              ) : (
-                <VisibilityOffIcon fontSize="small" />
-              )}
+          <Tooltip title={showManagedFields ? 'Hide Managed Fields' : 'Show Managed Fields'}>
+            <IconButton size="small" onClick={() => setShowManagedFields((v) => !v)} sx={iconButtonSx(showManagedFields)}>
+              {showManagedFields ? <VisibilityIcon fontSize="small" /> : <VisibilityOffIcon fontSize="small" />}
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Toggle Word Wrap">
-            <IconButton
-              size="small"
-              onClick={() => setWordWrap((w) => (w === 'on' ? 'off' : 'on'))}
-              sx={iconButtonSx(wordWrap === 'on')}
-            >
+            <IconButton size="small" onClick={() => setWordWrap((w) => (w === 'on' ? 'off' : 'on'))} sx={iconButtonSx(wordWrap === 'on')}>
               <WrapTextIcon fontSize="small" />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Toggle Minimap">
-            <IconButton
-              size="small"
-              onClick={() => setMinimap((m) => !m)}
-              sx={iconButtonSx(minimap)}
-            >
+            <IconButton size="small" onClick={() => setMinimap((m) => !m)} sx={iconButtonSx(minimap)}>
               <MapIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -391,12 +335,7 @@ function ResourceEditor({
           </Tooltip>
 
           <Tooltip title="Refresh">
-            <IconButton
-              size="small"
-              onClick={fetchResource}
-              disabled={loading}
-              sx={iconButtonSx()}
-            >
+            <IconButton size="small" onClick={fetchResource} disabled={loading} sx={iconButtonSx()}>
               <RefreshIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -411,14 +350,7 @@ function ResourceEditor({
             }}
           />
 
-          <Button
-            startIcon={<SaveIcon />}
-            variant="contained"
-            size="small"
-            disabled={loading || saving}
-            onClick={handleSave}
-            sx={{ textTransform: 'none', fontWeight: 500, px: 2 }}
-          >
+          <Button startIcon={<SaveIcon />} variant="contained" size="small" disabled={loading || saving} onClick={handleSave} sx={{ textTransform: 'none', fontWeight: 500, px: 2 }}>
             {saving ? 'Saving...' : 'Apply'}
           </Button>
 
@@ -546,33 +478,21 @@ function ResourceEditor({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography
-            variant="caption"
-            sx={{ color: 'primary.contrastText', fontSize: '11px' }}
-          >
+          <Typography variant="caption" sx={{ color: 'primary.contrastText', fontSize: '11px' }}>
             YAML
           </Typography>
           {!showManagedFields && (
-            <Typography
-              variant="caption"
-              sx={{ color: alpha('#fff', 0.7), fontSize: '11px' }}
-            >
+            <Typography variant="caption" sx={{ color: alpha('#fff', 0.7), fontSize: '11px' }}>
               (Managed fields hidden)
             </Typography>
           )}
           {showAiPanel && analysis.suggestions.length > 0 && (
-            <Typography
-              variant="caption"
-              sx={{ color: alpha('#fff', 0.7), fontSize: '11px' }}
-            >
+            <Typography variant="caption" sx={{ color: alpha('#fff', 0.7), fontSize: '11px' }}>
               ✨ {analysis.suggestions.length} suggestions pending
             </Typography>
           )}
         </Box>
-        <Typography
-          variant="caption"
-          sx={{ color: 'primary.contrastText', fontSize: '11px' }}
-        >
+        <Typography variant="caption" sx={{ color: 'primary.contrastText', fontSize: '11px' }}>
           {content.split('\n').length} lines · UTF-8
         </Typography>
       </Box>

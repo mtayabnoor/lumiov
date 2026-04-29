@@ -5,21 +5,10 @@
  * Handles API token configuration and chat panel visibility.
  */
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useMemo,
-  type ReactNode,
-  useEffect,
-} from 'react';
+import { createContext, useContext, useState, useMemo, type ReactNode, useEffect } from 'react';
 import { useSocket } from '../hooks/useSocket';
 import { useSettings } from './SettingsContext';
-import {
-  secureStoreKey,
-  secureRetrieveKey,
-  secureDeleteKey,
-} from '../services/secureStorage';
+import { secureStoreKey, secureRetrieveKey, secureDeleteKey } from '../services/secureStorage';
 
 // Message types for the chat
 export interface ChatMessage {
@@ -96,18 +85,14 @@ export function AgentProvider({ children }: AgentProviderProps) {
     let cancelled = false;
     secureRetrieveKey().then((storedKey) => {
       if (cancelled || !storedKey || !socket) return;
-      socket.emit(
-        'agent:configure',
-        storedKey,
-        (result: { success: boolean; error?: string }) => {
-          if (result.success) {
-            setIsConfigured(true);
-          } else {
-            // Key is no longer valid, remove it
-            void secureDeleteKey();
-          }
-        },
-      );
+      socket.emit('agent:configure', storedKey, (result: { success: boolean; error?: string }) => {
+        if (result.success) {
+          setIsConfigured(true);
+        } else {
+          // Key is no longer valid, remove it
+          void secureDeleteKey();
+        }
+      });
     });
     return () => {
       cancelled = true;
@@ -115,9 +100,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
   }, [socket]);
 
   // Configure the agent with an API key
-  const configureAgent = async (
-    apiKey: string,
-  ): Promise<{ success: boolean; error?: string }> => {
+  const configureAgent = async (apiKey: string): Promise<{ success: boolean; error?: string }> => {
     if (!socket) {
       return { success: false, error: 'Not connected to server' };
     }
@@ -127,25 +110,21 @@ export function AgentProvider({ children }: AgentProviderProps) {
 
     // We wrap the socket callback in a Promise so the UI can 'await' the result.
     return new Promise((resolve) => {
-      socket.emit(
-        'agent:configure',
-        apiKey,
-        (result: { success: boolean; error?: string }) => {
-          setIsConfiguring(false);
+      socket.emit('agent:configure', apiKey, (result: { success: boolean; error?: string }) => {
+        setIsConfiguring(false);
 
-          if (result.success) {
-            setIsConfigured(true);
-            void secureStoreKey(apiKey);
-            setIsConfigModalOpen(false);
-            setIsChatOpen(true); // Open chat panel automatically
-            resolve({ success: true });
-          } else {
-            const errorMsg = result.error || 'Configuration failed';
-            setConfigError(errorMsg);
-            resolve({ success: false, error: errorMsg });
-          }
-        },
-      );
+        if (result.success) {
+          setIsConfigured(true);
+          void secureStoreKey(apiKey);
+          setIsConfigModalOpen(false);
+          setIsChatOpen(true); // Open chat panel automatically
+          resolve({ success: true });
+        } else {
+          const errorMsg = result.error || 'Configuration failed';
+          setConfigError(errorMsg);
+          resolve({ success: false, error: errorMsg });
+        }
+      });
     });
   };
 
@@ -173,31 +152,27 @@ export function AgentProvider({ children }: AgentProviderProps) {
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
-    socket.emit(
-      'agent:chat',
-      { message: content.trim(), allowWrite: enableAgentWritePermission },
-      (result: { response?: string; error?: string }) => {
-        setIsLoading(false);
+    socket.emit('agent:chat', { message: content.trim(), allowWrite: enableAgentWritePermission }, (result: { response?: string; error?: string }) => {
+      setIsLoading(false);
 
-        if (result.error) {
-          const errorMessage: ChatMessage = {
-            id: generateId(),
-            role: 'error',
-            content: result.error,
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, errorMessage]);
-        } else if (result.response) {
-          const assistantMessage: ChatMessage = {
-            id: generateId(),
-            role: 'assistant',
-            content: result.response,
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
-        }
-      },
-    );
+      if (result.error) {
+        const errorMessage: ChatMessage = {
+          id: generateId(),
+          role: 'error',
+          content: result.error,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      } else if (result.response) {
+        const assistantMessage: ChatMessage = {
+          id: generateId(),
+          role: 'assistant',
+          content: result.response,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
+    });
   };
 
   // Clear chat history
@@ -254,17 +229,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
       resetConfiguration,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      isConfigured,
-      isConfiguring,
-      configError,
-      isChatOpen,
-      isConfigModalOpen,
-      messages,
-      isLoading,
-      socket,
-      enableAgentWritePermission,
-    ],
+    [isConfigured, isConfiguring, configError, isChatOpen, isConfigModalOpen, messages, isLoading, socket, enableAgentWritePermission],
   );
 
   return <AgentContext.Provider value={contextValue}>{children}</AgentContext.Provider>;

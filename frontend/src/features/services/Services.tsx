@@ -60,9 +60,7 @@ function Services() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: Service) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: Service) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -95,10 +93,7 @@ function Services() {
     );
 
   return (
-    <PageLayout
-      title="Services"
-      description="Real-time monitoring dashboard for services"
-    >
+    <PageLayout title="Services" description="Real-time monitoring dashboard for services">
       <ResourceTable config={config} data={services} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

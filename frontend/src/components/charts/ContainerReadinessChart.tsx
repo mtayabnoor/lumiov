@@ -8,10 +8,7 @@ interface ContainerReadinessChartProps {
   title?: string;
 }
 
-function ContainerReadinessChart({
-  pods,
-  title = 'Container Readiness',
-}: ContainerReadinessChartProps) {
+function ContainerReadinessChart({ pods, title = 'Container Readiness' }: ContainerReadinessChartProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -88,24 +85,9 @@ function ContainerReadinessChart({
       <Box sx={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative' }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={80}
-              paddingAngle={2}
-              dataKey="value"
-              animationBegin={0}
-              animationDuration={800}
-            >
+            <Pie data={chartData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value" animationBegin={0} animationDuration={800}>
               {chartData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={entry.color}
-                  stroke={theme.palette.background.paper}
-                  strokeWidth={2}
-                />
+                <Cell key={`cell-${index}`} fill={entry.color} stroke={theme.palette.background.paper} strokeWidth={2} />
               ))}
             </Pie>
             <Tooltip
@@ -118,10 +100,7 @@ function ContainerReadinessChart({
               }}
               formatter={(value, name) => {
                 const v = Number(value) || 0;
-                return [
-                  `${v} container${v !== 1 ? 's' : ''} (${((v / totalContainers) * 100).toFixed(1)}%)`,
-                  String(name),
-                ];
+                return [`${v} container${v !== 1 ? 's' : ''} (${((v / totalContainers) * 100).toFixed(1)}%)`, String(name)];
               }}
             />
             <Legend
@@ -133,11 +112,7 @@ function ContainerReadinessChart({
               wrapperStyle={{
                 paddingLeft: 20,
               }}
-              formatter={(value) => (
-                <span style={{ color: theme.palette.text.secondary, fontSize: 13 }}>
-                  {value}
-                </span>
-              )}
+              formatter={(value) => <span style={{ color: theme.palette.text.secondary, fontSize: 13 }}>{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>

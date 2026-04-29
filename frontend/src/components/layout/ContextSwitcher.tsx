@@ -1,16 +1,5 @@
 import { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  ButtonBase,
-  CircularProgress,
-  Divider,
-  alpha,
-} from '@mui/material';
+import { Box, Typography, Menu, MenuItem, ListItemIcon, ListItemText, ButtonBase, CircularProgress, Divider, alpha } from '@mui/material';
 import CloudQueueIcon from '@mui/icons-material/CloudQueue';
 import CheckIcon from '@mui/icons-material/Check';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
@@ -46,8 +35,7 @@ export default function ContextSwitcher() {
   }
 
   // Truncate long context names for the button display
-  const displayName =
-    currentContext.length > 28 ? `${currentContext.substring(0, 25)}…` : currentContext;
+  const displayName = currentContext.length > 28 ? `${currentContext.substring(0, 25)}…` : currentContext;
 
   return (
     <>
@@ -71,11 +59,7 @@ export default function ContextSwitcher() {
           },
         }}
       >
-        {switching ? (
-          <CircularProgress size={14} sx={{ color: 'primary.main' }} />
-        ) : (
-          <CloudQueueIcon sx={{ fontSize: 16, color: 'primary.main', opacity: 0.9 }} />
-        )}
+        {switching ? <CircularProgress size={14} sx={{ color: 'primary.main' }} /> : <CloudQueueIcon sx={{ fontSize: 16, color: 'primary.main', opacity: 0.9 }} />}
         <Typography
           variant="caption"
           sx={{
@@ -105,10 +89,7 @@ export default function ContextSwitcher() {
               maxWidth: 400,
               maxHeight: 360,
               borderRadius: '8px',
-              boxShadow: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? '0 8px 32px rgba(0,0,0,0.5)'
-                  : '0 8px 32px rgba(0,0,0,0.12)',
+              boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 8px 32px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.12)'),
             },
           },
         }}
@@ -145,13 +126,7 @@ export default function ContextSwitcher() {
                 },
               }}
             >
-              <ListItemIcon sx={{ minWidth: 28 }}>
-                {isActive ? (
-                  <CheckIcon sx={{ fontSize: 16, color: 'primary.main' }} />
-                ) : (
-                  <Box sx={{ width: 16 }} />
-                )}
-              </ListItemIcon>
+              <ListItemIcon sx={{ minWidth: 28 }}>{isActive ? <CheckIcon sx={{ fontSize: 16, color: 'primary.main' }} /> : <Box sx={{ width: 16 }} />}</ListItemIcon>
               <ListItemText
                 primary={ctx.name}
                 secondary={ctx.cluster}

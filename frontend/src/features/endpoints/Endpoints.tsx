@@ -28,9 +28,7 @@ function EndpointsPage() {
         header: 'ENDPOINTS',
         accessor: (row: Endpoints) => {
           if (!row.subsets?.length) return '<none>';
-          const addresses = row.subsets.flatMap(
-            (s) => s.addresses?.map((a) => a.ip) ?? [],
-          );
+          const addresses = row.subsets.flatMap((s) => s.addresses?.map((a) => a.ip) ?? []);
           if (addresses.length === 0) return '<none>';
           if (addresses.length <= 3) return addresses.join(', ');
           return `${addresses.slice(0, 3).join(', ')} + ${addresses.length - 3} more`;
@@ -39,9 +37,7 @@ function EndpointsPage() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: Endpoints) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: Endpoints) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -74,10 +70,7 @@ function EndpointsPage() {
     );
 
   return (
-    <PageLayout
-      title="Endpoints"
-      description="Real-time monitoring dashboard for endpoints"
-    >
+    <PageLayout title="Endpoints" description="Real-time monitoring dashboard for endpoints">
       <ResourceTable config={config} data={endpoints} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

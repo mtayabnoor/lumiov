@@ -11,12 +11,9 @@ import ResourceEditor from '../../components/common/Editor/ResourceEditor';
 import { useState } from 'react';
 
 const getJobStatus = (job: Job) => {
-  if ((job.status?.succeeded ?? 0) > 0)
-    return { kind: 'status', label: 'Complete', cssClass: 'success' };
-  if ((job.status?.failed ?? 0) > 0)
-    return { kind: 'status', label: 'Failed', cssClass: 'error' };
-  if ((job.status?.active ?? 0) > 0)
-    return { kind: 'status', label: 'Running', cssClass: 'warning' };
+  if ((job.status?.succeeded ?? 0) > 0) return { kind: 'status', label: 'Complete', cssClass: 'success' };
+  if ((job.status?.failed ?? 0) > 0) return { kind: 'status', label: 'Failed', cssClass: 'error' };
+  if ((job.status?.active ?? 0) > 0) return { kind: 'status', label: 'Running', cssClass: 'warning' };
   return { kind: 'status', label: 'Pending', cssClass: 'info' };
 };
 
@@ -53,9 +50,7 @@ function Jobs() {
         accessor: (row: Job) => {
           if (!row.status?.startTime) return '-';
           const start = new Date(row.status.startTime).getTime();
-          const end = row.status.completionTime
-            ? new Date(row.status.completionTime).getTime()
-            : Date.now();
+          const end = row.status.completionTime ? new Date(row.status.completionTime).getTime() : Date.now();
           const seconds = Math.floor((end - start) / 1000);
           if (seconds < 60) return `${seconds}s`;
           if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
@@ -65,9 +60,7 @@ function Jobs() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: Job) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: Job) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [

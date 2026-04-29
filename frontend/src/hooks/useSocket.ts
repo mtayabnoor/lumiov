@@ -4,9 +4,7 @@ import { getSocket } from '../services/socket';
 import type { ClientToServerEvents, ServerToClientEvents } from '../interfaces/socket';
 
 export function useSocket() {
-  const [socket] = useState<Socket<ServerToClientEvents, ClientToServerEvents> | null>(
-    () => getSocket(),
-  );
+  const [socket] = useState<Socket<ServerToClientEvents, ClientToServerEvents> | null>(() => getSocket());
 
   return socket;
 }

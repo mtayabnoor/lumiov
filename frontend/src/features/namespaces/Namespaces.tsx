@@ -24,9 +24,7 @@ function Namespaces() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (namespace: Namespace) => (
-          <ResourceLiveAge creationTimestamp={namespace.metadata.creationTimestamp} />
-        ),
+        accessor: (namespace: Namespace) => <ResourceLiveAge creationTimestamp={namespace.metadata.creationTimestamp} />,
       },
     ],
     actions: [{ id: 'delete', label: 'Delete', icon: DeleteIcon }],
@@ -66,16 +64,8 @@ function Namespaces() {
     );
 
   return (
-    <PageLayout
-      title="Namespaces"
-      description="Real-time monitoring dashboard for namespaces"
-    >
-      <ResourceTable
-        config={namespaceConfig}
-        data={namespaces}
-        onAction={handleAction}
-        resourceType="namespaces"
-      />
+    <PageLayout title="Namespaces" description="Real-time monitoring dashboard for namespaces">
+      <ResourceTable config={namespaceConfig} data={namespaces} onAction={handleAction} resourceType="namespaces" />
       {selectedNamespace && (
         <ResourceDeleteConfirmDialog
           open={deleteDialogOpen}

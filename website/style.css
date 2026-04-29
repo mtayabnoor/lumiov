@@ -37,11 +37,7 @@
 
   --gradient-primary: linear-gradient(135deg, #58a6ff, #bc8cff);
   --gradient-purple: linear-gradient(135deg, #bc8cff, #f778ba);
-  --gradient-glow: radial-gradient(
-    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(88, 166, 255, 0.06),
-    transparent 40%
-  );
+  --gradient-glow: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(88, 166, 255, 0.06), transparent 40%);
 
   /* Sizing */
   --max-width: 1200px;
@@ -289,16 +285,10 @@ code {
 .hero__bg-grid {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(48, 54, 61, 0.15) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(48, 54, 61, 0.15) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(48, 54, 61, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(48, 54, 61, 0.15) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 100%);
-  -webkit-mask-image: radial-gradient(
-    ellipse 80% 60% at 50% 0%,
-    #000 30%,
-    transparent 100%
-  );
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 100%);
 }
 
 .hero__glow {

@@ -1,14 +1,4 @@
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-  Legend,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
 import { useTheme } from '@mui/material/styles';
 import { Box, Typography, Paper } from '@mui/material';
 import type { Deployment } from '../../interfaces/deployment';
@@ -18,10 +8,7 @@ interface DeploymentHealthChartProps {
   title?: string;
 }
 
-function DeploymentHealthChart({
-  deployments,
-  title = 'Deployment Replica Status',
-}: DeploymentHealthChartProps) {
+function DeploymentHealthChart({ deployments, title = 'Deployment Replica Status' }: DeploymentHealthChartProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -38,10 +25,7 @@ function DeploymentHealthChart({
     const updating = desired - ready - unavailable;
 
     // We perform the name truncation right here inside the map
-    const name =
-      deployment.metadata.name.length > 12
-        ? `${deployment.metadata.name.slice(0, 12)}...`
-        : deployment.metadata.name;
+    const name = deployment.metadata.name.length > 12 ? `${deployment.metadata.name.slice(0, 12)}...` : deployment.metadata.name;
 
     return {
       name,
@@ -97,31 +81,10 @@ function DeploymentHealthChart({
 
       <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            layout="vertical"
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              horizontal={true}
-              vertical={false}
-              stroke={isDark ? '#374151' : '#e5e7eb'}
-            />
-            <XAxis
-              type="number"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
-            />
-            <YAxis
-              type="category"
-              dataKey="name"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
-              width={100}
-            />
+          <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={isDark ? '#374151' : '#e5e7eb'} />
+            <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: theme.palette.text.secondary }} />
+            <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: theme.palette.text.secondary }} width={100} />
             <Tooltip
               contentStyle={{
                 backgroundColor: theme.palette.background.paper,
@@ -131,10 +94,7 @@ function DeploymentHealthChart({
                 color: theme.palette.text.primary,
               }}
               labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName || ''}
-              formatter={(value, name) => [
-                value ?? 0,
-                String(name).charAt(0).toUpperCase() + String(name).slice(1),
-              ]}
+              formatter={(value, name) => [value ?? 0, String(name).charAt(0).toUpperCase() + String(name).slice(1)]}
             />
             <Legend
               iconType="circle"
@@ -153,18 +113,8 @@ function DeploymentHealthChart({
               )}
             />
             <Bar dataKey="ready" stackId="a" fill={colors.ready} radius={[0, 0, 0, 0]} />
-            <Bar
-              dataKey="updating"
-              stackId="a"
-              fill={colors.updating}
-              radius={[0, 0, 0, 0]}
-            />
-            <Bar
-              dataKey="unavailable"
-              stackId="a"
-              fill={colors.unavailable}
-              radius={[0, 4, 4, 0]}
-            />
+            <Bar dataKey="updating" stackId="a" fill={colors.updating} radius={[0, 0, 0, 0]} />
+            <Bar dataKey="unavailable" stackId="a" fill={colors.unavailable} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Box>

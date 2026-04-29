@@ -45,12 +45,7 @@ function MainLayout() {
         >
           {/* Logo + Title */}
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box
-              component="img"
-              src={LOGO_SRC}
-              alt="Lumiov Logo"
-              sx={{ height: 35, width: 35, mr: 1.5, objectFit: 'contain' }}
-            />
+            <Box component="img" src={LOGO_SRC} alt="Lumiov Logo" sx={{ height: 35, width: 35, mr: 1.5, objectFit: 'contain' }} />
             <Typography
               variant="subtitle2"
               noWrap
@@ -95,9 +90,7 @@ function MainLayout() {
                 fontSize="medium"
                 sx={{
                   color: isConfigured ? 'error.main' : 'text.primary',
-                  filter: isConfigured
-                    ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
-                    : 'none',
+                  filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
                   transition: 'all 0.3s ease',
                 }}
               />
@@ -105,25 +98,15 @@ function MainLayout() {
           </Tooltip>
 
           {/* Theme Toggle */}
-          <Tooltip
-            title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          >
+          <Tooltip title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
             <IconButton onClick={toggleTheme} size="small" sx={{ color: 'text.primary' }}>
               {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
           </Tooltip>
-          <Divider
-            orientation="vertical"
-            flexItem
-            sx={{ bgcolor: 'divider', mx: 1, height: 24, alignSelf: 'center' }}
-          />
+          <Divider orientation="vertical" flexItem sx={{ bgcolor: 'divider', mx: 1, height: 24, alignSelf: 'center' }} />
           {/* Settings */}
           <Tooltip title="Settings">
-            <IconButton
-              onClick={() => setSettingsOpen(true)}
-              size="small"
-              sx={{ color: 'text.primary' }}
-            >
+            <IconButton onClick={() => setSettingsOpen(true)} size="small" sx={{ color: 'text.primary' }}>
               <SettingsRoundedIcon fontSize="small" />
             </IconButton>
           </Tooltip>

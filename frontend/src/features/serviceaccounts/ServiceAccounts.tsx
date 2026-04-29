@@ -11,11 +11,7 @@ import ResourceEditor from '../../components/common/Editor/ResourceEditor';
 import { useState } from 'react';
 
 function ServiceAccounts() {
-  const {
-    data: serviceAccounts,
-    error,
-    loading,
-  } = useResource<ServiceAccount>('serviceaccounts');
+  const { data: serviceAccounts, error, loading } = useResource<ServiceAccount>('serviceaccounts');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -35,9 +31,7 @@ function ServiceAccounts() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: ServiceAccount) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: ServiceAccount) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -70,10 +64,7 @@ function ServiceAccounts() {
     );
 
   return (
-    <PageLayout
-      title="Service Accounts"
-      description="Real-time monitoring dashboard for service accounts"
-    >
+    <PageLayout title="Service Accounts" description="Real-time monitoring dashboard for service accounts">
       <ResourceTable config={config} data={serviceAccounts} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

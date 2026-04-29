@@ -25,11 +25,7 @@ const getPvcStatus = (pvc: PersistentVolumeClaim) => {
 };
 
 function PersistentVolumeClaims() {
-  const {
-    data: pvcs,
-    error,
-    loading,
-  } = useResource<PersistentVolumeClaim>('persistentvolumeclaims');
+  const { data: pvcs, error, loading } = useResource<PersistentVolumeClaim>('persistentvolumeclaims');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -55,16 +51,13 @@ function PersistentVolumeClaims() {
       {
         key: 'accessModes',
         header: 'ACCESS MODES',
-        accessor: (row: PersistentVolumeClaim) =>
-          row.status?.accessModes?.join(', ') ?? row.spec?.accessModes?.join(', ') ?? '-',
+        accessor: (row: PersistentVolumeClaim) => row.status?.accessModes?.join(', ') ?? row.spec?.accessModes?.join(', ') ?? '-',
       },
       { key: 'spec.storageClassName', header: 'STORAGE CLASS' },
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: PersistentVolumeClaim) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: PersistentVolumeClaim) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -97,10 +90,7 @@ function PersistentVolumeClaims() {
     );
 
   return (
-    <PageLayout
-      title="Persistent Volume Claims"
-      description="Real-time monitoring dashboard for persistent volume claims"
-    >
+    <PageLayout title="Persistent Volume Claims" description="Real-time monitoring dashboard for persistent volume claims">
       <ResourceTable config={config} data={pvcs} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

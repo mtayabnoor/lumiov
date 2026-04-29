@@ -1,3 +1,9 @@
+## [1.6.0-rc.1](https://github.com/mtayabnoor/lumiov/compare/v1.5.0...v1.6.0-rc.1) (2026-04-29)
+
+### ✨ Features
+
+- Update yaml analysis and diagnosis func to use secure key instad of local staorage key ([518bec6](https://github.com/mtayabnoor/lumiov/commit/518bec6f40aec79145630f53bbe620e6cb1d417e))
+
 ## [1.5.0](https://github.com/mtayabnoor/lumiov/compare/v1.4.0...v1.5.0) (2026-04-29)
 
 ### ✨ Features

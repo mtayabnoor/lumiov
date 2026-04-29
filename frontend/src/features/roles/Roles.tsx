@@ -31,9 +31,7 @@ function Roles() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: Role) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: Role) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [

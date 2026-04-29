@@ -2,20 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
-import {
-  Drawer,
-  IconButton,
-  Box,
-  Typography,
-  Alert,
-  FormControl,
-  Select,
-  MenuItem,
-  Divider,
-  Chip,
-  Tooltip,
-  useTheme,
-} from '@mui/material';
+import { Drawer, IconButton, Box, Typography, Alert, FormControl, Select, MenuItem, Divider, Chip, Tooltip, useTheme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -36,21 +23,11 @@ interface PodExecDrawerProps {
   socket: Socket | null;
 }
 
-export default function PodExecDrawer({
-  open,
-  onClose,
-  namespace,
-  podName,
-  containers,
-  defaultContainer,
-  socket,
-}: PodExecDrawerProps) {
+export default function PodExecDrawer({ open, onClose, namespace, podName, containers, defaultContainer, socket }: PodExecDrawerProps) {
   const theme = useTheme();
 
   // --- State ---
-  const [selectedContainer, setSelectedContainer] = useState(
-    defaultContainer || containers[0]?.name || '',
-  );
+  const [selectedContainer, setSelectedContainer] = useState(defaultContainer || containers[0]?.name || '');
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [height, setHeight] = useState('50vh');
@@ -261,11 +238,7 @@ export default function PodExecDrawer({
 
           {containers.length > 1 && (
             <>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={{ mx: 1, height: 24, alignSelf: 'center' }}
-              />
+              <Divider orientation="vertical" flexItem sx={{ mx: 1, height: 24, alignSelf: 'center' }} />
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography variant="caption">Container:</Typography>
                 <FormControl size="small" sx={{ minWidth: 200 }}>
@@ -326,26 +299,14 @@ export default function PodExecDrawer({
               }
             />
           )}
-          <Divider
-            orientation="vertical"
-            flexItem
-            sx={{ mx: 0.5, height: 24, alignSelf: 'center' }}
-          />
+          <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 24, alignSelf: 'center' }} />
           <Tooltip title={height === '50vh' ? 'Expand' : 'Collapse'}>
-            <IconButton
-              onClick={toggleHeight}
-              size="small"
-              sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
-            >
+            <IconButton onClick={toggleHeight} size="small" sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}>
               {height === '50vh' ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
           </Tooltip>
           <Tooltip title="Close">
-            <IconButton
-              onClick={handleClose}
-              size="small"
-              sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
-            >
+            <IconButton onClick={handleClose} size="small" sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}>
               <CloseIcon />
             </IconButton>
           </Tooltip>
@@ -385,10 +346,7 @@ export default function PodExecDrawer({
             When it updates or unmounts, React calls `initTerminal(null)`.
             We handle the cleanup inside that function.
         */}
-        <div
-          ref={initTerminal}
-          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
-        />
+        <div ref={initTerminal} style={{ width: '100%', height: '100%', overflow: 'hidden' }} />
       </Box>
     </Drawer>
   );

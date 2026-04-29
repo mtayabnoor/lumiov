@@ -5,22 +5,7 @@
  */
 
 import { useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Alert,
-  CircularProgress,
-  IconButton,
-  InputAdornment,
-  Link,
-  Divider,
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Box, Typography, Alert, CircularProgress, IconButton, InputAdornment, Link, Divider } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import PsychologyIcon from '@mui/icons-material/Psychology';
@@ -28,15 +13,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useAgent } from '../../context/AgentContext';
 
 export default function AgentConfigModal() {
-  const {
-    isConfigModalOpen,
-    closeConfigModal,
-    configureAgent,
-    isConfiguring,
-    configError,
-    isConfigured,
-    resetConfiguration,
-  } = useAgent();
+  const { isConfigModalOpen, closeConfigModal, configureAgent, isConfiguring, configError, isConfigured, resetConfiguration } = useAgent();
 
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
@@ -95,9 +72,7 @@ export default function AgentConfigModal() {
             fontSize="medium"
             sx={{
               color: isConfigured ? '#b42323ff' : 'text.primary',
-              filter: isConfigured
-                ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
-                : 'none',
+              filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
               transition: 'all 0.3s ease',
             }}
           />
@@ -116,8 +91,7 @@ export default function AgentConfigModal() {
             </Alert>
 
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Your OpenAI API key is stored locally. You can disconnect at any time to
-              remove your API key from this device.
+              Your OpenAI API key is stored locally. You can disconnect at any time to remove your API key from this device.
             </Typography>
 
             <Box
@@ -139,12 +113,7 @@ export default function AgentConfigModal() {
                   This will remove your API key and clear chat history
                 </Typography>
               </Box>
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<LogoutIcon />}
-                onClick={handleDisconnect}
-              >
+              <Button variant="outlined" color="error" startIcon={<LogoutIcon />} onClick={handleDisconnect}>
                 Disconnect
               </Button>
             </Box>
@@ -157,8 +126,7 @@ export default function AgentConfigModal() {
           </Box>
         ) : (
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Enter your OpenAI API key to enable the AI cluster assistant. Your key is
-            stored locally and never sent to our servers.
+            Enter your OpenAI API key to enable the AI cluster assistant. Your key is stored locally and never sent to our servers.
           </Typography>
         )}
 
@@ -181,11 +149,7 @@ export default function AgentConfigModal() {
             input: {
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowKey(!showKey)}
-                    edge="end"
-                    size="small"
-                  >
+                  <IconButton onClick={() => setShowKey(!showKey)} edge="end" size="small">
                     {showKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
                   </IconButton>
                 </InputAdornment>
@@ -199,17 +163,9 @@ export default function AgentConfigModal() {
           }}
         />
 
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ mt: 2, display: 'block' }}
-        >
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
           Don't have an API key?{' '}
-          <Link
-            href="https://platform.openai.com/api-keys"
-            target="_blank"
-            rel="noopener"
-          >
+          <Link href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">
             Get one from OpenAI
           </Link>
         </Typography>
@@ -219,11 +175,7 @@ export default function AgentConfigModal() {
         <Button onClick={handleClose} disabled={isConfiguring}>
           {isConfigured ? 'Close' : 'Cancel'}
         </Button>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={isConfiguring || !apiKey.trim()}
-        >
+        <Button variant="contained" onClick={handleSubmit} disabled={isConfiguring || !apiKey.trim()}>
           {isConfiguring ? (
             <>
               <CircularProgress size={16} sx={{ mr: 1, color: 'text.primary' }} />

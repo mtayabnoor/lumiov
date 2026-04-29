@@ -66,9 +66,7 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
 
   // 1. Computed: Namespace List
   const namespaces = data.map((p: any) => p?.metadata?.namespace || '');
-  const namespaceList = Array.from(new Set(namespaces))
-    .filter(Boolean)
-    .sort() as string[];
+  const namespaceList = Array.from(new Set(namespaces)).filter(Boolean).sort() as string[];
 
   // 2. Computed: Filtered & Sorted
   const sorted = [...data].sort((a: any, b: any) => {
@@ -79,12 +77,7 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
     return (a?.metadata?.name ?? '').localeCompare(b?.metadata?.name ?? '');
   });
 
-  const filteredData =
-    selectedNamespaces.length === 0
-      ? sorted
-      : sorted.filter((item: any) =>
-          selectedNamespaces.includes(item?.metadata?.namespace),
-        );
+  const filteredData = selectedNamespaces.length === 0 ? sorted : sorted.filter((item: any) => selectedNamespaces.includes(item?.metadata?.namespace));
 
   // Handlers
   const handleNamespaceChange = (event: SelectChangeEvent<string[]>) => {
@@ -146,8 +139,7 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
             size="small" // 2. Makes the height smaller (compact mode)
             sx={{ minWidth: 150, maxWidth: 300 }} // 3. Reduced width (was 200/400)
           >
-            <InputLabel size="small">Namespace</InputLabel>{' '}
-            {/* 4. Ensure label matches small size */}
+            <InputLabel size="small">Namespace</InputLabel> {/* 4. Ensure label matches small size */}
             <Select
               multiple
               value={selectedNamespaces}
@@ -158,8 +150,7 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
             >
               {namespaceList.map((ns) => (
                 <MenuItem key={ns} value={ns}>
-                  <Checkbox checked={selectedNamespaces.indexOf(ns) > -1} size="small" />{' '}
-                  {/* Optional: make checkbox small too */}
+                  <Checkbox checked={selectedNamespaces.indexOf(ns) > -1} size="small" /> {/* Optional: make checkbox small too */}
                   <ListItemText primary={ns} />
                 </MenuItem>
               ))}
@@ -194,19 +185,11 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
           </TableHead>
           <TableBody>
             {filteredData.map((row: any, index: number) => (
-              <TableRow
-                key={row?.object?.metadata?.uid || index}
-                hover
-                sx={getRowStyle(row)}
-              >
+              <TableRow key={row?.object?.metadata?.uid || index} hover sx={getRowStyle(row)}>
                 {config.columns.map((col) => {
                   const val = getValue(row, col);
                   // Check if it's our custom status object
-                  const isStatusObj =
-                    val &&
-                    typeof val === 'object' &&
-                    'kind' in val &&
-                    (val as any).kind === 'status';
+                  const isStatusObj = val && typeof val === 'object' && 'kind' in val && (val as any).kind === 'status';
 
                   return (
                     <TableCell key={col.key}>
@@ -249,12 +232,7 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
       </TableContainer>
 
       {/* 3. Dropdown Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} onClick={(e) => e.stopPropagation()}>
         {(config.actions ?? []).map((action) => {
           const isDelete = action.id === 'delete';
           const isDisabled = isDelete && !deleteEnabled;

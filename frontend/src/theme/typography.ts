@@ -1,13 +1,6 @@
 import { type ThemeOptions } from '@mui/material/styles';
 
-const FONT_PRIMARY = [
-  'Inter',
-  '-apple-system',
-  'BlinkMacSystemFont',
-  '"Segoe UI"',
-  'Roboto',
-  'sans-serif',
-].join(',');
+const FONT_PRIMARY = ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'].join(',');
 
 export const typography: ThemeOptions['typography'] = {
   fontFamily: FONT_PRIMARY,

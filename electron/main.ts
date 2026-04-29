@@ -75,9 +75,7 @@ async function runPreLaunchChecks() {
     if (isDev) {
       splashWindow.loadFile(path.join(appRoot, 'frontend', 'public', 'splash.html'));
     } else {
-      splashWindow.loadFile(
-        path.join(process.resourcesPath, 'frontend', 'public', 'splash.html'),
-      );
+      splashWindow.loadFile(path.join(process.resourcesPath, 'frontend', 'public', 'splash.html'));
     }
 
     let retryInterval: NodeJS.Timeout;
@@ -97,11 +95,7 @@ async function runPreLaunchChecks() {
                 splashWindow?.close();
                 resolve();
               } else {
-                splashWindow?.webContents.send(
-                  'splash-status',
-                  parsed.k8sState,
-                  parsed.k8sError,
-                );
+                splashWindow?.webContents.send('splash-status', parsed.k8sState, parsed.k8sError);
               }
             } catch (e) {
               // parse error
@@ -109,29 +103,18 @@ async function runPreLaunchChecks() {
           });
         })
         .on('error', () => {
-          splashWindow?.webContents.send(
-            'splash-status',
-            'INITIALIZING',
-            'Starting backend services...',
-          );
+          splashWindow?.webContents.send('splash-status', 'INITIALIZING', 'Starting backend services...');
         });
     };
 
     ipcMain.on('splash-retry', () => {
       isRetrying = true;
-      splashWindow?.webContents.send(
-        'splash-status',
-        'INITIALIZING',
-        'Retrying connection...',
-      );
+      splashWindow?.webContents.send('splash-status', 'INITIALIZING', 'Retrying connection...');
 
-      const req = http.request(
-        { hostname: 'localhost', port: 3030, path: '/api/k8s/retry', method: 'POST' },
-        (res) => {
-          isRetrying = false;
-          checkHealth();
-        },
-      );
+      const req = http.request({ hostname: 'localhost', port: 3030, path: '/api/k8s/retry', method: 'POST' }, (res) => {
+        isRetrying = false;
+        checkHealth();
+      });
       req.on('error', () => {
         isRetrying = false;
         checkHealth();
@@ -181,9 +164,7 @@ function createWindow() {
     mainWindow.loadFile(path.join(appRoot, 'frontend', 'dist', 'index.html'));
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(
-      path.join(process.resourcesPath, 'frontend', 'dist', 'index.html'),
-    );
+    mainWindow.loadFile(path.join(process.resourcesPath, 'frontend', 'dist', 'index.html'));
   }
 }
 
@@ -199,8 +180,7 @@ autoUpdater.on('update-available', (info) => {
       type: 'info',
       title: 'Update Available',
       message: `A new version (v${version}) is available.`,
-      detail:
-        'Would you like to download it now? The download happens in the background — you can keep working.',
+      detail: 'Would you like to download it now? The download happens in the background — you can keep working.',
       buttons: ['Download', 'Skip'],
       defaultId: 0,
       cancelId: 1,
@@ -235,8 +215,7 @@ autoUpdater.on('update-downloaded', (info: UpdateDownloadedEvent) => {
       type: 'info',
       title: 'Update Ready',
       message: `Version ${info.version} has been downloaded.`,
-      detail:
-        'A restart is required to apply the new update. Would you like to restart now?',
+      detail: 'A restart is required to apply the new update. Would you like to restart now?',
       buttons: ['Restart Now', 'Later'],
       defaultId: 0,
       cancelId: 1,

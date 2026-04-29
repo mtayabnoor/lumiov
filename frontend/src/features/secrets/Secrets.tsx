@@ -36,9 +36,7 @@ function Secrets() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: Secret) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: Secret) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [

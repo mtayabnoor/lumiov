@@ -11,11 +11,7 @@ import ResourceEditor from '../../components/common/Editor/ResourceEditor';
 import { useState } from 'react';
 
 function HPAs() {
-  const {
-    data: hpas,
-    error,
-    loading,
-  } = useResource<HorizontalPodAutoscaler>('horizontalpodautoscalers');
+  const { data: hpas, error, loading } = useResource<HorizontalPodAutoscaler>('horizontalpodautoscalers');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -62,9 +58,7 @@ function HPAs() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: HorizontalPodAutoscaler) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: HorizontalPodAutoscaler) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -97,10 +91,7 @@ function HPAs() {
     );
 
   return (
-    <PageLayout
-      title="Horizontal Pod Autoscalers"
-      description="Real-time monitoring dashboard for HPAs"
-    >
+    <PageLayout title="Horizontal Pod Autoscalers" description="Real-time monitoring dashboard for HPAs">
       <ResourceTable config={config} data={hpas} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

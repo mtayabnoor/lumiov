@@ -46,13 +46,11 @@ router.post('/contexts/switch', async (req, res) => {
     await k8sService.switchContext(context);
     res.json({ success: true, context, state: k8sService.k8sState });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        state: k8sService.k8sState,
-        ...toAppError(err, 'CONTEXT_SWITCH_FAILED', true),
-      });
+    res.status(500).json({
+      success: false,
+      state: k8sService.k8sState,
+      ...toAppError(err, 'CONTEXT_SWITCH_FAILED', true),
+    });
   }
 });
 
@@ -165,12 +163,10 @@ router.post('/diagnose', async (req, res) => {
     const result = await diagnosePod({ namespace, podName, apiKey });
 
     if (result.error) {
-      res
-        .status(422)
-        .json({
-          ...toAppError(result.error, 'DIAGNOSIS_LLM_ERROR', false),
-          rawData: result.rawData,
-        });
+      res.status(422).json({
+        ...toAppError(result.error, 'DIAGNOSIS_LLM_ERROR', false),
+        rawData: result.rawData,
+      });
       return;
     }
 

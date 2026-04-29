@@ -40,9 +40,7 @@ function Deployments() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (deployment: Deployment) => (
-          <ResourceLiveAge creationTimestamp={deployment.metadata.creationTimestamp} />
-        ),
+        accessor: (deployment: Deployment) => <ResourceLiveAge creationTimestamp={deployment.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -90,15 +88,8 @@ function Deployments() {
     );
 
   return (
-    <PageLayout
-      title="Deployments"
-      description="Real-time monitoring dashboard for deployments"
-    >
-      <ResourceTable
-        config={deploymentConfig}
-        data={deployments}
-        onAction={handleAction}
-      />
+    <PageLayout title="Deployments" description="Real-time monitoring dashboard for deployments">
+      <ResourceTable config={deploymentConfig} data={deployments} onAction={handleAction} />
       {selectedDeployment && (
         <ResourceEditor
           open={editDrawerOpen}
