@@ -109,8 +109,8 @@ export default function PodExecDrawer({
       const term = new Terminal({
         cursorBlink: true,
         theme: {
-          background: theme.palette.background.default,
-          foreground: theme.palette.text.primary,
+          background: 'black',
+          foreground: '#e6e6e6',
           cursor: cursorColor,
         },
         fontFamily: '"JetBrains Mono", "Fira Code", Consolas, monospace',
@@ -250,7 +250,6 @@ export default function PodExecDrawer({
               <Typography
                 variant="caption"
                 sx={{
-                  color: 'primary.contrastText',
                   fontFamily: 'monospace',
                   fontSize: '0.7rem',
                 }}
