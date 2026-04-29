@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { API_BASE } from '../../../config/api';
+import { secureRetrieveKey } from '../../../services/secureStorage';
 import {
   Dialog,
   DialogTitle,
@@ -230,53 +231,59 @@ export default function PodDiagnosisDialog({
     setError(null);
     setLoading(true);
 
-    const apiKey = localStorage.getItem('lumiov-agent-api-key') || '';
-
-    if (!apiKey) {
-      setError('No OpenAI API key configured.');
-      setLoading(false);
-      return;
-    }
-
     // 2. Create an AbortController to track this specific request
     const controller = new AbortController();
     const signal = controller.signal;
+    let cancelled = false;
 
-    fetch(`${API_BASE}/api/diagnose`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ namespace, podName, apiKey }),
-      signal, // <-- Attach the signal here
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        // 3. Check if the request was cancelled before updating state
-        if (signal.aborted) return;
+    void (async () => {
+      const apiKey = (await secureRetrieveKey()) || '';
 
-        if (!res.ok) {
-          setError(data.error || 'Diagnosis request failed');
-          if (data.rawData) setResult({ rawData: data.rawData });
-        } else {
-          setResult(data);
-        }
+      if (cancelled || signal.aborted) return;
+
+      if (!apiKey) {
+        setError('No OpenAI API key configured.');
+        setLoading(false);
+        return;
+      }
+
+      fetch(`${API_BASE}/api/diagnose`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ namespace, podName, apiKey }),
+        signal, // <-- Attach the signal here
       })
-      .catch((err) => {
-        // Ignore errors caused by us cancelling the request
-        if (err.name === 'AbortError') return;
+        .then(async (res) => {
+          const data = await res.json();
+          // 3. Check if the request was cancelled before updating state
+          if (signal.aborted || cancelled) return;
 
-        if (!signal.aborted) {
-          setError(err.message || 'Network error');
-        }
-      })
-      .finally(() => {
-        if (!signal.aborted) {
-          setLoading(false);
-        }
-      });
+          if (!res.ok) {
+            setError(data.error || 'Diagnosis request failed');
+            if (data.rawData) setResult({ rawData: data.rawData });
+          } else {
+            setResult(data);
+          }
+        })
+        .catch((err) => {
+          // Ignore errors caused by us cancelling the request
+          if (err.name === 'AbortError') return;
+
+          if (!signal.aborted && !cancelled) {
+            setError(err.message || 'Network error');
+          }
+        })
+        .finally(() => {
+          if (!signal.aborted && !cancelled) {
+            setLoading(false);
+          }
+        });
+    })();
 
     // 4. Cleanup function: Cancels the fetch if component unmounts
     //    or if 'podName' changes before the fetch finishes.
     return () => {
+      cancelled = true;
       controller.abort();
     };
   }, [open, namespace, podName]);
