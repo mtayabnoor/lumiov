@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSocket } from './useSocket';
-import {
-  SocketEvent,
-  type K8sEventPayload,
-  type K8sListPayload,
-  type ResourceType,
-} from '../interfaces/socket';
+import { SocketEvent, type K8sEventPayload, type K8sListPayload, type ResourceType } from '../interfaces/socket';
 
 interface ResourceWithMetadata {
   metadata: {
@@ -58,9 +53,7 @@ export function useResource<T extends ResourceWithMetadata>(resource: ResourceTy
             if (prev.some((p) => p.metadata.uid === object.metadata.uid)) {
               // OPTIONAL: Even if it exists, it might be newer version.
               // Treat ADDED as MODIFIED if it exists is often safer.
-              return prev.map((p) =>
-                p.metadata.uid === object.metadata.uid ? object : p,
-              );
+              return prev.map((p) => (p.metadata.uid === object.metadata.uid ? object : p));
             }
             return [...prev, object];
 
@@ -70,9 +63,7 @@ export function useResource<T extends ResourceWithMetadata>(resource: ResourceTy
             const exists = prev.some((p) => p.metadata.uid === object.metadata.uid);
 
             if (exists) {
-              return prev.map((p) =>
-                p.metadata.uid === object.metadata.uid ? object : p,
-              );
+              return prev.map((p) => (p.metadata.uid === object.metadata.uid ? object : p));
             } else {
               // It wasn't in our list (maybe we missed the ADD event), so add it now.
               return [...prev, object];

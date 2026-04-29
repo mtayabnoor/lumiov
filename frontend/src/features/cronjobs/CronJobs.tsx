@@ -45,9 +45,7 @@ function CronJobs() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: CronJob) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: CronJob) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -80,10 +78,7 @@ function CronJobs() {
     );
 
   return (
-    <PageLayout
-      title="CronJobs"
-      description="Real-time monitoring dashboard for cronjobs"
-    >
+    <PageLayout title="CronJobs" description="Real-time monitoring dashboard for cronjobs">
       <ResourceTable config={config} data={cronJobs} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

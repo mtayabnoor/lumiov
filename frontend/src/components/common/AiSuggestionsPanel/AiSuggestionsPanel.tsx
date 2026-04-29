@@ -7,19 +7,7 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  IconButton,
-  Tooltip,
-  CircularProgress,
-  Alert,
-  LinearProgress,
-  Chip,
-  useTheme,
-  alpha,
-} from '@mui/material';
+import { Box, Typography, Button, IconButton, Tooltip, CircularProgress, Alert, LinearProgress, Chip, useTheme, alpha } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
@@ -48,18 +36,7 @@ function getScoreInfo(score: number): { color: string; label: string } {
   return { color: '#f44336', label: 'Critical' };
 }
 
-function AiSuggestionsPanel({
-  suggestions,
-  overallScore,
-  summary,
-  loading,
-  error,
-  onAccept,
-  onReject,
-  onAcceptAll,
-  onRejectAll,
-  onClose,
-}: AiSuggestionsPanelProps) {
+function AiSuggestionsPanel({ suggestions, overallScore, summary, loading, error, onAccept, onReject, onAcceptAll, onRejectAll, onClose }: AiSuggestionsPanelProps) {
   const theme = useTheme();
 
   const criticalCount = suggestions.filter((s) => s.severity === 'critical').length;
@@ -93,20 +70,10 @@ function AiSuggestionsPanel({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography
-            variant="subtitle2"
-            sx={{ fontSize: '13px', fontWeight: 700, color: 'text.primary' }}
-          >
+          <Typography variant="subtitle2" sx={{ fontSize: '13px', fontWeight: 700, color: 'text.primary' }}>
             AI Analysis
           </Typography>
-          {suggestions.length > 0 && (
-            <Chip
-              label={`${suggestions.length}`}
-              size="small"
-              color="primary"
-              sx={{ height: 20, fontSize: '11px', fontWeight: 600 }}
-            />
-          )}
+          {suggestions.length > 0 && <Chip label={`${suggestions.length}`} size="small" color="primary" sx={{ height: 20, fontSize: '11px', fontWeight: 600 }} />}
         </Box>
 
         <IconButton size="small" onClick={onClose} sx={{ p: 0.5 }}>
@@ -128,16 +95,10 @@ function AiSuggestionsPanel({
           }}
         >
           <CircularProgress size={36} thickness={3} />
-          <Typography
-            variant="body2"
-            sx={{ color: 'text.secondary', textAlign: 'center' }}
-          >
+          <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
             Analyzing your YAML manifest...
           </Typography>
-          <Typography
-            variant="caption"
-            sx={{ color: 'text.disabled', textAlign: 'center' }}
-          >
+          <Typography variant="caption" sx={{ color: 'text.disabled', textAlign: 'center' }}>
             Checking syntax, security, best practices & optimizations
           </Typography>
         </Box>
@@ -165,10 +126,7 @@ function AiSuggestionsPanel({
                 mb: 0.5,
               }}
             >
-              <Typography
-                variant="caption"
-                sx={{ fontWeight: 600, color: 'text.primary' }}
-              >
+              <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary' }}>
                 Quality Score
               </Typography>
               <Typography
@@ -209,33 +167,9 @@ function AiSuggestionsPanel({
 
             {/* Severity counts */}
             <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-              {criticalCount > 0 && (
-                <Chip
-                  label={`${criticalCount} Critical`}
-                  size="small"
-                  color="error"
-                  variant="outlined"
-                  sx={{ height: 20, fontSize: '10px' }}
-                />
-              )}
-              {warningCount > 0 && (
-                <Chip
-                  label={`${warningCount} Warning`}
-                  size="small"
-                  color="warning"
-                  variant="outlined"
-                  sx={{ height: 20, fontSize: '10px' }}
-                />
-              )}
-              {infoCount > 0 && (
-                <Chip
-                  label={`${infoCount} Info`}
-                  size="small"
-                  color="info"
-                  variant="outlined"
-                  sx={{ height: 20, fontSize: '10px' }}
-                />
-              )}
+              {criticalCount > 0 && <Chip label={`${criticalCount} Critical`} size="small" color="error" variant="outlined" sx={{ height: 20, fontSize: '10px' }} />}
+              {warningCount > 0 && <Chip label={`${warningCount} Warning`} size="small" color="warning" variant="outlined" sx={{ height: 20, fontSize: '10px' }} />}
+              {infoCount > 0 && <Chip label={`${infoCount} Info`} size="small" color="info" variant="outlined" sx={{ height: 20, fontSize: '10px' }} />}
             </Box>
           </Box>
 
@@ -296,22 +230,12 @@ function AiSuggestionsPanel({
                 }}
               >
                 <CheckIcon sx={{ fontSize: 36, color: 'success.main' }} />
-                <Typography
-                  variant="body2"
-                  sx={{ color: 'text.secondary', fontWeight: 500 }}
-                >
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   All suggestions reviewed!
                 </Typography>
               </Box>
             ) : (
-              suggestions.map((suggestion) => (
-                <SuggestionCard
-                  key={suggestion.id}
-                  suggestion={suggestion}
-                  onAccept={onAccept}
-                  onReject={onReject}
-                />
-              ))
+              suggestions.map((suggestion) => <SuggestionCard key={suggestion.id} suggestion={suggestion} onAccept={onAccept} onReject={onReject} />)
             )}
           </Box>
         </Box>
@@ -328,10 +252,7 @@ function AiSuggestionsPanel({
             p: 3,
           }}
         >
-          <Typography
-            variant="body2"
-            sx={{ color: 'text.disabled', textAlign: 'center' }}
-          >
+          <Typography variant="body2" sx={{ color: 'text.disabled', textAlign: 'center' }}>
             Click "✨ Analyze" to start AI analysis
           </Typography>
         </Box>

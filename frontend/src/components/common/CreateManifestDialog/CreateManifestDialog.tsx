@@ -8,22 +8,7 @@
 
 import { API_BASE } from '../../../config/api';
 import { useState, useCallback } from 'react';
-import {
-  Dialog,
-  Box,
-  Typography,
-  IconButton,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Alert,
-  CircularProgress,
-  Tooltip,
-  Chip,
-  alpha,
-} from '@mui/material';
+import { Dialog, Box, Typography, IconButton, Button, Select, MenuItem, FormControl, InputLabel, Alert, CircularProgress, Tooltip, Chip, alpha } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -333,12 +318,7 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
           {/* Template Selector */}
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel sx={{ fontSize: '14px' }}>Template</InputLabel>
-            <Select
-              value={template}
-              label="Template"
-              onChange={(e) => handleTemplateChange(e.target.value)}
-              sx={{ fontSize: '16px', height: 34 }}
-            >
+            <Select value={template} label="Template" onChange={(e) => handleTemplateChange(e.target.value)} sx={{ fontSize: '16px', height: 34 }}>
               {Object.entries(TEMPLATES).map(([key, tmpl]) => (
                 <MenuItem key={key} value={key} sx={{ fontSize: '13px' }}>
                   {tmpl.label}
@@ -355,9 +335,7 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
               <SmartToyIcon
                 sx={{
                   color: isConfigured ? '#b42323ff' : 'text.primary',
-                  filter: isConfigured
-                    ? 'drop-shadow(0 0 0.8px text.primary) drop-shadow(0 0 1px text.primary)'
-                    : 'none',
+                  filter: isConfigured ? 'drop-shadow(0 0 0.8px text.primary) drop-shadow(0 0 1px text.primary)' : 'none',
                   transition: 'all 0.3s ease',
                 }}
               />
@@ -370,9 +348,7 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
             </IconButton>
           </Tooltip>
 
-          <Box
-            sx={{ width: 1, height: 24, mx: 1, borderLeft: 1, borderColor: 'divider' }}
-          />
+          <Box sx={{ width: 1, height: 24, mx: 1, borderLeft: 1, borderColor: 'divider' }} />
 
           {/* Apply Button */}
           <Button
@@ -406,20 +382,12 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
       {(error || success) && (
         <Box sx={{ px: 2, py: 1 }}>
           {error && (
-            <Alert
-              severity="error"
-              onClose={() => setError(null)}
-              sx={{ py: 0, fontSize: '13px' }}
-            >
+            <Alert severity="error" onClose={() => setError(null)} sx={{ py: 0, fontSize: '13px' }}>
               {error}
             </Alert>
           )}
           {success && (
-            <Alert
-              severity="success"
-              onClose={() => setSuccess(null)}
-              sx={{ py: 0, fontSize: '13px' }}
-            >
+            <Alert severity="success" onClose={() => setSuccess(null)} sx={{ py: 0, fontSize: '13px' }}>
               {success}
             </Alert>
           )}

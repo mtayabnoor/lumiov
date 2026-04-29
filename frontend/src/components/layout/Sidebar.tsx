@@ -1,16 +1,5 @@
 import { useState } from 'react';
-import {
-  Box,
-  Drawer,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Collapse,
-  Button,
-  Tooltip,
-} from '@mui/material';
+import { Box, Drawer, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Collapse, Button, Tooltip } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -54,9 +43,7 @@ function Sidebar() {
         >
           <List component="nav" sx={{ flex: 1, overflow: 'auto' }}>
             {sidebarItems.map((group) => {
-              const isChildActive = group.items.some(
-                (item) => item.route === location.pathname,
-              );
+              const isChildActive = group.items.some((item) => item.route === location.pathname);
               const isOpen = openSections[group.title] || isChildActive;
 
               return (
@@ -135,11 +122,7 @@ function Sidebar() {
             }}
           >
             <Tooltip title="Create & Apply Manifest" placement="right">
-              <Button
-                size="small"
-                onClick={() => setManifestDialogOpen(true)}
-                variant="contained"
-              >
+              <Button size="small" onClick={() => setManifestDialogOpen(true)} variant="contained">
                 <AddIcon />
               </Button>
             </Tooltip>
@@ -148,10 +131,7 @@ function Sidebar() {
       </Drawer>
 
       {/* Create Manifest Dialog */}
-      <CreateManifestDialog
-        open={manifestDialogOpen}
-        onClose={() => setManifestDialogOpen(false)}
-      />
+      <CreateManifestDialog open={manifestDialogOpen} onClose={() => setManifestDialogOpen(false)} />
     </>
   );
 }

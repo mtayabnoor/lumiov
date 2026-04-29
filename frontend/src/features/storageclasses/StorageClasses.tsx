@@ -11,11 +11,7 @@ import ResourceEditor from '../../components/common/Editor/ResourceEditor';
 import { useState } from 'react';
 
 function StorageClasses() {
-  const {
-    data: storageClasses,
-    error,
-    loading,
-  } = useResource<StorageClass>('storageclasses');
+  const { data: storageClasses, error, loading } = useResource<StorageClass>('storageclasses');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -44,9 +40,7 @@ function StorageClasses() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: StorageClass) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: StorageClass) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -76,10 +70,7 @@ function StorageClasses() {
     );
 
   return (
-    <PageLayout
-      title="Storage Classes"
-      description="Real-time monitoring dashboard for storage classes"
-    >
+    <PageLayout title="Storage Classes" description="Real-time monitoring dashboard for storage classes">
       <ResourceTable config={config} data={storageClasses} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

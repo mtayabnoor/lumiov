@@ -46,9 +46,7 @@ function DaemonSets() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: DaemonSet) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: DaemonSet) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -81,10 +79,7 @@ function DaemonSets() {
     );
 
   return (
-    <PageLayout
-      title="DaemonSets"
-      description="Real-time monitoring dashboard for daemonsets"
-    >
+    <PageLayout title="DaemonSets" description="Real-time monitoring dashboard for daemonsets">
       <ResourceTable config={config} data={daemonSets} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

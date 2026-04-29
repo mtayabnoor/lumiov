@@ -81,9 +81,7 @@ export function useYamlAnalysis(): UseYamlAnalysisReturn {
       });
 
       if (!res.ok) {
-        const errData = await res
-          .json()
-          .catch(() => ({ error: 'Analysis request failed' }));
+        const errData = await res.json().catch(() => ({ error: 'Analysis request failed' }));
         throw new Error(errData.error || `Server error: ${res.status}`);
       }
 

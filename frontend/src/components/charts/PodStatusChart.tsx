@@ -17,10 +17,7 @@ const getPhaseColors = (isDark: boolean) => ({
   Unknown: isDark ? '#9ca3af' : '#6b7280', // gray
 });
 
-function PodStatusChart({
-  pods,
-  title = 'Pod Status Distribution',
-}: PodStatusChartProps) {
+function PodStatusChart({ pods, title = 'Pod Status Distribution' }: PodStatusChartProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const COLORS = getPhaseColors(isDark);
@@ -85,24 +82,9 @@ function PodStatusChart({
       <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={80}
-              paddingAngle={2}
-              dataKey="value"
-              animationBegin={0}
-              animationDuration={800}
-            >
+            <Pie data={chartData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value" animationBegin={0} animationDuration={800}>
               {chartData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={entry.color}
-                  stroke={theme.palette.background.paper}
-                  strokeWidth={2}
-                />
+                <Cell key={`cell-${index}`} fill={entry.color} stroke={theme.palette.background.paper} strokeWidth={2} />
               ))}
             </Pie>
             <Tooltip
@@ -127,11 +109,7 @@ function PodStatusChart({
               wrapperStyle={{
                 paddingLeft: 20,
               }}
-              formatter={(value) => (
-                <span style={{ color: theme.palette.text.secondary, fontSize: 13 }}>
-                  {value}
-                </span>
-              )}
+              formatter={(value) => <span style={{ color: theme.palette.text.secondary, fontSize: 13 }}>{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>

@@ -59,8 +59,7 @@ export default {
     [
       '@semantic-release/exec',
       {
-        prepareCmd:
-          'node scripts/update-versions.js ${nextRelease.version} && npm run build && npm run package',
+        prepareCmd: 'node scripts/update-versions.js ${nextRelease.version} && npm run build && npm run package',
       },
     ],
 
@@ -87,11 +86,7 @@ export default {
       {
         successComment: false,
         failComment: false,
-        assets: [
-          { path: 'electron/release/*.exe' },
-          { path: 'electron/release/latest.yml' },
-          { path: 'electron/release/*.blockmap' },
-        ],
+        assets: [{ path: 'electron/release/*.exe' }, { path: 'electron/release/latest.yml' }, { path: 'electron/release/*.blockmap' }],
       },
     ],
   ],

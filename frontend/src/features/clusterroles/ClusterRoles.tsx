@@ -34,9 +34,7 @@ function ClusterRoles() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: ClusterRole) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: ClusterRole) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -66,10 +64,7 @@ function ClusterRoles() {
     );
 
   return (
-    <PageLayout
-      title="Cluster Roles"
-      description="Real-time monitoring dashboard for cluster roles"
-    >
+    <PageLayout title="Cluster Roles" description="Real-time monitoring dashboard for cluster roles">
       <ResourceTable config={config} data={clusterRoles} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

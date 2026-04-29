@@ -1,13 +1,4 @@
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useTheme } from '@mui/material/styles';
 import { Box, Typography, Paper } from '@mui/material';
 import type { Pod } from '../../interfaces/pod';
@@ -34,12 +25,7 @@ const NAMESPACE_COLORS = [
   '#3b82f6', // blue
 ];
 
-function NamespaceDistributionChart({
-  pods = [],
-  deployments = [],
-  title = 'Resources by Namespace',
-  resourceType = 'both',
-}: NamespaceDistributionChartProps) {
+function NamespaceDistributionChart({ pods = [], deployments = [], title = 'Resources by Namespace', resourceType = 'both' }: NamespaceDistributionChartProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -125,26 +111,9 @@ function NamespaceDistributionChart({
       <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              vertical={false}
-              stroke={isDark ? '#374151' : '#e5e7eb'}
-            />
-            <XAxis
-              dataKey="name"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 11, fill: theme.palette.text.secondary }}
-              angle={-45}
-              textAnchor="end"
-              height={60}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
-              allowDecimals={false}
-            />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#374151' : '#e5e7eb'} />
+            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: theme.palette.text.secondary }} angle={-45} textAnchor="end" height={60} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: theme.palette.text.secondary }} allowDecimals={false} />
             <Tooltip
               contentStyle={{
                 backgroundColor: theme.palette.background.paper,
@@ -154,27 +123,12 @@ function NamespaceDistributionChart({
                 color: theme.palette.text.primary,
               }}
               labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName || ''}
-              formatter={(value, name) => [
-                value ?? 0,
-                String(name).charAt(0).toUpperCase() + String(name).slice(1),
-              ]}
+              formatter={(value, name) => [value ?? 0, String(name).charAt(0).toUpperCase() + String(name).slice(1)]}
             />
             {(resourceType === 'pods' || resourceType === 'both') && (
-              <Bar
-                dataKey="pods"
-                fill={isDark ? '#60a5fa' : '#3b82f6'}
-                radius={resourceType === 'pods' ? [4, 4, 0, 0] : [0, 0, 0, 0]}
-                name="Pods"
-              />
+              <Bar dataKey="pods" fill={isDark ? '#60a5fa' : '#3b82f6'} radius={resourceType === 'pods' ? [4, 4, 0, 0] : [0, 0, 0, 0]} name="Pods" />
             )}
-            {(resourceType === 'deployments' || resourceType === 'both') && (
-              <Bar
-                dataKey="deployments"
-                fill={isDark ? '#a78bfa' : '#8b5cf6'}
-                radius={[4, 4, 0, 0]}
-                name="Deployments"
-              />
-            )}
+            {(resourceType === 'deployments' || resourceType === 'both') && <Bar dataKey="deployments" fill={isDark ? '#a78bfa' : '#8b5cf6'} radius={[4, 4, 0, 0]} name="Deployments" />}
           </BarChart>
         </ResponsiveContainer>
       </Box>

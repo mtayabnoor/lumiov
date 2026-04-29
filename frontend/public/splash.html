@@ -199,18 +199,13 @@
             container.classList.add('error-state');
             if (status === 'CONFIG_MISSING') {
               mainText.innerText = 'Configuration Missing';
-              subText.innerText =
-                errorMsg ||
-                'No Kubeconfig found. Please run "az aks get-credentials" or ensure your config exists.';
+              subText.innerText = errorMsg || 'No Kubeconfig found. Please run "az aks get-credentials" or ensure your config exists.';
             } else if (status === 'CLUSTER_UNREACHABLE') {
               mainText.innerText = 'Cluster Unreachable';
-              subText.innerText =
-                errorMsg ||
-                'Cannot connect to the Kubernetes cluster. Ensure it is running.';
+              subText.innerText = errorMsg || 'Cannot connect to the Kubernetes cluster. Ensure it is running.';
             } else {
               mainText.innerText = 'Connection Error';
-              subText.innerText =
-                errorMsg || 'An unknown error occurred connecting to Kubernetes.';
+              subText.innerText = errorMsg || 'An unknown error occurred connecting to Kubernetes.';
             }
           }
         });

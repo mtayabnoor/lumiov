@@ -154,9 +154,7 @@ const getPodCpuReq = (pod: Pod) => {
 
 const getPodMemReq = (pod: Pod) => {
   const containers = pod.spec?.containers ?? [];
-  const totalMem = containers
-    .map((c) => c.resources?.requests?.memory || 'ns')
-    .join(', ');
+  const totalMem = containers.map((c) => c.resources?.requests?.memory || 'ns').join(', ');
   return totalMem || '-';
 };
 
@@ -173,9 +171,7 @@ function Pods() {
     containers?: { name: string }[];
     defaultContainer?: string;
   } | null>(null);
-  const [actionType, setActionType] = useState<
-    'exec' | 'logs' | 'edit' | 'diagnosis' | 'delete' | null
-  >(null);
+  const [actionType, setActionType] = useState<'exec' | 'logs' | 'edit' | 'diagnosis' | 'delete' | null>(null);
 
   const podConfig: ResourceTableConfig = {
     columns: [
@@ -209,9 +205,7 @@ function Pods() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
       { key: 'spec.nodeName', header: 'NODE' },
       {
@@ -238,9 +232,7 @@ function Pods() {
               <SmartToyIcon
                 sx={{
                   color: isConfigured ? '#b42323ff' : 'text.primary',
-                  filter: isConfigured
-                    ? 'drop-shadow(0 0 0.8px text.primary) drop-shadow(0 0 1px text.primary)'
-                    : 'none',
+                  filter: isConfigured ? 'drop-shadow(0 0 0.8px text.primary) drop-shadow(0 0 1px text.primary)' : 'none',
                   transition: 'all 0.3s ease',
                 }}
               />
@@ -347,35 +339,12 @@ function Pods() {
         />
       )}
 
-      {selectedPod && actionType === 'edit' && (
-        <ResourceEditor
-          open={true}
-          onClose={handleClose}
-          apiVersion="v1"
-          kind="Pod"
-          namespace={selectedPod.namespace}
-          name={selectedPod.podName}
-        />
-      )}
+      {selectedPod && actionType === 'edit' && <ResourceEditor open={true} onClose={handleClose} apiVersion="v1" kind="Pod" namespace={selectedPod.namespace} name={selectedPod.podName} />}
 
-      {selectedPod && actionType === 'diagnosis' && (
-        <PodDiagnosisDialog
-          open={true}
-          onClose={handleClose}
-          namespace={selectedPod.namespace}
-          podName={selectedPod.podName}
-        />
-      )}
+      {selectedPod && actionType === 'diagnosis' && <PodDiagnosisDialog open={true} onClose={handleClose} namespace={selectedPod.namespace} podName={selectedPod.podName} />}
 
       {selectedPod && actionType === 'delete' && (
-        <ResourceDeleteConfirmDialog
-          open={true}
-          onClose={handleClose}
-          onConfirm={confirmDelete}
-          resourceName={selectedPod?.podName || ''}
-          resourceKind="Pod"
-          isDeleting={isDeleting}
-        />
+        <ResourceDeleteConfirmDialog open={true} onClose={handleClose} onConfirm={confirmDelete} resourceName={selectedPod?.podName || ''} resourceKind="Pod" isDeleting={isDeleting} />
       )}
     </PageLayout>
   );

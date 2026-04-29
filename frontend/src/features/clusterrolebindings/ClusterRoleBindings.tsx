@@ -11,11 +11,7 @@ import ResourceEditor from '../../components/common/Editor/ResourceEditor';
 import { useState } from 'react';
 
 function ClusterRoleBindings() {
-  const {
-    data: bindings,
-    error,
-    loading,
-  } = useResource<ClusterRoleBinding>('clusterrolebindings');
+  const { data: bindings, error, loading } = useResource<ClusterRoleBinding>('clusterrolebindings');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -38,9 +34,7 @@ function ClusterRoleBindings() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: ClusterRoleBinding) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: ClusterRoleBinding) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -70,10 +64,7 @@ function ClusterRoleBindings() {
     );
 
   return (
-    <PageLayout
-      title="Cluster Role Bindings"
-      description="Real-time monitoring dashboard for cluster role bindings"
-    >
+    <PageLayout title="Cluster Role Bindings" description="Real-time monitoring dashboard for cluster role bindings">
       <ResourceTable config={config} data={bindings} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

@@ -1,13 +1,4 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography, Box } from '@mui/material';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 
 interface DeleteConfirmDialogProps {
@@ -19,14 +10,7 @@ interface DeleteConfirmDialogProps {
   isDeleting?: boolean; // To show loading state on the button
 }
 
-function ResourceDeleteConfirmDialog({
-  open,
-  onClose,
-  onConfirm,
-  resourceName,
-  resourceKind,
-  isDeleting = false,
-}: DeleteConfirmDialogProps) {
+function ResourceDeleteConfirmDialog({ open, onClose, onConfirm, resourceName, resourceKind, isDeleting = false }: DeleteConfirmDialogProps) {
   return (
     <Dialog
       open={open}
@@ -65,26 +49,15 @@ function ResourceDeleteConfirmDialog({
             color: 'text.secondary',
           }}
         >
-          This action cannot be undone. The resource will be permanently removed from the
-          cluster.
+          This action cannot be undone. The resource will be permanently removed from the cluster.
         </Box>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button
-          onClick={onClose}
-          disabled={isDeleting}
-          sx={{ color: 'text.primary', backgroundColor: 'background.default' }}
-        >
+        <Button onClick={onClose} disabled={isDeleting} sx={{ color: 'text.primary', backgroundColor: 'background.default' }}>
           Cancel
         </Button>
-        <Button
-          onClick={onConfirm}
-          disabled={isDeleting}
-          variant="contained"
-          color="error"
-          autoFocus
-        >
+        <Button onClick={onConfirm} disabled={isDeleting} variant="contained" color="error" autoFocus>
           {isDeleting ? 'Deleting...' : 'Delete Resource'}
         </Button>
       </DialogActions>

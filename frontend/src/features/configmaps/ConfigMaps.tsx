@@ -26,8 +26,7 @@ function ConfigMaps() {
       {
         key: 'data',
         header: 'DATA',
-        accessor: (row: ConfigMap) =>
-          Object.keys(row.data ?? {}).length + Object.keys(row.binaryData ?? {}).length,
+        accessor: (row: ConfigMap) => Object.keys(row.data ?? {}).length + Object.keys(row.binaryData ?? {}).length,
       },
       {
         key: 'immutable',
@@ -37,9 +36,7 @@ function ConfigMaps() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: ConfigMap) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: ConfigMap) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -72,10 +69,7 @@ function ConfigMaps() {
     );
 
   return (
-    <PageLayout
-      title="ConfigMaps"
-      description="Real-time monitoring dashboard for config maps"
-    >
+    <PageLayout title="ConfigMaps" description="Real-time monitoring dashboard for config maps">
       <ResourceTable config={config} data={configMaps} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

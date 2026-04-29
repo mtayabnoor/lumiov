@@ -37,9 +37,7 @@ function ResourceQuotas() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: ResourceQuota) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: ResourceQuota) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -72,10 +70,7 @@ function ResourceQuotas() {
     );
 
   return (
-    <PageLayout
-      title="Resource Quotas"
-      description="Real-time monitoring dashboard for resource quotas"
-    >
+    <PageLayout title="Resource Quotas" description="Real-time monitoring dashboard for resource quotas">
       <ResourceTable config={config} data={quotas} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

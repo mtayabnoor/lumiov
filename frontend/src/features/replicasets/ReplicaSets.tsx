@@ -41,17 +41,12 @@ function ReplicaSets() {
       {
         key: 'owner',
         header: 'OWNER',
-        accessor: (row: ReplicaSet) =>
-          row.metadata?.ownerReferences?.[0]
-            ? `${row.metadata.ownerReferences[0].kind}/${row.metadata.ownerReferences[0].name}`
-            : '-',
+        accessor: (row: ReplicaSet) => (row.metadata?.ownerReferences?.[0] ? `${row.metadata.ownerReferences[0].kind}/${row.metadata.ownerReferences[0].name}` : '-'),
       },
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: ReplicaSet) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: ReplicaSet) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -84,10 +79,7 @@ function ReplicaSets() {
     );
 
   return (
-    <PageLayout
-      title="ReplicaSets"
-      description="Real-time monitoring dashboard for replicasets"
-    >
+    <PageLayout title="ReplicaSets" description="Real-time monitoring dashboard for replicasets">
       <ResourceTable config={config} data={replicaSets} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

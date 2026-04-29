@@ -11,11 +11,7 @@ import ResourceEditor from '../../components/common/Editor/ResourceEditor';
 import { useState } from 'react';
 
 function CRDs() {
-  const {
-    data: crds,
-    error,
-    loading,
-  } = useResource<CustomResourceDefinition>('customresourcedefinitions');
+  const { data: crds, error, loading } = useResource<CustomResourceDefinition>('customresourcedefinitions');
 
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<{
@@ -52,9 +48,7 @@ function CRDs() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: CustomResourceDefinition) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: CustomResourceDefinition) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -84,10 +78,7 @@ function CRDs() {
     );
 
   return (
-    <PageLayout
-      title="Custom Resource Definitions"
-      description="Real-time monitoring dashboard for CRDs"
-    >
+    <PageLayout title="Custom Resource Definitions" description="Real-time monitoring dashboard for CRDs">
       <ResourceTable config={config} data={crds} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

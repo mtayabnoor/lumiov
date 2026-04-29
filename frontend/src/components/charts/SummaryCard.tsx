@@ -23,10 +23,7 @@ function SummaryCard({ title, value, loading, color, subtitle }: SummaryCardProp
         borderLeft: color ? `4px solid ${color}` : undefined,
       }}
     >
-      <Typography
-        variant="body2"
-        sx={{ color: 'text.secondary', mb: 0.5, fontWeight: 500 }}
-      >
+      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
         {title}
       </Typography>
       {loading ? (

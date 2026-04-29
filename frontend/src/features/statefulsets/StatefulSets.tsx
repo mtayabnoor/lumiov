@@ -35,9 +35,7 @@ function StatefulSets() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: StatefulSet) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: StatefulSet) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -70,10 +68,7 @@ function StatefulSets() {
     );
 
   return (
-    <PageLayout
-      title="StatefulSets"
-      description="Real-time monitoring dashboard for statefulsets"
-    >
+    <PageLayout title="StatefulSets" description="Real-time monitoring dashboard for statefulsets">
       <ResourceTable config={config} data={statefulSets} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

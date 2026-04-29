@@ -127,8 +127,7 @@ const TIME_OPTIONS: TimeOption[] = [
 // --- Helpers ---
 const detectLogLevel = (content: string): LogLevel => {
   const lower = content.toLowerCase();
-  if (lower.includes('error') || lower.includes('fatal') || lower.includes('exception'))
-    return 'error';
+  if (lower.includes('error') || lower.includes('fatal') || lower.includes('exception')) return 'error';
   if (lower.includes('warn')) return 'warn';
   if (lower.includes('info')) return 'info';
   if (lower.includes('debug') || lower.includes('trace')) return 'debug';
@@ -148,9 +147,7 @@ const parseLogLine = (line: string, id: number): LogLine => {
   }
 
   const timestampMatch = workingLine.match(/^(\d{4}-\d{2}-\d{2}T[\d:.]+Z?)\s*/);
-  const content = timestampMatch
-    ? workingLine.slice(timestampMatch[0].length)
-    : workingLine;
+  const content = timestampMatch ? workingLine.slice(timestampMatch[0].length) : workingLine;
 
   return {
     id,
@@ -241,24 +238,12 @@ const LEVEL_COLORS: Record<LogLevel, string> = {
 const LEVEL_BORDER_OPAQUE: Set<LogLevel> = new Set(['error', 'warn']);
 
 // --- Row Component ---
-function LogRow({
-  index,
-  style,
-  logs,
-  showTimestamps,
-  wrapLines,
-  fontSize,
-  highlightTerms,
-  containers,
-  showContainer,
-}: RowComponentProps<LogRowProps>) {
+function LogRow({ index, style, logs, showTimestamps, wrapLines, fontSize, highlightTerms, containers, showContainer }: RowComponentProps<LogRowProps>) {
   const log = logs[index];
   if (!log) return null;
 
   // Get container color for multi-container mode
-  const containerColor = log.container
-    ? getContainerColor(log.container, containers)
-    : '#6b7280';
+  const containerColor = log.container ? getContainerColor(log.container, containers) : '#6b7280';
 
   return (
     <Box
@@ -275,11 +260,7 @@ function LogRow({
         },
         borderLeftWidth: log.container ? 3 : 2,
         borderLeftStyle: 'solid',
-        borderLeftColor: log.container
-          ? containerColor
-          : LEVEL_BORDER_OPAQUE.has(log.level)
-            ? LEVEL_COLORS[log.level]
-            : 'transparent',
+        borderLeftColor: log.container ? containerColor : LEVEL_BORDER_OPAQUE.has(log.level) ? LEVEL_COLORS[log.level] : 'transparent',
       }}
     >
       {/* Line number */}
@@ -435,19 +416,13 @@ function SettingsPopover({
         },
       }}
     >
-      <Typography
-        variant="subtitle2"
-        sx={{ color: 'text.primary', mb: 2, fontWeight: 600 }}
-      >
+      <Typography variant="subtitle2" sx={{ color: 'text.primary', mb: 2, fontWeight: 600 }}>
         Log Settings
       </Typography>
 
       {/* Filter Mode Toggle */}
       <Box sx={{ mb: 2 }}>
-        <Typography
-          variant="caption"
-          sx={{ color: 'text.secondary', display: 'block', mb: 1 }}
-        >
+        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>
           Filter Mode
         </Typography>
         <ToggleButtonGroup
@@ -553,11 +528,9 @@ function SettingsPopover({
                 size="small"
                 onClick={() => setSinceSeconds(opt.seconds)}
                 sx={{
-                  bgcolor:
-                    sinceSeconds === opt.seconds ? 'action.selected' : 'action.hover',
+                  bgcolor: sinceSeconds === opt.seconds ? 'action.selected' : 'action.hover',
                   color: sinceSeconds === opt.seconds ? 'text.primary' : 'text.secondary',
-                  border:
-                    sinceSeconds === opt.seconds ? '1px solid' : '1px solid transparent',
+                  border: sinceSeconds === opt.seconds ? '1px solid' : '1px solid transparent',
                   borderColor: sinceSeconds === opt.seconds ? 'divider' : 'transparent',
                   cursor: 'pointer',
                   '&:hover': { bgcolor: 'action.hover' },
@@ -570,10 +543,7 @@ function SettingsPopover({
 
       {/* Font Size */}
       <Box sx={{ mb: 2 }}>
-        <Typography
-          variant="caption"
-          sx={{ color: 'text.secondary', display: 'block', mb: 1 }}
-        >
+        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>
           Font Size: {fontSize}px
         </Typography>
         <Slider
@@ -592,13 +562,7 @@ function SettingsPopover({
 
       {/* Toggles */}
       <FormControlLabel
-        control={
-          <Switch
-            checked={showTimestamps}
-            onChange={(e) => setShowTimestamps(e.target.checked)}
-            size="small"
-          />
-        }
+        control={<Switch checked={showTimestamps} onChange={(e) => setShowTimestamps(e.target.checked)} size="small" />}
         label={
           <Typography variant="body2" sx={{ color: 'text.primary' }}>
             Show Timestamps
@@ -608,13 +572,7 @@ function SettingsPopover({
       />
 
       <FormControlLabel
-        control={
-          <Switch
-            checked={wrapLines}
-            onChange={(e) => setWrapLines(e.target.checked)}
-            size="small"
-          />
-        }
+        control={<Switch checked={wrapLines} onChange={(e) => setWrapLines(e.target.checked)} size="small" />}
         label={
           <Typography variant="body2" sx={{ color: 'text.primary' }}>
             Wrap Lines
@@ -625,13 +583,7 @@ function SettingsPopover({
 
       {/* Live/Snapshot Mode Toggle */}
       <FormControlLabel
-        control={
-          <Switch
-            checked={isLive}
-            onChange={(e) => setIsLive(e.target.checked)}
-            size="small"
-          />
-        }
+        control={<Switch checked={isLive} onChange={(e) => setIsLive(e.target.checked)} size="small" />}
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
             <Typography variant="body2" sx={{ color: 'text.primary' }}>
@@ -654,13 +606,7 @@ function SettingsPopover({
       />
 
       <FormControlLabel
-        control={
-          <Switch
-            checked={showPrevious}
-            onChange={(e) => setShowPrevious(e.target.checked)}
-            size="small"
-          />
-        }
+        control={<Switch checked={showPrevious} onChange={(e) => setShowPrevious(e.target.checked)} size="small" />}
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
             <HistoryIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
@@ -675,22 +621,12 @@ function SettingsPopover({
 }
 
 // --- Main Component ---
-export default function PodLogsDrawer({
-  open,
-  onClose,
-  namespace,
-  podName,
-  containers,
-  defaultContainer,
-  socket,
-}: PodLogsDrawerProps) {
+export default function PodLogsDrawer({ open, onClose, namespace, podName, containers, defaultContainer, socket }: PodLogsDrawerProps) {
   const theme = useTheme();
   const listRef = useRef<ListImperativeAPI>(null);
 
   // --- State ---
-  const [selectedContainer, setSelectedContainer] = useState(
-    defaultContainer || containers[0]?.name || '',
-  );
+  const [selectedContainer, setSelectedContainer] = useState(defaultContainer || containers[0]?.name || '');
   const [logs, setLogs] = useState<LogLine[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -711,13 +647,7 @@ export default function PodLogsDrawer({
   const [fontSize, setFontSize] = useState(12);
   const [showPrevious, setShowPrevious] = useState(false);
   const [isLive, setIsLive] = useState(true); // true = live streaming, false = snapshot
-  const [levelFilters, setLevelFilters] = useState<LogLevel[]>([
-    'error',
-    'warn',
-    'info',
-    'debug',
-    'unknown',
-  ]);
+  const [levelFilters, setLevelFilters] = useState<LogLevel[]>(['error', 'warn', 'info', 'debug', 'unknown']);
   const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(null);
 
   // --- Refs ---
@@ -752,25 +682,15 @@ export default function PodLogsDrawer({
     if (isRegex) {
       try {
         const regex = new RegExp(searchQuery, 'i');
-        filtered = filtered.filter(
-          (log) => regex.test(log.content) || regex.test(log.timestamp),
-        );
+        filtered = filtered.filter((log) => regex.test(log.content) || regex.test(log.timestamp));
       } catch {
         // Invalid regex, fall back to literal search
         const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (log) =>
-            log.content.toLowerCase().includes(query) ||
-            log.timestamp.toLowerCase().includes(query),
-        );
+        filtered = filtered.filter((log) => log.content.toLowerCase().includes(query) || log.timestamp.toLowerCase().includes(query));
       }
     } else {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (log) =>
-          log.content.toLowerCase().includes(query) ||
-          log.timestamp.toLowerCase().includes(query),
-      );
+      filtered = filtered.filter((log) => log.content.toLowerCase().includes(query) || log.timestamp.toLowerCase().includes(query));
     }
   }
 
@@ -784,9 +704,7 @@ export default function PodLogsDrawer({
   useEffect(() => {
     if (!open || !socket || !selectedContainer) return;
 
-    console.log(
-      `📜 [Logs] Subscribing: ${podName}/${selectedContainer} (tail: ${tailLines}, previous: ${showPrevious})`,
-    );
+    console.log(`📜 [Logs] Subscribing: ${podName}/${selectedContainer} (tail: ${tailLines}, previous: ${showPrevious})`);
 
     // Clear error before new subscription - handled by onChange or Close
     // setError(null);
@@ -921,9 +839,7 @@ export default function PodLogsDrawer({
   };
 
   const toggleLevelFilter = (level: LogLevel) => {
-    setLevelFilters((prev) =>
-      prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level],
-    );
+    setLevelFilters((prev) => (prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level]));
   };
 
   const toggleHeight = () => setHeight((h) => (h === '50vh' ? '85vh' : '50vh'));
@@ -1008,8 +924,7 @@ export default function PodLogsDrawer({
                             width: 8,
                             height: 8,
                             borderRadius: '50%',
-                            background:
-                              'linear-gradient(135deg, #60a5fa, #f472b6, #34d399)',
+                            background: 'linear-gradient(135deg, #60a5fa, #f472b6, #34d399)',
                           }}
                         />
                         All Containers
@@ -1099,9 +1014,7 @@ export default function PodLogsDrawer({
                 onClick={() => toggleLevelFilter('error')}
                 sx={{
                   ...ICON_BUTTON_SX,
-                  color: levelFilters.includes('error')
-                    ? LEVEL_COLORS.error
-                    : 'text.disabled',
+                  color: levelFilters.includes('error') ? LEVEL_COLORS.error : 'text.disabled',
                   opacity: levelFilters.includes('error') ? 1 : 0.5,
                 }}
               >
@@ -1128,9 +1041,7 @@ export default function PodLogsDrawer({
                 onClick={() => toggleLevelFilter('warn')}
                 sx={{
                   ...ICON_BUTTON_SX,
-                  color: levelFilters.includes('warn')
-                    ? LEVEL_COLORS.warn
-                    : 'text.disabled',
+                  color: levelFilters.includes('warn') ? LEVEL_COLORS.warn : 'text.disabled',
                   opacity: levelFilters.includes('warn') ? 1 : 0.5,
                 }}
               >
@@ -1157,9 +1068,7 @@ export default function PodLogsDrawer({
                 onClick={() => toggleLevelFilter('info')}
                 sx={{
                   ...ICON_BUTTON_SX,
-                  color: levelFilters.includes('info')
-                    ? LEVEL_COLORS.info
-                    : 'text.disabled',
+                  color: levelFilters.includes('info') ? LEVEL_COLORS.info : 'text.disabled',
                   opacity: levelFilters.includes('info') ? 1 : 0.5,
                 }}
               >
@@ -1292,11 +1201,7 @@ export default function PodLogsDrawer({
           </Tooltip>
 
           <Tooltip title="Download logs">
-            <IconButton
-              onClick={() => downloadLogs(filteredLogs, podName, 'txt')}
-              size="small"
-              sx={ICON_BUTTON_SX}
-            >
+            <IconButton onClick={() => downloadLogs(filteredLogs, podName, 'txt')} size="small" sx={ICON_BUTTON_SX}>
               <DownloadIcon />
             </IconButton>
           </Tooltip>
@@ -1308,11 +1213,7 @@ export default function PodLogsDrawer({
           </Tooltip>
 
           <Tooltip title="Settings">
-            <IconButton
-              onClick={(e) => setSettingsAnchor(e.currentTarget)}
-              size="small"
-              sx={ICON_BUTTON_SX}
-            >
+            <IconButton onClick={(e) => setSettingsAnchor(e.currentTarget)} size="small" sx={ICON_BUTTON_SX}>
               <SettingsIcon />
             </IconButton>
           </Tooltip>
@@ -1393,13 +1294,7 @@ export default function PodLogsDrawer({
             }}
           >
             <Typography variant="body2">
-              {isConnected
-                ? searchQuery
-                  ? 'No logs match your search'
-                  : levelFilters.length < 5
-                    ? 'No logs match level filters'
-                    : 'Waiting for logs...'
-                : 'Connecting to pod...'}
+              {isConnected ? (searchQuery ? 'No logs match your search' : levelFilters.length < 5 ? 'No logs match level filters' : 'Waiting for logs...') : 'Connecting to pod...'}
             </Typography>
           </Box>
         )}

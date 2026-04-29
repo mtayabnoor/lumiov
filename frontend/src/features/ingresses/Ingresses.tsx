@@ -48,9 +48,7 @@ function Ingresses() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: Ingress) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: Ingress) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -83,10 +81,7 @@ function Ingresses() {
     );
 
   return (
-    <PageLayout
-      title="Ingresses"
-      description="Real-time monitoring dashboard for ingresses"
-    >
+    <PageLayout title="Ingresses" description="Real-time monitoring dashboard for ingresses">
       <ResourceTable config={config} data={ingresses} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

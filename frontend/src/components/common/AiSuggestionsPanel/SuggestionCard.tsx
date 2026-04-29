@@ -6,16 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  IconButton,
-  Chip,
-  Tooltip,
-  Collapse,
-  useTheme,
-  alpha,
-} from '@mui/material';
+import { Box, Typography, IconButton, Chip, Tooltip, Collapse, useTheme, alpha } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -23,11 +14,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import CodeIcon from '@mui/icons-material/Code';
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 import SpeedIcon from '@mui/icons-material/Speed';
-import type {
-  YamlSuggestion,
-  SuggestionType,
-  SuggestionSeverity,
-} from '../../../interfaces/yaml-analysis';
+import type { YamlSuggestion, SuggestionType, SuggestionSeverity } from '../../../interfaces/yaml-analysis';
 import DiffViewer from './DiffViewer';
 
 interface SuggestionCardProps {
@@ -36,10 +23,7 @@ interface SuggestionCardProps {
   onReject: (id: string) => void;
 }
 
-const TYPE_CONFIG: Record<
-  SuggestionType,
-  { icon: React.ReactElement; label: string; color: string }
-> = {
+const TYPE_CONFIG: Record<SuggestionType, { icon: React.ReactElement; label: string; color: string }> = {
   syntax: { icon: <CodeIcon sx={{ fontSize: 14 }} />, label: 'Syntax', color: '#e040fb' },
   security: {
     icon: <SecurityIcon sx={{ fontSize: 14 }} />,
@@ -58,10 +42,7 @@ const TYPE_CONFIG: Record<
   },
 };
 
-const SEVERITY_CONFIG: Record<
-  SuggestionSeverity,
-  { color: 'error' | 'warning' | 'info'; label: string }
-> = {
+const SEVERITY_CONFIG: Record<SuggestionSeverity, { color: 'error' | 'warning' | 'info'; label: string }> = {
   critical: { color: 'error', label: 'Critical' },
   warning: { color: 'warning', label: 'Warning' },
   info: { color: 'info', label: 'Info' },
@@ -117,13 +98,7 @@ function SuggestionCard({ suggestion, onAccept, onReject }: SuggestionCardProps)
         />
 
         {/* Severity */}
-        <Chip
-          label={severityConfig.label}
-          size="small"
-          color={severityConfig.color}
-          variant="outlined"
-          sx={{ height: 20, fontSize: '10px' }}
-        />
+        <Chip label={severityConfig.label} size="small" color={severityConfig.color} variant="outlined" sx={{ height: 20, fontSize: '10px' }} />
 
         {/* Line indicator */}
         <Typography
@@ -192,26 +167,17 @@ function SuggestionCard({ suggestion, onAccept, onReject }: SuggestionCardProps)
       <Collapse in={expanded}>
         <Box sx={{ px: 1.5, py: 1 }}>
           {/* Title */}
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 600, fontSize: '12px', mb: 0.5, color: 'text.primary' }}
-          >
+          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '12px', mb: 0.5, color: 'text.primary' }}>
             {suggestion.title}
           </Typography>
 
           {/* Description */}
-          <Typography
-            variant="caption"
-            sx={{ color: 'text.secondary', display: 'block', mb: 1, lineHeight: 1.5 }}
-          >
+          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1, lineHeight: 1.5 }}>
             {suggestion.description}
           </Typography>
 
           {/* Diff */}
-          <DiffViewer
-            originalCode={suggestion.originalCode}
-            suggestedCode={suggestion.suggestedCode}
-          />
+          <DiffViewer originalCode={suggestion.originalCode} suggestedCode={suggestion.suggestedCode} />
 
           {/* Rationale */}
           <Typography

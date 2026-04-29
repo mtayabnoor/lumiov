@@ -34,9 +34,7 @@ function LimitRanges() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: LimitRange) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: LimitRange) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
@@ -69,10 +67,7 @@ function LimitRanges() {
     );
 
   return (
-    <PageLayout
-      title="Limit Ranges"
-      description="Real-time monitoring dashboard for limit ranges"
-    >
+    <PageLayout title="Limit Ranges" description="Real-time monitoring dashboard for limit ranges">
       <ResourceTable config={config} data={limitRanges} onAction={handleAction} />
       {editingResource && (
         <ResourceEditor

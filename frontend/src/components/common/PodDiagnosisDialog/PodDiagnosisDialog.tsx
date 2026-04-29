@@ -78,10 +78,7 @@ function ConfidenceGauge({ value }: { value: number }) {
           }}
         />
       </Box>
-      <Typography
-        variant="h6"
-        sx={{ fontWeight: 700, color, minWidth: 50, textAlign: 'right' }}
-      >
+      <Typography variant="h6" sx={{ fontWeight: 700, color, minWidth: 50, textAlign: 'right' }}>
         {value}%
       </Typography>
     </Box>
@@ -154,10 +151,7 @@ function FixCard({ fix, index }: { fix: Fix; index: number }) {
               }}
             />
           </Box>
-          <Typography
-            variant="body2"
-            sx={{ color: 'text.secondary', fontSize: '0.8rem' }}
-          >
+          <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
             {fix.description}
           </Typography>
         </Box>
@@ -176,11 +170,7 @@ function FixCard({ fix, index }: { fix: Fix; index: number }) {
             overflowX: 'auto',
           }}
         >
-          <IconButton
-            size="small"
-            onClick={() => handleCopy(fix.command!)}
-            sx={{ position: 'absolute', top: 2, right: 2, opacity: 0.7 }}
-          >
+          <IconButton size="small" onClick={() => handleCopy(fix.command!)} sx={{ position: 'absolute', top: 2, right: 2, opacity: 0.7 }}>
             <ContentCopyIcon sx={{ fontSize: 14 }} />
           </IconButton>
           <code>{fix.command}</code>
@@ -212,12 +202,7 @@ interface PodDiagnosisDialogProps {
   podName: string;
 }
 
-export default function PodDiagnosisDialog({
-  open,
-  onClose,
-  namespace,
-  podName,
-}: PodDiagnosisDialogProps) {
+export default function PodDiagnosisDialog({ open, onClose, namespace, podName }: PodDiagnosisDialogProps) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -342,9 +327,7 @@ export default function PodDiagnosisDialog({
             }}
           >
             <CircularProgress size={48} />
-            <Typography variant="body2">
-              Collecting pod data and running AI analysis...
-            </Typography>
+            <Typography variant="body2">Collecting pod data and running AI analysis...</Typography>
             <Typography
               variant="caption"
               sx={{
@@ -352,8 +335,7 @@ export default function PodDiagnosisDialog({
                 textAlign: 'center',
               }}
             >
-              Fetching events, container logs, and pod status. This may take 10-20
-              seconds.
+              Fetching events, container logs, and pod status. This may take 10-20 seconds.
             </Typography>
           </Box>
         )}
@@ -380,33 +362,17 @@ export default function PodDiagnosisDialog({
               >
                 <WarningAmberIcon
                   sx={{
-                    color:
-                      report.severity === 'critical' || report.severity === 'high'
-                        ? 'error.main'
-                        : 'warning.main',
+                    color: report.severity === 'critical' || report.severity === 'high' ? 'error.main' : 'warning.main',
                     fontSize: 20,
                   }}
                 />
                 <Typography variant="h4" sx={{ flexGrow: 1 }}>
                   Summary
                 </Typography>
-                <Chip
-                  label={report.severity.toUpperCase()}
-                  size="small"
-                  color={SEVERITY_COLORS[report.severity]}
-                  sx={{ fontWeight: 700, fontSize: '0.7rem' }}
-                />
-                <Chip
-                  label={report.category}
-                  size="small"
-                  variant="outlined"
-                  sx={{ fontSize: '0.7rem' }}
-                />
+                <Chip label={report.severity.toUpperCase()} size="small" color={SEVERITY_COLORS[report.severity]} sx={{ fontWeight: 700, fontSize: '0.7rem' }} />
+                <Chip label={report.category} size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} />
               </Box>
-              <Typography
-                variant="body2"
-                sx={{ color: 'text.secondary', lineHeight: 1.6 }}
-              >
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
                 {report.summary}
               </Typography>
             </Box>
@@ -432,13 +398,7 @@ export default function PodDiagnosisDialog({
                     Affected:
                   </Typography>
                   {report.affectedContainers.map((c) => (
-                    <Chip
-                      key={c}
-                      label={c}
-                      size="small"
-                      variant="outlined"
-                      sx={{ fontSize: '0.65rem', height: 20 }}
-                    />
+                    <Chip key={c} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
                   ))}
                 </Box>
               )}
@@ -507,11 +467,7 @@ export default function PodDiagnosisDialog({
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <BuildIcon sx={{ fontSize: 20, color: 'warning.main' }} />
                 <Typography variant="h4">Recommended Fixes</Typography>
-                <Chip
-                  label={`${report.fixes.length} fixes`}
-                  size="small"
-                  sx={{ fontSize: '0.65rem', height: 20 }}
-                />
+                <Chip label={`${report.fixes.length} fixes`} size="small" sx={{ fontSize: '0.65rem', height: 20 }} />
               </Box>
               {report.fixes.map((fix, i) => (
                 <FixCard key={i} fix={fix} index={i} />

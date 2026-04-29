@@ -60,9 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }, observerOptions);
 
   // Apply fade-up to sections
-  const animatable = document.querySelectorAll(
-    '.feature-row__content, .ai-section__inner, .tech-card, .demo-section__player, .download-section__card',
-  );
+  const animatable = document.querySelectorAll('.feature-row__content, .ai-section__inner, .tech-card, .demo-section__player, .download-section__card');
 
   animatable.forEach((el) => {
     el.classList.add('fade-up');

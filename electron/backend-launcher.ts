@@ -77,9 +77,7 @@ export async function launchBackend(isDev: boolean): Promise<ChildProcess> {
       cwd = resourceRoot;
       entryPoint = 'index.js';
     } else {
-      throw new Error(
-        `Could not find index.js in ${resourceRoot} or ${resourceRoot}/dist`,
-      );
+      throw new Error(`Could not find index.js in ${resourceRoot} or ${resourceRoot}/dist`);
     }
 
     // 🔴 CRITICAL FIX FOR PRODUCTION 🔴

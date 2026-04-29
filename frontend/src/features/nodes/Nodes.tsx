@@ -13,9 +13,7 @@ import { useState } from 'react';
 const getNodeStatus = (node: Node) => {
   const readyCondition = node.status?.conditions?.find((c) => c.type === 'Ready');
   if (!readyCondition) return { kind: 'status', label: 'Unknown', cssClass: 'info' };
-  return readyCondition.status === 'True'
-    ? { kind: 'status', label: 'Ready', cssClass: 'success' }
-    : { kind: 'status', label: 'NotReady', cssClass: 'error' };
+  return readyCondition.status === 'True' ? { kind: 'status', label: 'Ready', cssClass: 'success' } : { kind: 'status', label: 'NotReady', cssClass: 'error' };
 };
 
 const getNodeRoles = (node: Node) => {
@@ -65,9 +63,7 @@ function Nodes() {
       {
         key: 'age',
         header: 'AGE',
-        accessor: (row: Node) => (
-          <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />
-        ),
+        accessor: (row: Node) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
       },
     ],
     actions: [
