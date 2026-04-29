@@ -18,6 +18,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('secure-key-store', plaintext),
   secureKeyRetrieve: (encrypted: string): Promise<string | null> =>
     ipcRenderer.invoke('secure-key-retrieve', encrypted),
-  secureKeyDelete: (): Promise<boolean> =>
-    ipcRenderer.invoke('secure-key-delete'),
+  secureKeyDelete: (): Promise<boolean> => ipcRenderer.invoke('secure-key-delete'),
 });
