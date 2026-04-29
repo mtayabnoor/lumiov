@@ -1,3 +1,14 @@
+## [1.5.0-rc.3](https://github.com/mtayabnoor/lumiov/compare/v1.5.0-rc.2...v1.5.0-rc.3) (2026-04-29)
+
+### ✨ Features
+
+- Init co pilot and update docs ([b161c6a](https://github.com/mtayabnoor/lumiov/commit/b161c6a28e243abdfe5b3124d359f560eeaa439c))
+
+### 🐞 Bug Fixes
+
+- Fix exec drawer color ([c00d0d7](https://github.com/mtayabnoor/lumiov/commit/c00d0d77b1e46c08eafc412ce7e1bd0b22cdde17))
+- Implement S1–R10 audit improvements security,frontend,backend ([6477ce2](https://github.com/mtayabnoor/lumiov/commit/6477ce2379db168ef60dad1dcf1c645a4d98400f)), closes [#cd3d53ff](https://github.com/mtayabnoor/lumiov/issues/cd3d53ff) [#b42323ff](https://github.com/mtayabnoor/lumiov/issues/b42323ff)
+
 ## [1.5.0-rc.2](https://github.com/mtayabnoor/lumiov/compare/v1.5.0-rc.1...v1.5.0-rc.2) (2026-03-24)
 
 ### ✨ Features
