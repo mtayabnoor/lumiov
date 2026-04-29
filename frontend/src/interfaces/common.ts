@@ -7,6 +7,7 @@ export interface ColumnDef {
   header: string;
   type?: CellType; // simple formatting
   accessor?: (row: any) => any; // compute value here
+  sortValue?: (row: any) => string | number; // sortable primitive; falls back to getByPath(key) if omitted
 }
 
 export interface ActionDef {

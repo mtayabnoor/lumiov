@@ -18,12 +18,18 @@ import {
   Menu,
   Chip,
   useTheme,
+  TextField,
+  InputAdornment,
+  TableSortLabel,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import SearchIcon from '@mui/icons-material/Search';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import type { ColumnDef, ResourceTableProps } from '../../../interfaces/common';
 import { useSettings } from '../../../context/SettingsContext';
+
+type SortDirection = 'asc' | 'desc';
 
 // --- Helper Functions ---
 
@@ -58,8 +64,11 @@ function getValue(row: any, col: ColumnDef): React.ReactNode {
 function ResourceTable({ config, data, onAction, resourceType }: ResourceTableProps) {
   const theme = useTheme();
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortKey, setSortKey] = useState<string>('metadata.name');
+  const [sortDir, setSortDir] = useState<SortDirection>('asc');
   const { deleteEnabled } = useSettings();
-  console.log(config);
+
   // State for Action Menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [activeRow, setActiveRow] = useState<any | null>(null);
@@ -69,15 +78,20 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
   const namespaceList = Array.from(new Set(namespaces)).filter(Boolean).sort() as string[];
 
   // 2. Computed: Filtered & Sorted
-  const sorted = [...data].sort((a: any, b: any) => {
-    const nsA = a?.metadata?.namespace ?? '';
-    const nsB = b?.metadata?.namespace ?? '';
-    const nsCompare = nsA.localeCompare(nsB);
-    if (nsCompare !== 0) return nsCompare;
-    return (a?.metadata?.name ?? '').localeCompare(b?.metadata?.name ?? '');
-  });
-
-  const filteredData = selectedNamespaces.length === 0 ? sorted : sorted.filter((item: any) => selectedNamespaces.includes(item?.metadata?.namespace));
+  const processedData = [...data]
+    .filter((item: any) => {
+      const nsMatch = selectedNamespaces.length === 0 || selectedNamespaces.includes(item?.metadata?.namespace);
+      const searchLower = searchQuery.toLowerCase();
+      const nameMatch = !searchQuery || (item?.metadata?.name ?? '').toLowerCase().includes(searchLower);
+      return nsMatch && nameMatch;
+    })
+    .sort((a: any, b: any) => {
+      const col = config.columns.find((c) => c.key === sortKey);
+      const valA = col?.sortValue ? col.sortValue(a) : (getByPath(a, sortKey) ?? '');
+      const valB = col?.sortValue ? col.sortValue(b) : (getByPath(b, sortKey) ?? '');
+      const cmp = typeof valA === 'number' && typeof valB === 'number' ? valA - valB : String(valA).localeCompare(String(valB), undefined, { numeric: true });
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
 
   // Handlers
   const handleNamespaceChange = (event: SelectChangeEvent<string[]>) => {
@@ -94,6 +108,15 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
   const handleMenuClose = () => {
     setAnchorEl(null);
     setActiveRow(null);
+  };
+
+  const handleSortClick = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
   };
 
   const handleActionClick = (actionId: string) => {
@@ -123,41 +146,35 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
       }}
     >
       {/* 1. Filter Section */}
-      {resourceType !== 'namespaces' && (
-        <Box
-          sx={{
-            pt: 1,
-            pb: 2,
-            display: 'flex',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
+      <Box sx={{ pt: 1, pb: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+        <TextField
+          size="small"
+          placeholder="Search by name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ minWidth: 200 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
           }}
-        >
-          {' '}
-          {/* 1. Aligns content to left */}
-          <FormControl
-            size="small" // 2. Makes the height smaller (compact mode)
-            sx={{ minWidth: 150, maxWidth: 300 }} // 3. Reduced width (was 200/400)
-          >
-            <InputLabel size="small">Namespace</InputLabel> {/* 4. Ensure label matches small size */}
-            <Select
-              multiple
-              value={selectedNamespaces}
-              onChange={handleNamespaceChange}
-              renderValue={(selected) => selected.join(', ')}
-              label="Namespace"
-              // size="small" is inherited from FormControl, but you can add it here too to be safe
-            >
+        />
+        {resourceType !== 'namespaces' && (
+          <FormControl size="small" sx={{ minWidth: 150, maxWidth: 300 }}>
+            <InputLabel size="small">Namespace</InputLabel>
+            <Select multiple value={selectedNamespaces} onChange={handleNamespaceChange} renderValue={(selected) => selected.join(', ')} label="Namespace">
               {namespaceList.map((ns) => (
                 <MenuItem key={ns} value={ns}>
-                  <Checkbox checked={selectedNamespaces.indexOf(ns) > -1} size="small" /> {/* Optional: make checkbox small too */}
+                  <Checkbox checked={selectedNamespaces.indexOf(ns) > -1} size="small" />
                   <ListItemText primary={ns} />
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-        </Box>
-      )}
+        )}
+      </Box>
       {/* 2. Table Section */}
       <TableContainer
         component={Paper}
@@ -172,8 +189,10 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
           <TableHead>
             <TableRow>
               {config.columns.map((col) => (
-                <TableCell key={col.key} sx={{ fontWeight: 'bold' }}>
-                  {col.header}
+                <TableCell key={col.key} sx={{ fontWeight: 'bold' }} sortDirection={sortKey === col.key ? sortDir : false}>
+                  <TableSortLabel active={sortKey === col.key} direction={sortKey === col.key ? sortDir : 'asc'} onClick={() => handleSortClick(col.key)}>
+                    {col.header}
+                  </TableSortLabel>
                 </TableCell>
               ))}
               {(config.actions?.length ?? 0) > 0 && (
@@ -184,7 +203,7 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredData.map((row: any, index: number) => (
+            {processedData.map((row: any, index: number) => (
               <TableRow key={row?.object?.metadata?.uid || index} hover sx={getRowStyle(row)}>
                 {config.columns.map((col) => {
                   const val = getValue(row, col);
@@ -220,7 +239,7 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
                 )}
               </TableRow>
             ))}
-            {filteredData.length === 0 && (
+            {processedData.length === 0 && (
               <TableRow>
                 <TableCell colSpan={config.columns.length + 1} align="center">
                   No resources found.

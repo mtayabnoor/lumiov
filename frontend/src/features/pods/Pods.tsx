@@ -184,31 +184,44 @@ function Pods() {
         key: 'ready',
         header: 'READY',
         accessor: (row) => getPodReadyStatus(row),
+        sortValue: (row) => {
+          const total = row?.spec?.containers?.length ?? 0;
+          const ready = row?.status?.containerStatuses?.filter((c: any) => c.ready).length ?? 0;
+          return total > 0 ? ready / total : 0;
+        },
       },
       {
         key: 'status',
         header: 'STATUS',
         accessor: (row) => getPodStatus(row),
+        sortValue: (row) => {
+          const s = getPodStatus(row);
+          return typeof s === 'object' && s !== null && 'label' in s ? (s as any).label : String(s);
+        },
       },
       {
         key: 'restarts',
         header: 'RESTARTS',
         accessor: (row) => getPodRestarts(row),
+        sortValue: (row) => getPodRestarts(row),
       },
       {
         key: 'cpu',
         header: 'CPU Req',
         accessor: (row) => getPodCpuReq(row),
+        sortValue: (row) => getPodCpuReq(row),
       },
       {
         key: 'mem',
         header: 'MEM Req',
         accessor: (row) => getPodMemReq(row),
+        sortValue: (row) => getPodMemReq(row),
       },
       {
         key: 'age',
         header: 'AGE',
         accessor: (row) => <ResourceLiveAge creationTimestamp={row.metadata.creationTimestamp} />,
+        sortValue: (row) => row?.metadata?.creationTimestamp ?? '',
       },
       { key: 'spec.nodeName', header: 'NODE' },
       {
