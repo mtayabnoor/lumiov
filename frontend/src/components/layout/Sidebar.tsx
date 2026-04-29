@@ -65,7 +65,7 @@ function Sidebar() {
                   <ListItemButton
                     onClick={() => handleToggle(group.title)}
                     sx={{
-                      color: 'grey',
+                      color: 'text.secondary',
                     }}
                   >
                     <ListItemIcon>{iconMapping[group.icon] || <DnsIcon />}</ListItemIcon>

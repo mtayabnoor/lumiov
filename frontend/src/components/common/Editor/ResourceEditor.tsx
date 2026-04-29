@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { API_BASE } from '../../../config/api';
 import {
   Drawer,
   Box,
@@ -147,7 +148,7 @@ function ResourceEditor({
 
     try {
       const res = await fetch(
-        `http://localhost:3030/api/resource/yaml?apiVersion=${encodeURIComponent(apiVersion)}&kind=${encodeURIComponent(kind)}&namespace=${encodeURIComponent(namespace)}&name=${encodeURIComponent(name)}`,
+        `${API_BASE}/api/resource/yaml?apiVersion=${encodeURIComponent(apiVersion)}&kind=${encodeURIComponent(kind)}&namespace=${encodeURIComponent(namespace)}&name=${encodeURIComponent(name)}`,
       );
 
       if (!res.ok) throw new Error('Failed to fetch resource');
@@ -181,7 +182,7 @@ function ResourceEditor({
         throw new Error(`Invalid YAML: ${e.message}`);
       }
 
-      const res = await fetch(`http://localhost:3030/api/resource/yaml`, {
+      const res = await fetch(`${API_BASE}/api/resource/yaml`, {
         method: 'PUT',
         headers: { 'Content-Type': 'text/yaml' },
         body: content,

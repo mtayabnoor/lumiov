@@ -17,7 +17,9 @@ import {
   IconButton,
   Menu,
   Chip,
+  useTheme,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import type { ColumnDef, ResourceTableProps } from '../../../interfaces/common';
@@ -54,6 +56,7 @@ function getValue(row: any, col: ColumnDef): React.ReactNode {
 // --- Main Component ---
 
 function ResourceTable({ config, data, onAction, resourceType }: ResourceTableProps) {
+  const theme = useTheme();
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
   const { deleteEnabled } = useSettings();
   console.log(config);
@@ -109,7 +112,7 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
 
   const getRowStyle = (row: any) => {
     if (row?.metadata?.deletionTimestamp) {
-      return { backgroundColor: '#cd3d53ff', opacity: 0.7 };
+      return { backgroundColor: alpha(theme.palette.error.main, 0.5), opacity: 0.7 };
     }
     return {};
   };

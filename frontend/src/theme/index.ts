@@ -66,8 +66,8 @@ export const getAppTheme = (mode: PaletteMode): Theme => {
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          backgroundColor: mode === 'dark' ? '#2a2a2a' : '#333',
-          color: mode === 'dark' ? baseTheme.palette.text.primary : '#fff',
+          backgroundColor: baseTheme.palette.background.paper,
+          color: baseTheme.palette.text.primary,
           fontSize: '0.75rem',
           border: `1px solid ${baseTheme.palette.divider}`,
         },

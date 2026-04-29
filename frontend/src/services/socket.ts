@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import { API_BASE } from '../config/api';
 import type { ClientToServerEvents, ServerToClientEvents } from '../interfaces/socket';
 
 // Singleton instance
@@ -6,7 +7,7 @@ let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
 export const getSocket = (): Socket<ServerToClientEvents, ClientToServerEvents> => {
   if (!socket) {
-    socket = io(`http://localhost:3030`, {
+    socket = io(API_BASE, {
       transports: ['websocket'],
       autoConnect: false, // We will call connect() manually
       reconnection: true,

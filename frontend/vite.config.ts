@@ -15,5 +15,6 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist', // Output to 'dist' instead of 'dist' to match CRA
+    sourcemap: false, // Never emit source maps in production builds
   },
 });

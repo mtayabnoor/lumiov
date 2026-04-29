@@ -2,6 +2,7 @@
 import { Socket } from 'socket.io';
 import { k8sService } from '../services/kubernetes.service';
 import type { ShellSession } from '../types/common';
+import { toAppError } from '../types/errors';
 
 export function registerExecHandlers(socket: Socket) {
   console.log(`🔌 Exec client connected: ${socket.id}`);
@@ -41,7 +42,7 @@ export function registerExecHandlers(socket: Socket) {
           socket.emit('exec:data', data);
         },
         (err: string) => {
-          socket.emit('exec:error', { message: err });
+          socket.emit('exec:error', toAppError(err, 'EXEC_ERROR', true));
         },
       );
     },

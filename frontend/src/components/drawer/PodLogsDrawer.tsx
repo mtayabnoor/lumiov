@@ -229,22 +229,16 @@ const highlightText = (text: string, terms: string[]): React.ReactNode => {
   );
 };
 
-// Level colors (domain-specific, not theme tokens)
+// Level colors mapped to semantic MUI palette tokens
 const LEVEL_COLORS: Record<LogLevel, string> = {
-  error: '#f87171',
-  warn: '#fbbf24',
-  info: '#60a5fa',
+  error: 'error.main',
+  warn: 'warning.main',
+  info: 'info.main',
   debug: '#a78bfa',
-  unknown: '#9ca3af',
+  unknown: 'text.disabled',
 };
 
-const LEVEL_BORDER_COLORS: Record<LogLevel, string> = {
-  error: '#f87171',
-  warn: '#fbbf24',
-  info: 'transparent',
-  debug: 'transparent',
-  unknown: 'transparent',
-};
+const LEVEL_BORDER_OPAQUE: Set<LogLevel> = new Set(['error', 'warn']);
 
 // --- Row Component ---
 function LogRow({
@@ -279,9 +273,13 @@ function LogRow({
         '&:hover': {
           bgcolor: 'rgba(255, 255, 255, 0.02)',
         },
-        borderLeft: log.container
-          ? `3px solid ${containerColor}`
-          : `2px solid ${LEVEL_BORDER_COLORS[log.level]}`,
+        borderLeftWidth: log.container ? 3 : 2,
+        borderLeftStyle: 'solid',
+        borderLeftColor: log.container
+          ? containerColor
+          : LEVEL_BORDER_OPAQUE.has(log.level)
+            ? LEVEL_COLORS[log.level]
+            : 'transparent',
       }}
     >
       {/* Line number */}
@@ -342,7 +340,7 @@ function LogRow({
         <Typography
           component="span"
           sx={{
-            color: '#34d399',
+            color: 'success.main',
             minWidth: 200,
             mr: 2,
             fontSize: 'inherit',

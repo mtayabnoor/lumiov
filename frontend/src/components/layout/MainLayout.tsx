@@ -94,7 +94,7 @@ function MainLayout() {
               <PsychologyIcon
                 fontSize="medium"
                 sx={{
-                  color: isConfigured ? '#b42323ff' : 'text.primary',
+                  color: isConfigured ? 'error.main' : 'text.primary',
                   filter: isConfigured
                     ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
                     : 'none',
@@ -115,7 +115,7 @@ function MainLayout() {
           <Divider
             orientation="vertical"
             flexItem
-            sx={{ bgcolor: 'grey', mx: 1, height: 24, alignSelf: 'center' }}
+            sx={{ bgcolor: 'divider', mx: 1, height: 24, alignSelf: 'center' }}
           />
           {/* Settings */}
           <Tooltip title="Settings">

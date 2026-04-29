@@ -5,9 +5,21 @@
  * Handles API token configuration and chat panel visibility.
  */
 
-import { createContext, useContext, useState, type ReactNode, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  type ReactNode,
+  useEffect,
+} from 'react';
 import { useSocket } from '../hooks/useSocket';
 import { useSettings } from './SettingsContext';
+import {
+  secureStoreKey,
+  secureRetrieveKey,
+  secureDeleteKey,
+} from '../services/secureStorage';
 
 // Message types for the chat
 export interface ChatMessage {
@@ -47,8 +59,6 @@ interface AgentContextType {
 
 const AgentContext = createContext<AgentContextType | undefined>(undefined);
 
-const API_KEY_STORAGE_KEY = 'lumiov-agent-api-key';
-
 export function useAgent() {
   const context = useContext(AgentContext);
   if (!context) {
@@ -83,9 +93,9 @@ export function AgentProvider({ children }: AgentProviderProps) {
 
   // Try to restore configuration on mount
   useEffect(() => {
-    const storedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-    if (storedKey && socket) {
-      // Attempt to reconfigure with stored key
+    let cancelled = false;
+    secureRetrieveKey().then((storedKey) => {
+      if (cancelled || !storedKey || !socket) return;
       socket.emit(
         'agent:configure',
         storedKey,
@@ -94,11 +104,14 @@ export function AgentProvider({ children }: AgentProviderProps) {
             setIsConfigured(true);
           } else {
             // Key is no longer valid, remove it
-            localStorage.removeItem(API_KEY_STORAGE_KEY);
+            void secureDeleteKey();
           }
         },
       );
-    }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [socket]);
 
   // Configure the agent with an API key
@@ -122,7 +135,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
 
           if (result.success) {
             setIsConfigured(true);
-            localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
+            void secureStoreKey(apiKey);
             setIsConfigModalOpen(false);
             setIsChatOpen(true); // Open chat panel automatically
             resolve({ success: true });
@@ -138,7 +151,7 @@ export function AgentProvider({ children }: AgentProviderProps) {
 
   // Reset configuration
   const resetConfiguration = () => {
-    localStorage.removeItem(API_KEY_STORAGE_KEY);
+    void secureDeleteKey();
     setIsConfigured(false);
     setMessages([]);
     setConfigError(null);
@@ -220,28 +233,39 @@ export function AgentProvider({ children }: AgentProviderProps) {
     setConfigError(null);
   };
 
-  return (
-    <AgentContext.Provider
-      value={{
-        isConfigured,
-        isConfiguring,
-        configError,
-        isChatOpen,
-        openChat,
-        closeChat,
-        toggleChat,
-        isConfigModalOpen,
-        openConfigModal,
-        closeConfigModal,
-        messages,
-        isLoading,
-        sendMessage,
-        clearHistory,
-        configureAgent,
-        resetConfiguration,
-      }}
-    >
-      {children}
-    </AgentContext.Provider>
+  // R2: Memoize context value to prevent unnecessary re-renders in all consumers
+  const contextValue = useMemo(
+    () => ({
+      isConfigured,
+      isConfiguring,
+      configError,
+      isChatOpen,
+      openChat,
+      closeChat,
+      toggleChat,
+      isConfigModalOpen,
+      openConfigModal,
+      closeConfigModal,
+      messages,
+      isLoading,
+      sendMessage,
+      clearHistory,
+      configureAgent,
+      resetConfiguration,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      isConfigured,
+      isConfiguring,
+      configError,
+      isChatOpen,
+      isConfigModalOpen,
+      messages,
+      isLoading,
+      socket,
+      enableAgentWritePermission,
+    ],
   );
+
+  return <AgentContext.Provider value={contextValue}>{children}</AgentContext.Provider>;
 }

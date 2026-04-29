@@ -157,74 +157,81 @@ export class K8sService {
         switch (resource) {
           // ─── Cluster ───
           case 'namespaces':
-            return (await this.coreApi!.listNamespace()).items;
+            return (await this.coreApi!.listNamespace()).items ?? [];
           case 'nodes':
-            return (await this.coreApi!.listNode()).items;
+            return (await this.coreApi!.listNode()).items ?? [];
 
           // ─── Workloads ───
           case 'pods':
-            return (await this.coreApi!.listPodForAllNamespaces()).items;
+            return (await this.coreApi!.listPodForAllNamespaces()).items ?? [];
           case 'deployments':
-            return (await this.appsApi!.listDeploymentForAllNamespaces()).items;
+            return (await this.appsApi!.listDeploymentForAllNamespaces()).items ?? [];
           case 'statefulsets':
-            return (await this.appsApi!.listStatefulSetForAllNamespaces()).items;
+            return (await this.appsApi!.listStatefulSetForAllNamespaces()).items ?? [];
           case 'daemonsets':
-            return (await this.appsApi!.listDaemonSetForAllNamespaces()).items;
+            return (await this.appsApi!.listDaemonSetForAllNamespaces()).items ?? [];
           case 'replicasets':
-            return (await this.appsApi!.listReplicaSetForAllNamespaces()).items;
+            return (await this.appsApi!.listReplicaSetForAllNamespaces()).items ?? [];
           case 'jobs':
-            return (await this.batchApi!.listJobForAllNamespaces()).items;
+            return (await this.batchApi!.listJobForAllNamespaces()).items ?? [];
           case 'cronjobs':
-            return (await this.batchApi!.listCronJobForAllNamespaces()).items;
+            return (await this.batchApi!.listCronJobForAllNamespaces()).items ?? [];
 
           // ─── Storage ───
           case 'persistentvolumeclaims':
-            return (await this.coreApi!.listPersistentVolumeClaimForAllNamespaces())
-              .items;
+            return (
+              (await this.coreApi!.listPersistentVolumeClaimForAllNamespaces()).items ??
+              []
+            );
           case 'persistentvolumes':
-            return (await this.coreApi!.listPersistentVolume()).items;
+            return (await this.coreApi!.listPersistentVolume()).items ?? [];
           case 'storageclasses':
-            return (await this.storageApi!.listStorageClass()).items;
+            return (await this.storageApi!.listStorageClass()).items ?? [];
 
           // ─── Network ───
           case 'services':
-            return (await this.coreApi!.listServiceForAllNamespaces()).items;
+            return (await this.coreApi!.listServiceForAllNamespaces()).items ?? [];
           case 'ingresses':
-            return (await this.networkingApi!.listIngressForAllNamespaces()).items;
+            return (await this.networkingApi!.listIngressForAllNamespaces()).items ?? [];
           case 'networkpolicies':
-            return (await this.networkingApi!.listNetworkPolicyForAllNamespaces()).items;
+            return (
+              (await this.networkingApi!.listNetworkPolicyForAllNamespaces()).items ?? []
+            );
           case 'endpoints':
-            return (await this.coreApi!.listEndpointsForAllNamespaces()).items;
+            return (await this.coreApi!.listEndpointsForAllNamespaces()).items ?? [];
 
           // ─── Configuration ───
           case 'configmaps':
-            return (await this.coreApi!.listConfigMapForAllNamespaces()).items;
+            return (await this.coreApi!.listConfigMapForAllNamespaces()).items ?? [];
           case 'secrets':
-            return (await this.coreApi!.listSecretForAllNamespaces()).items;
+            return (await this.coreApi!.listSecretForAllNamespaces()).items ?? [];
           case 'resourcequotas':
-            return (await this.coreApi!.listResourceQuotaForAllNamespaces()).items;
+            return (await this.coreApi!.listResourceQuotaForAllNamespaces()).items ?? [];
           case 'limitranges':
-            return (await this.coreApi!.listLimitRangeForAllNamespaces()).items;
+            return (await this.coreApi!.listLimitRangeForAllNamespaces()).items ?? [];
           case 'horizontalpodautoscalers':
             return (
-              await this.autoscalingApi!.listHorizontalPodAutoscalerForAllNamespaces()
-            ).items;
+              (await this.autoscalingApi!.listHorizontalPodAutoscalerForAllNamespaces())
+                .items ?? []
+            );
 
           // ─── Access Control ───
           case 'serviceaccounts':
-            return (await this.coreApi!.listServiceAccountForAllNamespaces()).items;
+            return (await this.coreApi!.listServiceAccountForAllNamespaces()).items ?? [];
           case 'roles':
-            return (await this.rbacApi!.listRoleForAllNamespaces()).items;
+            return (await this.rbacApi!.listRoleForAllNamespaces()).items ?? [];
           case 'rolebindings':
-            return (await this.rbacApi!.listRoleBindingForAllNamespaces()).items;
+            return (await this.rbacApi!.listRoleBindingForAllNamespaces()).items ?? [];
           case 'clusterroles':
-            return (await this.rbacApi!.listClusterRole()).items;
+            return (await this.rbacApi!.listClusterRole()).items ?? [];
           case 'clusterrolebindings':
-            return (await this.rbacApi!.listClusterRoleBinding()).items;
+            return (await this.rbacApi!.listClusterRoleBinding()).items ?? [];
 
           // ─── Custom Resources ───
           case 'customresourcedefinitions':
-            return (await this.apiExtensionsApi!.listCustomResourceDefinition()).items;
+            return (
+              (await this.apiExtensionsApi!.listCustomResourceDefinition()).items ?? []
+            );
 
           default:
             console.warn(`Unknown resource type: ${resource}`);

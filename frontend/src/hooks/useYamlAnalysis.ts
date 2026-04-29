@@ -8,7 +8,8 @@
 import { useState, useCallback, useRef } from 'react';
 import type { YamlSuggestion, YamlAnalysisResponse } from '../interfaces/yaml-analysis';
 
-const API_BASE = 'http://localhost:3030/api';
+import { API_PATH } from '../config/api';
+const API_BASE = API_PATH;
 const API_KEY_STORAGE_KEY = 'lumiov-agent-api-key';
 
 interface UseYamlAnalysisReturn {

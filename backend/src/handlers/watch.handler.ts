@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 import { k8sService } from '../services/kubernetes.service';
 import type { ResourceType } from '../types/common';
+import { toAppError } from '../types/errors';
 
 export const registerWatchResourceHandlers = (socket: Socket) => {
   console.log('Electron UI Connected');
@@ -17,7 +18,7 @@ export const registerWatchResourceHandlers = (socket: Socket) => {
       const items = await k8sService.listResource(resource);
       socket.emit('k8s-list', { resource, items });
     } catch (e) {
-      socket.emit('error', `Failed to list ${resource}`);
+      socket.emit('k8s-error', toAppError(e, 'LIST_FAILED', true));
     }
 
     // If already watching, don't duplicate streams

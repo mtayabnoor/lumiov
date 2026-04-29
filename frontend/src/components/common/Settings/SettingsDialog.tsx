@@ -96,13 +96,13 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                 ? ' Active — be careful.'
                 : ' Currently disabled.'}
               <br />
-              <div style={{ marginTop: '0.5rem', color: 'orange' }}>
+              <Box sx={{ mt: 1, color: 'warning.main' }}>
                 <b>Note:</b>{' '}
-                <p style={{ margin: 0 }}>
+                <Box component="p" sx={{ m: 0 }}>
                   This change applies only to the application session. Your local
                   kubeconfig and terminal context will remain unchanged.
-                </p>
-              </div>
+                </Box>
+              </Box>
             </Typography>
           </Box>
           <Switch

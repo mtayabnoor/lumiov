@@ -31,12 +31,13 @@ function ResourceDeleteConfirmDialog({
     <Dialog
       open={open}
       onClose={onClose}
+      maxWidth="xs"
+      fullWidth
       slotProps={{
         paper: {
           sx: {
             borderRadius: 2,
             padding: 1,
-            minWidth: '400px',
           },
         },
       }}
