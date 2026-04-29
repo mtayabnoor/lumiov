@@ -69,6 +69,12 @@ export interface ErrorPayload {
   message: string;
 }
 
+export interface AppErrorPayload {
+  code: string;
+  message: string;
+  recoverable: boolean;
+}
+
 export interface ExecParams {
   namespace: string;
   podName: string;
@@ -78,6 +84,20 @@ export interface ExecParams {
 export interface ExecResizeParams {
   rows: number;
   cols: number;
+}
+
+export interface PortForwardStartParams {
+  namespace: string;
+  podName: string;
+  localPort: number;
+  remotePort: number;
+}
+
+export interface PortForwardStartedPayload {
+  namespace: string;
+  podName: string;
+  localPort: number;
+  remotePort: number;
 }
 
 // Agent response types
@@ -102,6 +122,8 @@ export interface ServerToClientEvents {
   [SocketEvent.ERROR]: (payload: ErrorPayload) => void;
   [SocketEvent.EXEC_DATA]: (data: string) => void;
   [SocketEvent.EXEC_ERROR]: (payload: ErrorPayload) => void;
+  'portforward:started': (payload: PortForwardStartedPayload) => void;
+  'portforward:error': (payload: AppErrorPayload) => void;
 }
 
 export interface ClientToServerEvents {
@@ -110,6 +132,8 @@ export interface ClientToServerEvents {
   [SocketEvent.EXEC_INPUT]: (data: string) => void;
   [SocketEvent.EXEC_RESIZE]: (params: ExecResizeParams) => void;
   [SocketEvent.UNSUBSCRIBE]: (resource: ResourceType) => void;
+  'portforward:start': (params: PortForwardStartParams) => void;
+  'portforward:stop': () => void;
   // Agent events with callbacks
   [SocketEvent.AGENT_STATUS]: (callback: (response: AgentStatusResponse) => void) => void;
   [SocketEvent.AGENT_CONFIGURE]: (apiKey: string, callback: (response: AgentConfigureResponse) => void) => void;

@@ -6,12 +6,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArticleIcon from '@mui/icons-material/Article';
 import TerminalIcon from '@mui/icons-material/Terminal';
+import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { Box, CircularProgress, Alert, IconButton, Tooltip } from '@mui/material';
 import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
 import { useState } from 'react';
 import PodExecDrawer from '../../components/drawer/PodExecDrawer';
 import PodLogsDrawer from '../../components/drawer/PodLogsDrawer';
+import PodPortForwardDrawer from '../../components/drawer/PodPortForwardDrawer';
 import PodDiagnosisDialog from '../../components/common/PodDiagnosisDialog/PodDiagnosisDialog';
 import { useAgent } from '../../context/AgentContext';
 import PageLayout from '../../components/common/PageLayout/PageLayout';
@@ -170,8 +172,9 @@ function Pods() {
     podName: string;
     containers?: { name: string }[];
     defaultContainer?: string;
+    ports: number[];
   } | null>(null);
-  const [actionType, setActionType] = useState<'exec' | 'logs' | 'edit' | 'diagnosis' | 'delete' | null>(null);
+  const [actionType, setActionType] = useState<'exec' | 'logs' | 'port-forward' | 'edit' | 'diagnosis' | 'delete' | null>(null);
 
   const podConfig: ResourceTableConfig = {
     columns: [
@@ -245,6 +248,7 @@ function Pods() {
       { id: 'edit', label: 'Edit', icon: EditIcon },
       { id: 'logs', label: 'Logs', icon: ArticleIcon },
       { id: 'exec', label: 'Exec', icon: TerminalIcon },
+      { id: 'port-forward', label: 'Port Forward', icon: SettingsEthernetIcon },
       { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
@@ -254,6 +258,7 @@ function Pods() {
     setSelectedPod({
       namespace: pod.metadata.namespace,
       podName: pod.metadata.name,
+      ports: [],
     });
   };
 
@@ -264,9 +269,18 @@ function Pods() {
       pod.spec.containers?.map((c) => ({
         name: c.name,
       })) || [];
+
+    const ports = Array.from(
+      new Set(
+        (pod.spec.containers || []).flatMap((container) =>
+          ((container as unknown as { ports?: Array<{ containerPort?: number }> }).ports || []).map((p) => p.containerPort).filter((p): p is number => typeof p === 'number'),
+        ),
+      ),
+    ).sort((a, b) => a - b);
+
     const defaultContainer = containers[0]?.name;
 
-    setSelectedPod({ namespace, podName, containers, defaultContainer });
+    setSelectedPod({ namespace, podName, containers, defaultContainer, ports });
 
     if (actionId === 'edit') {
       setActionType('edit');
@@ -279,6 +293,9 @@ function Pods() {
     }
     if (actionId === 'exec') {
       setActionType('exec');
+    }
+    if (actionId === 'port-forward') {
+      setActionType('port-forward');
     }
   };
 
@@ -337,6 +354,10 @@ function Pods() {
           defaultContainer={selectedPod.defaultContainer}
           socket={socket}
         />
+      )}
+
+      {selectedPod && actionType === 'port-forward' && (
+        <PodPortForwardDrawer open={true} onClose={handleClose} namespace={selectedPod.namespace} podName={selectedPod.podName} socket={socket} detectedPorts={selectedPod.ports} />
       )}
 
       {selectedPod && actionType === 'edit' && <ResourceEditor open={true} onClose={handleClose} apiVersion="v1" kind="Pod" namespace={selectedPod.namespace} name={selectedPod.podName} />}

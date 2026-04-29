@@ -10,6 +10,7 @@ import { k8sService } from './services/kubernetes.service';
 import { registerWatchResourceHandlers } from './handlers/watch.handler';
 import { registerExecHandlers } from './handlers/exec.handler';
 import { registerLogHandlers } from './handlers/logs.handler';
+import { registerPortForwardHandlers } from './handlers/portforward.handler';
 import { registerAgentHandlers } from './handlers/agent.handler';
 import { resourceRouter } from './routes/resource.route';
 
@@ -103,6 +104,7 @@ io.on('connection', (socket) => {
   registerWatchResourceHandlers(socket);
   registerExecHandlers(socket);
   registerLogHandlers(socket);
+  registerPortForwardHandlers(socket);
   registerAgentHandlers(socket);
 
   socket.on('disconnect', () => {

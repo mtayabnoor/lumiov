@@ -4,6 +4,10 @@ export interface ShellSession {
   resize?: (cols: number, rows: number) => void;
 }
 
+export interface PortForwardSession {
+  stop: () => void;
+}
+
 export type ResourceType =
   // Cluster
   | 'namespaces'

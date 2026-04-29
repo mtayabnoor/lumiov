@@ -2,6 +2,7 @@ import * as k8s from '@kubernetes/client-node';
 import {
   KubeConfig,
   Exec,
+  PortForward,
   Watch,
   CoreV1Api,
   AppsV1Api,
@@ -18,7 +19,8 @@ import {
 import { loadKubeConfig } from '../config/k8s';
 import { Writable, PassThrough } from 'stream';
 import WebSocket from 'ws';
-import type { ResourceType, ShellSession } from '../types/common';
+import net from 'node:net';
+import type { ResourceType, ShellSession, PortForwardSession } from '../types/common';
 import * as yaml from 'js-yaml';
 import equal from 'fast-deep-equal';
 
@@ -26,6 +28,7 @@ export class K8sService {
   private kc: KubeConfig | null = null;
   private watch: Watch | null = null;
   private exec: Exec | null = null;
+  private portForward: PortForward | null = null;
   private log: Log | null = null;
 
   // REST Clients for fetching initial lists
@@ -63,6 +66,7 @@ export class K8sService {
 
       this.watch = new Watch(this.kc);
       this.exec = new Exec(this.kc);
+      this.portForward = new PortForward(this.kc);
       this.log = new Log(this.kc);
 
       this.coreApi = this.kc.makeApiClient(CoreV1Api);
@@ -348,6 +352,99 @@ export class K8sService {
       if (retryTimeout) clearTimeout(retryTimeout);
       if (req && req.abort) req.abort();
       console.log(`🛑 Stopped watching: ${resource}`);
+    };
+  }
+
+  public async startPodPortForward(
+    namespace: string,
+    podName: string,
+    localPort: number,
+    remotePort: number,
+    onError: (err: string) => void,
+  ): Promise<PortForwardSession> {
+    this.checkInit();
+
+    if (!this.portForward) {
+      throw new Error('PortForward client is not initialized');
+    }
+
+    const clientSockets = new Set<net.Socket>();
+    const activeConnections = new Set<WebSocket | (() => WebSocket | null)>();
+
+    const server = net.createServer(async (clientSocket) => {
+      clientSockets.add(clientSocket);
+
+      const errorStream = new Writable({
+        write(chunk, _encoding, callback) {
+          onError(chunk.toString());
+          callback();
+        },
+      });
+
+      clientSocket.on('error', (err) => {
+        onError(err.message);
+      });
+
+      clientSocket.on('close', () => {
+        clientSockets.delete(clientSocket);
+      });
+
+      try {
+        const wsConnection = await this.portForward!.portForward(
+          namespace,
+          podName,
+          [remotePort],
+          clientSocket,
+          errorStream,
+          clientSocket,
+        );
+        activeConnections.add(wsConnection);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        onError(message);
+        if (!clientSocket.destroyed) {
+          clientSocket.destroy();
+        }
+      }
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      const handleError = (err: NodeJS.ErrnoException) => {
+        reject(err);
+      };
+
+      server.once('error', handleError);
+      server.listen(localPort, '127.0.0.1', () => {
+        server.off('error', handleError);
+        resolve();
+      });
+    });
+
+    return {
+      stop: () => {
+        for (const sock of clientSockets) {
+          if (!sock.destroyed) {
+            sock.destroy();
+          }
+        }
+        clientSockets.clear();
+
+        for (const connection of activeConnections) {
+          try {
+            const ws = typeof connection === 'function' ? connection() : connection;
+            ws?.close();
+          } catch {
+            // Ignore cleanup failures
+          }
+        }
+        activeConnections.clear();
+
+        try {
+          server.close();
+        } catch {
+          // Ignore cleanup failures
+        }
+      },
     };
   }
 
