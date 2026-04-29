@@ -166,6 +166,22 @@ function createWindow() {
   } else {
     mainWindow.loadFile(path.join(process.resourcesPath, 'frontend', 'dist', 'index.html'));
   }
+
+  // ─── Periodic Update Checks (every hour) ───
+  if (app.isPackaged) {
+    setInterval(() => {
+      console.log('🔄 Checking for updates (hourly)...');
+      autoUpdater.checkForUpdates();
+    }, 3600000); // 1 hour
+  }
+
+  // ─── Check for updates when app comes back into focus ───
+  mainWindow.on('focus', () => {
+    if (app.isPackaged) {
+      console.log('🔄 Checking for updates (app focused)...');
+      autoUpdater.checkForUpdates();
+    }
+  });
 }
 
 // ═══════════════ Auto-Update Flow ═══════════════
@@ -235,6 +251,9 @@ autoUpdater.on('update-downloaded', (info: UpdateDownloadedEvent) => {
 
 autoUpdater.on('error', (err) => {
   console.error('Auto-update error:', err);
+  if (mainWindow && app.isPackaged) {
+    dialog.showErrorBox('Update Check Failed', 'Failed to check for updates. The app will continue to work normally.\n\n' + (err instanceof Error ? err.message : String(err)));
+  }
 });
 
 // ─── Cleanup ───
