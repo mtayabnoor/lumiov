@@ -1,22 +1,15 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 
-// ─── Settings Shape ────────────────────────────────────────────
-// Extend this interface as new settings are added
-
 interface AppSettings {
   deleteEnabled: boolean;
+  changeClusterContextEnabed: boolean;
+  enableAgentWritePermission: boolean;
 }
-
-const DEFAULT_SETTINGS: AppSettings = {
-  deleteEnabled: false, // Safe default — user must opt in
-};
-
-const STORAGE_KEY = 'lumiov-settings';
-
-// ─── Context ───────────────────────────────────────────────────
 
 interface SettingsContextType extends AppSettings {
   setDeleteEnabled: (enabled: boolean) => void;
+  setChangeClusterContextEnabed: (enabled: boolean) => void;
+  setEnableAgentWritePermission: (enabled: boolean) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -29,30 +22,35 @@ export function useSettings() {
   return context;
 }
 
-// ─── Provider ──────────────────────────────────────────────────
+const STORAGE_KEY = 'lumiov-settings';
 
 function loadSettings(): AppSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      return { ...DEFAULT_SETTINGS, ...parsed };
+      return {
+        deleteEnabled: false,
+        changeClusterContextEnabed: false,
+        enableAgentWritePermission: false,
+        ...parsed,
+      };
     }
   } catch {
     // Corrupted storage — fall back to defaults
   }
-  return DEFAULT_SETTINGS;
+  return {
+    deleteEnabled: false,
+    changeClusterContextEnabed: false,
+    enableAgentWritePermission: false,
+  };
 }
 
 function saveSettings(settings: AppSettings) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
 }
 
-interface SettingsProviderProps {
-  children: ReactNode;
-}
-
-export function SettingsProvider({ children }: SettingsProviderProps) {
+export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<AppSettings>(loadSettings);
 
   const setDeleteEnabled = useCallback((enabled: boolean) => {
@@ -63,11 +61,29 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     });
   }, []);
 
+  const setChangeClusterContextEnabed = useCallback((enabled: boolean) => {
+    setSettings((prev) => {
+      const next = { ...prev, changeClusterContextEnabed: enabled };
+      saveSettings(next);
+      return next;
+    });
+  }, []);
+
+  const setEnableAgentWritePermission = useCallback((enabled: boolean) => {
+    setSettings((prev) => {
+      const next = { ...prev, enableAgentWritePermission: enabled };
+      saveSettings(next);
+      return next;
+    });
+  }, []);
+
   return (
     <SettingsContext.Provider
       value={{
         ...settings,
         setDeleteEnabled,
+        setChangeClusterContextEnabed,
+        setEnableAgentWritePermission,
       }}
     >
       {children}

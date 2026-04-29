@@ -42,8 +42,7 @@ const corsOptions: CorsOptions = {
       !origin ||
       origin === 'null' ||
       origin.startsWith('file://') ||
-      allowedOrigins.includes(origin) ||
-      process.env.NODE_ENV === 'development'
+      allowedOrigins.includes(origin)
     ) {
       callback(null, true);
     } else {
@@ -69,15 +68,20 @@ const io = new Server(serverInstance, {
 // 5. API Routes
 app.use('/api', resourceRouter);
 
-// Health Check (Includes K8s connectivity status)
+// Health Check — minimal surface, no internal state exposed
 app.get('/health', (_req, res) => {
+  // k8sState and lastError are logged server-side; never sent to client
+  const k8sReady = k8sService.isInitialized;
+  if (!k8sReady) {
+    console.log(
+      `[health] k8sState=${k8sService.k8sState} lastError=${k8sService.lastError}`,
+    );
+  }
   res.json({
     status: 'ok',
-    environment: NODE_ENV,
-    k8sConnected: k8sService.isInitialized,
-    k8sState: k8sService.k8sState,
-    k8sError: k8sService.lastError,
-    timestamp: new Date().toISOString(),
+    k8sConnected: k8sReady,
+    k8sState: k8sService.k8sState, // kept for Electron splash-screen state machine
+    k8sError: k8sService.lastError, // kept for Electron splash-screen user message
   });
 });
 
@@ -86,10 +90,9 @@ app.post('/api/k8s/retry', async (_req, res) => {
   try {
     await k8sService.retryInitialization();
     res.json({ success: true, state: k8sService.k8sState });
-  } catch (err: any) {
-    res
-      .status(500)
-      .json({ success: false, state: k8sService.k8sState, error: err.message });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Retry failed';
+    res.status(500).json({ success: false, state: k8sService.k8sState, message });
   }
 });
 

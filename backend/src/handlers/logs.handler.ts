@@ -1,5 +1,6 @@
 import { Socket } from 'socket.io';
 import { k8sService } from '../services/kubernetes.service';
+import { toAppError } from '../types/errors';
 
 interface LogSubscribeOptions {
   namespace: string;
@@ -32,7 +33,10 @@ export const registerLogHandlers = (socket: Socket) => {
 
     // 1. VALIDATION: Fail fast if data is missing
     if (!namespace || !podName) {
-      socket.emit('logs:error', 'Missing namespace or pod name');
+      socket.emit(
+        'logs:error',
+        toAppError('Missing namespace or pod name', 'VALIDATION_ERROR', false),
+      );
       return;
     }
 
@@ -84,9 +88,16 @@ export const registerLogHandlers = (socket: Socket) => {
           (err) => {
             const errString = String(err);
             if (errString.includes('400') && previous) {
-              socket.emit('logs:error', `Container "${container}" has no previous logs.`);
+              socket.emit(
+                'logs:error',
+                toAppError(
+                  `Container "${container}" has no previous logs.`,
+                  'NO_PREVIOUS_LOGS',
+                  false,
+                ),
+              );
             } else {
-              socket.emit('logs:error', errString);
+              socket.emit('logs:error', toAppError(errString, 'LOG_STREAM_ERROR', true));
             }
           },
           { tailLines, sinceSeconds, previous, timestamps, follow },
@@ -103,9 +114,9 @@ export const registerLogHandlers = (socket: Socket) => {
           stopStream();
         }
       } catch (error) {
-        const err = error as Error;
+        const err = error instanceof Error ? error : new Error(String(error));
         console.error(`❌ [Logs] Failed to stream container ${container}:`, err);
-        socket.emit('logs:error', `Failed to stream ${container}: ${err.message}`);
+        socket.emit('logs:error', toAppError(err, 'LOG_STREAM_FAILED', true));
       }
     });
 

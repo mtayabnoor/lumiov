@@ -43,15 +43,12 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import HistoryIcon from '@mui/icons-material/History';
 
-import {
-  DRAWER_STYLES,
-  getDrawerPaperSx,
-  DRAWER_HEADER_SX,
-  ICON_BUTTON_SX,
-  CONNECTED_CHIP_SX,
-  PULSE_DOT_SX,
-  DIVIDER_SX,
-} from './drawerStyles';
+// Shared inline sx helpers (theme-based)
+const ICON_BUTTON_SX = {
+  color: 'text.secondary',
+  '&:hover': { color: 'text.primary', bgcolor: 'action.hover' },
+} as const;
+const DIVIDER_SX = { mx: 1, height: 24, alignSelf: 'center' } as const;
 
 // --- Types ---
 interface Container {
@@ -232,22 +229,16 @@ const highlightText = (text: string, terms: string[]): React.ReactNode => {
   );
 };
 
-// Level colors
+// Level colors mapped to semantic MUI palette tokens
 const LEVEL_COLORS: Record<LogLevel, string> = {
-  error: DRAWER_STYLES.status.error.text,
-  warn: DRAWER_STYLES.status.warning.text,
-  info: '#60a5fa', // Blue
-  debug: '#a78bfa', // Purple
-  unknown: DRAWER_STYLES.text.secondary,
+  error: 'error.main',
+  warn: 'warning.main',
+  info: 'info.main',
+  debug: '#a78bfa',
+  unknown: 'text.disabled',
 };
 
-const LEVEL_BORDER_COLORS: Record<LogLevel, string> = {
-  error: DRAWER_STYLES.status.error.text,
-  warn: DRAWER_STYLES.status.warning.text,
-  info: 'transparent',
-  debug: 'transparent',
-  unknown: 'transparent',
-};
+const LEVEL_BORDER_OPAQUE: Set<LogLevel> = new Set(['error', 'warn']);
 
 // --- Row Component ---
 function LogRow({
@@ -267,7 +258,7 @@ function LogRow({
   // Get container color for multi-container mode
   const containerColor = log.container
     ? getContainerColor(log.container, containers)
-    : DRAWER_STYLES.text.muted;
+    : '#6b7280';
 
   return (
     <Box
@@ -282,16 +273,20 @@ function LogRow({
         '&:hover': {
           bgcolor: 'rgba(255, 255, 255, 0.02)',
         },
-        borderLeft: log.container
-          ? `3px solid ${containerColor}`
-          : `2px solid ${LEVEL_BORDER_COLORS[log.level]}`,
+        borderLeftWidth: log.container ? 3 : 2,
+        borderLeftStyle: 'solid',
+        borderLeftColor: log.container
+          ? containerColor
+          : LEVEL_BORDER_OPAQUE.has(log.level)
+            ? LEVEL_COLORS[log.level]
+            : 'transparent',
       }}
     >
       {/* Line number */}
       <Typography
         component="span"
         sx={{
-          color: DRAWER_STYLES.text.muted,
+          color: 'text.disabled',
           minWidth: 50,
           textAlign: 'right',
           mr: 2,
@@ -345,7 +340,7 @@ function LogRow({
         <Typography
           component="span"
           sx={{
-            color: DRAWER_STYLES.status.connected.text,
+            color: 'success.main',
             minWidth: 200,
             mr: 2,
             fontSize: 'inherit',
@@ -431,8 +426,9 @@ function SettingsPopover({
       slotProps={{
         paper: {
           sx: {
-            bgcolor: DRAWER_STYLES.paper.headerBg,
-            border: `1px solid ${DRAWER_STYLES.controls.inputBorder}`,
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
             minWidth: 280,
             p: 2,
           },
@@ -441,7 +437,7 @@ function SettingsPopover({
     >
       <Typography
         variant="subtitle2"
-        sx={{ color: DRAWER_STYLES.text.primary, mb: 2, fontWeight: 600 }}
+        sx={{ color: 'text.primary', mb: 2, fontWeight: 600 }}
       >
         Log Settings
       </Typography>
@@ -450,7 +446,7 @@ function SettingsPopover({
       <Box sx={{ mb: 2 }}>
         <Typography
           variant="caption"
-          sx={{ color: DRAWER_STYLES.text.secondary, display: 'block', mb: 1 }}
+          sx={{ color: 'text.secondary', display: 'block', mb: 1 }}
         >
           Filter Mode
         </Typography>
@@ -462,8 +458,8 @@ function SettingsPopover({
           fullWidth
           sx={{
             '& .MuiToggleButton-root': {
-              color: DRAWER_STYLES.text.secondary,
-              borderColor: DRAWER_STYLES.controls.inputBorder,
+              color: 'text.secondary',
+              borderColor: 'divider',
             },
           }}
         >
@@ -471,8 +467,8 @@ function SettingsPopover({
             value="lines"
             sx={{
               '&.Mui-selected': {
-                bgcolor: DRAWER_STYLES.menu.itemSelected,
-                color: DRAWER_STYLES.text.primary,
+                bgcolor: 'action.selected',
+                color: 'text.primary',
               },
             }}
           >
@@ -482,8 +478,8 @@ function SettingsPopover({
             value="time"
             sx={{
               '&.Mui-selected': {
-                bgcolor: DRAWER_STYLES.menu.itemSelected,
-                color: DRAWER_STYLES.text.primary,
+                bgcolor: 'action.selected',
+                color: 'text.primary',
               },
             }}
           >
@@ -498,7 +494,7 @@ function SettingsPopover({
           <Typography
             variant="caption"
             sx={{
-              color: DRAWER_STYLES.text.secondary,
+              color: 'text.secondary',
               display: 'block',
               mb: 1,
             }}
@@ -512,8 +508,8 @@ function SettingsPopover({
             size="small"
             sx={{
               '& .MuiToggleButton-root': {
-                color: DRAWER_STYLES.text.secondary,
-                borderColor: DRAWER_STYLES.controls.inputBorder,
+                color: 'text.secondary',
+                borderColor: 'divider',
                 px: 1.5,
               },
             }}
@@ -524,8 +520,8 @@ function SettingsPopover({
                 value={n}
                 sx={{
                   '&.Mui-selected': {
-                    bgcolor: DRAWER_STYLES.menu.itemSelected,
-                    color: DRAWER_STYLES.text.primary,
+                    bgcolor: 'action.selected',
+                    color: 'text.primary',
                   },
                 }}
               >
@@ -542,7 +538,7 @@ function SettingsPopover({
           <Typography
             variant="caption"
             sx={{
-              color: DRAWER_STYLES.text.secondary,
+              color: 'text.secondary',
               display: 'block',
               mb: 1,
             }}
@@ -558,19 +554,13 @@ function SettingsPopover({
                 onClick={() => setSinceSeconds(opt.seconds)}
                 sx={{
                   bgcolor:
-                    sinceSeconds === opt.seconds
-                      ? DRAWER_STYLES.menu.itemSelected
-                      : DRAWER_STYLES.controls.inputBg,
-                  color:
-                    sinceSeconds === opt.seconds
-                      ? DRAWER_STYLES.text.primary
-                      : DRAWER_STYLES.text.secondary,
+                    sinceSeconds === opt.seconds ? 'action.selected' : 'action.hover',
+                  color: sinceSeconds === opt.seconds ? 'text.primary' : 'text.secondary',
                   border:
-                    sinceSeconds === opt.seconds
-                      ? `1px solid ${DRAWER_STYLES.controls.inputBorderHover}`
-                      : '1px solid transparent',
+                    sinceSeconds === opt.seconds ? '1px solid' : '1px solid transparent',
+                  borderColor: sinceSeconds === opt.seconds ? 'divider' : 'transparent',
                   cursor: 'pointer',
-                  '&:hover': { bgcolor: DRAWER_STYLES.menu.itemHover },
+                  '&:hover': { bgcolor: 'action.hover' },
                 }}
               />
             ))}
@@ -582,7 +572,7 @@ function SettingsPopover({
       <Box sx={{ mb: 2 }}>
         <Typography
           variant="caption"
-          sx={{ color: DRAWER_STYLES.text.secondary, display: 'block', mb: 1 }}
+          sx={{ color: 'text.secondary', display: 'block', mb: 1 }}
         >
           Font Size: {fontSize}px
         </Typography>
@@ -595,7 +585,7 @@ function SettingsPopover({
           marks
           sx={{
             color: 'primary.main',
-            '& .MuiSlider-markLabel': { color: DRAWER_STYLES.text.muted },
+            '& .MuiSlider-markLabel': { color: 'text.disabled' },
           }}
         />
       </Box>
@@ -610,7 +600,7 @@ function SettingsPopover({
           />
         }
         label={
-          <Typography variant="body2" sx={{ color: DRAWER_STYLES.text.primary }}>
+          <Typography variant="body2" sx={{ color: 'text.primary' }}>
             Show Timestamps
           </Typography>
         }
@@ -626,7 +616,7 @@ function SettingsPopover({
           />
         }
         label={
-          <Typography variant="body2" sx={{ color: DRAWER_STYLES.text.primary }}>
+          <Typography variant="body2" sx={{ color: 'text.primary' }}>
             Wrap Lines
           </Typography>
         }
@@ -644,7 +634,7 @@ function SettingsPopover({
         }
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
-            <Typography variant="body2" sx={{ color: DRAWER_STYLES.text.primary }}>
+            <Typography variant="body2" sx={{ color: 'text.primary' }}>
               {isLive ? 'Live Streaming' : 'Snapshot Mode'}
             </Typography>
             <Chip
@@ -654,12 +644,8 @@ function SettingsPopover({
                 height: 16,
                 fontSize: 9,
                 fontWeight: 700,
-                bgcolor: isLive
-                  ? DRAWER_STYLES.status.connected.bg
-                  : 'rgba(255,255,255,0.1)',
-                color: isLive
-                  ? DRAWER_STYLES.status.connected.text
-                  : DRAWER_STYLES.text.muted,
+                bgcolor: isLive ? 'rgba(52, 211, 153, 0.15)' : 'rgba(255,255,255,0.1)',
+                color: isLive ? 'success.main' : 'text.disabled',
               }}
             />
           </Box>
@@ -677,8 +663,8 @@ function SettingsPopover({
         }
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
-            <HistoryIcon sx={{ fontSize: 16, color: DRAWER_STYLES.text.secondary }} />
-            <Typography variant="body2" sx={{ color: DRAWER_STYLES.text.primary }}>
+            <HistoryIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+            <Typography variant="body2" sx={{ color: 'text.primary' }}>
               Previous Container Logs
             </Typography>
           </Box>
@@ -949,12 +935,27 @@ export default function PodLogsDrawer({
       onClose={handleClose}
       slotProps={{
         paper: {
-          sx: getDrawerPaperSx(height),
+          sx: {
+            height,
+            display: 'flex',
+            flexDirection: 'column' as const,
+            transition: 'height 0.3s ease-in-out',
+            borderTop: (t: any) => `1px solid ${t.palette.divider}`,
+          },
         },
       }}
     >
       {/* --- HEADER --- */}
-      <Box sx={DRAWER_HEADER_SX}>
+      <Box
+        sx={{
+          p: 1.5,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: (t: any) => `1px solid ${t.palette.divider}`,
+          flexShrink: 0,
+        }}
+      >
         {/* Left: Pod Info */}
         <Box display="flex" alignItems="center" gap={2}>
           {/* Icon & Title */}
@@ -1100,7 +1101,7 @@ export default function PodLogsDrawer({
                   ...ICON_BUTTON_SX,
                   color: levelFilters.includes('error')
                     ? LEVEL_COLORS.error
-                    : DRAWER_STYLES.text.muted,
+                    : 'text.disabled',
                   opacity: levelFilters.includes('error') ? 1 : 0.5,
                 }}
               >
@@ -1129,7 +1130,7 @@ export default function PodLogsDrawer({
                   ...ICON_BUTTON_SX,
                   color: levelFilters.includes('warn')
                     ? LEVEL_COLORS.warn
-                    : DRAWER_STYLES.text.muted,
+                    : 'text.disabled',
                   opacity: levelFilters.includes('warn') ? 1 : 0.5,
                 }}
               >
@@ -1158,7 +1159,7 @@ export default function PodLogsDrawer({
                   ...ICON_BUTTON_SX,
                   color: levelFilters.includes('info')
                     ? LEVEL_COLORS.info
-                    : DRAWER_STYLES.text.muted,
+                    : 'text.disabled',
                   opacity: levelFilters.includes('info') ? 1 : 0.5,
                 }}
               >
@@ -1176,7 +1177,7 @@ export default function PodLogsDrawer({
             label={`${filteredLogs.length.toLocaleString()} / ${logs.length.toLocaleString()}`}
             sx={{
               bgcolor: 'rgba(255,255,255,0.08)',
-              color: DRAWER_STYLES.text.secondary,
+              color: 'text.secondary',
               fontSize: '0.75rem',
               height: 24,
             }}
@@ -1188,8 +1189,8 @@ export default function PodLogsDrawer({
               size="small"
               label={`+${bufferedCount} buffered`}
               sx={{
-                bgcolor: DRAWER_STYLES.status.warning.bg,
-                color: DRAWER_STYLES.status.warning.text,
+                bgcolor: 'rgba(251, 191, 36, 0.15)',
+                color: 'warning.main',
                 fontSize: '0.75rem',
                 height: 24,
               }}
@@ -1201,8 +1202,29 @@ export default function PodLogsDrawer({
             <Chip
               size="small"
               label="Connected"
-              sx={CONNECTED_CHIP_SX}
-              icon={<Box sx={PULSE_DOT_SX} />}
+              sx={{
+                bgcolor: 'rgba(52, 211, 153, 0.15)',
+                color: 'success.main',
+                fontSize: '0.75rem',
+                height: 24,
+                fontWeight: 500,
+              }}
+              icon={
+                <Box
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: 'success.main',
+                    ml: 1,
+                    animation: 'pulse 2s ease-in-out infinite',
+                    '@keyframes pulse': {
+                      '0%, 100%': { opacity: 1 },
+                      '50%': { opacity: 0.4 },
+                    },
+                  }}
+                />
+              }
             />
           )}
 
@@ -1215,9 +1237,7 @@ export default function PodLogsDrawer({
               size="small"
               sx={{
                 ...ICON_BUTTON_SX,
-                color: isPaused
-                  ? DRAWER_STYLES.status.warning.text
-                  : DRAWER_STYLES.controls.icon,
+                color: isPaused ? 'warning.main' : 'text.secondary',
               }}
             >
               {isPaused ? <PlayArrowIcon /> : <PauseIcon />}
@@ -1236,9 +1256,7 @@ export default function PodLogsDrawer({
               size="small"
               sx={{
                 ...ICON_BUTTON_SX,
-                color: wrapLines
-                  ? theme.palette.primary.main
-                  : DRAWER_STYLES.controls.icon,
+                color: wrapLines ? 'primary.main' : 'text.secondary',
               }}
             >
               <WrapTextIcon />
@@ -1251,9 +1269,7 @@ export default function PodLogsDrawer({
               size="small"
               sx={{
                 ...ICON_BUTTON_SX,
-                color: showTimestamps
-                  ? theme.palette.primary.main
-                  : DRAWER_STYLES.controls.icon,
+                color: showTimestamps ? 'primary.main' : 'text.secondary',
               }}
             >
               <AccessTimeIcon />
@@ -1268,9 +1284,7 @@ export default function PodLogsDrawer({
               size="small"
               sx={{
                 ...ICON_BUTTON_SX,
-                color: copySuccess
-                  ? DRAWER_STYLES.status.connected.text
-                  : DRAWER_STYLES.controls.icon,
+                color: copySuccess ? 'success.main' : 'text.secondary',
               }}
             >
               <ContentCopyIcon />
@@ -1359,9 +1373,9 @@ export default function PodLogsDrawer({
               left: 10,
               right: 10,
               zIndex: 10,
-              bgcolor: DRAWER_STYLES.status.error.bg,
-              color: DRAWER_STYLES.status.error.text,
-              '& .MuiAlert-icon': { color: DRAWER_STYLES.status.error.text },
+              bgcolor: 'rgba(248, 113, 113, 0.15)',
+              color: 'error.main',
+              '& .MuiAlert-icon': { color: 'error.main' },
             }}
           >
             {error}
@@ -1375,7 +1389,7 @@ export default function PodLogsDrawer({
               alignItems: 'center',
               justifyContent: 'center',
               height: '100%',
-              color: DRAWER_STYLES.text.secondary,
+              color: 'text.secondary',
             }}
           >
             <Typography variant="body2">

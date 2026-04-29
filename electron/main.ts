@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, safeStorage } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import http from 'http';
@@ -67,6 +67,7 @@ async function runPreLaunchChecks() {
         nodeIntegration: false,
         contextIsolation: true,
         sandbox: true,
+        webSecurity: true,
         preload: path.join(__dirname, 'preload.cjs'),
       },
     });
@@ -167,6 +168,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
+      webSecurity: true,
       preload: path.join(__dirname, 'preload.cjs'),
     },
   });
@@ -271,3 +273,23 @@ ipcMain.handle('get-platform', () => ({
   platform: process.platform,
   version: app.getVersion(),
 }));
+
+// ─── Secure key storage via safeStorage ───
+ipcMain.handle('secure-key-store', (_event, plaintext: string) => {
+  if (!safeStorage.isEncryptionAvailable()) return null;
+  return safeStorage.encryptString(plaintext).toString('base64');
+});
+
+ipcMain.handle('secure-key-retrieve', (_event, encrypted: string) => {
+  if (!safeStorage.isEncryptionAvailable()) return null;
+  try {
+    return safeStorage.decryptString(Buffer.from(encrypted, 'base64'));
+  } catch {
+    return null;
+  }
+});
+
+ipcMain.handle('secure-key-delete', () => {
+  // Nothing to do in main process — deletion managed by caller clearing the stored value
+  return true;
+});

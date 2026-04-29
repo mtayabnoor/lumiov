@@ -19,11 +19,32 @@ async function checkHealth(): Promise<boolean> {
   });
 }
 
+/** Only the env vars the backend process actually needs. Never spread process.env. */
+function buildBackendEnv(isDev: boolean): NodeJS.ProcessEnv {
+  const allowed: NodeJS.ProcessEnv = {
+    PORT: BACKEND_PORT.toString(),
+    NODE_ENV: isDev ? 'development' : 'production',
+    // Paths needed by the OS / Node resolution
+    PATH: process.env.PATH,
+    HOME: process.env.HOME,
+    USERPROFILE: process.env.USERPROFILE, // Windows equivalent of HOME
+    HOMEDRIVE: process.env.HOMEDRIVE,
+    HOMEPATH: process.env.HOMEPATH,
+    SYSTEMROOT: process.env.SYSTEMROOT,
+    // Kubeconfig — the only external dependency the backend needs
+    KUBECONFIG: process.env.KUBECONFIG,
+    // OpenAI key if the user pre-configured it via environment
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  };
+  // Remove undefined keys so child_process doesn't inherit accidental undefined entries
+  return Object.fromEntries(Object.entries(allowed).filter(([, v]) => v !== undefined));
+}
+
 export async function launchBackend(isDev: boolean): Promise<ChildProcess> {
   let binPath: string;
   let args: string[];
   let cwd: string;
-  let env: NodeJS.ProcessEnv = { ...process.env };
+  const env = buildBackendEnv(isDev);
 
   if (isDev) {
     // --- DEVELOPMENT MODE ---
@@ -70,16 +91,13 @@ export async function launchBackend(isDev: boolean): Promise<ChildProcess> {
 
     args = [entryPoint];
   }
+  // Freeze the env — no further mutation after this point
 
   console.log(`Spawning backend: ${binPath} ${args.join(' ')} (CWD: ${cwd})`);
 
   const proc = spawn(binPath, args, {
     cwd,
-    env: {
-      ...env, // Includes ELECTRON_RUN_AS_NODE if in prod
-      PORT: BACKEND_PORT.toString(),
-      NODE_ENV: isDev ? 'development' : 'production',
-    },
+    env, // Pre-built whitelist — never spreads all of process.env
     // inherit allows you to see logs in the terminal; 'pipe' allows programmatic handling
     stdio: isDev ? 'inherit' : 'pipe',
   });

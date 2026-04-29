@@ -13,6 +13,32 @@ updates:
       - 'mtayabnoor'
     labels:
       - 'dependencies'
+      - 'root'
+      - 'automated'
+    commit-message:
+      prefix: 'chore'
+      include: 'scope'
+    target-branch: 'development'
+    groups:
+      non-breaking:
+        update-types:
+          - 'minor'
+          - 'patch'
+      major:
+        update-types:
+          - 'major'
+
+  - package-ecosystem: 'npm'
+    directory: '/electron'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
+    open-pull-requests-limit: 10
+    reviewers:
+      - 'mtayabnoor'
+    labels:
+      - 'dependencies'
       - 'electron'
       - 'automated'
     commit-message:

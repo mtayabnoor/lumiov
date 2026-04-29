@@ -3,18 +3,19 @@
 ## Branching Model
 
 ```
-feature/*  ──PR──▶  development  ──PR──▶  release/vX.Y.Z  ──PR──▶  main
-                         ▲                    │ (RC tags)              │
-                         └──── back-merge PR ◀┘                       │
-                         └──── back-merge PR ◀────────────────────────┘
+feature/*  ──PR──▶  development  ──PR──▶  main
+                    (RC tags)             (stable tags)
+                         ▲                    │
+                         └──── auto back-merge┘
 ```
 
-| Branch           | Purpose                                              |
-| ---------------- | ---------------------------------------------------- |
-| `feature/*`      | Individual changes, PRs target `development`         |
-| `development`    | Integration branch, CI runs on every PR              |
-| `release/vX.Y.Z` | Release candidate testing, auto-tagged `vX.Y.Z-rc.N` |
-| `main`           | Stable releases only, auto-tagged `vX.Y.Z`           |
+| Branch        | Purpose                                                         |
+| ------------- | --------------------------------------------------------------- |
+| `feature/*`   | Individual changes, PRs target `development`                    |
+| `development` | Integration branch; every relevant push auto-tags `vX.Y.Z-rc.N` |
+| `main`        | Stable releases only; every merge auto-tags `vX.Y.Z`            |
+
+> There are no `release/vX.Y.Z` branches. RC candidates come straight from `development`.
 
 ---
 
@@ -29,64 +30,48 @@ git push origin feature/my-feature
 # Open PR → development
 ```
 
-**CI runs automatically.** Merge when all checks pass.
+**CI runs automatically on every PR.** Merge when all checks pass.
 
-### 2. Cut a Release
+### 2. RC Tags (automatic)
 
-```bash
-git checkout development && git pull
-git checkout -b release/v1.2.0
-git push origin release/v1.2.0
-```
+Once a PR is merged into `development`, semantic-release runs automatically.
+If the commits contain `feat`, `fix`, or `perf` changes a new RC tag is created:
 
-**🤖 Automation:** Creates tag `v1.2.0-rc.1` + GitHub Pre-Release + Electron build.
+- First merge with relevant commits → `v1.2.0-rc.1`
+- Next merge with relevant commits → `v1.2.0-rc.2`, etc.
 
-### 3. Fix During RC (if needed)
+No manual steps needed. A GitHub Pre-Release and Electron build are published automatically.
 
-```bash
-git checkout release/v1.2.0
-git commit -m "fix: Patch something"
-git push
-```
+### 3. Stable Release
 
-**🤖 Automation:** Creates `v1.2.0-rc.2`, `rc.3`, etc. automatically.
-
-### 4. Stable Release
-
-Open a PR on GitHub: `release/v1.2.0` → `main`, then merge.
+Open a PR on GitHub: `development` → `main`, then merge.
 
 **🤖 Automation:**
 
 - Creates tag `v1.2.0` + GitHub Release
 - Generates changelog
 - Builds and publishes signed Electron installer
-- Creates a back-merge PR (`main` → `development`)
-
-### 5. Back-merge
-
-Review and merge the auto-created PR to keep `development` in sync.
+- Directly merges `main` back into `development` (no PR needed)
 
 ---
 
 ## What's Manual vs Automatic
 
-| Step         | You                                 | Automation                     |
-| ------------ | ----------------------------------- | ------------------------------ |
-| Feature work | Branch, commit, PR to `development` | CI checks                      |
-| Cut release  | Create `release/vX.Y.Z` branch      | —                              |
-| RC tags      | —                                   | `vX.Y.Z-rc.N` + pre-release    |
-| RC fixes     | Push to `release/*`                 | Increments RC number           |
-| Go stable    | Merge release branch → `main`       | `vX.Y.Z` tag + release + build |
-| Back-merge   | Review and merge the PR             | Creates the PR                 |
+| Step         | You                                 | Automation                               |
+| ------------ | ----------------------------------- | ---------------------------------------- |
+| Feature work | Branch, commit, PR to `development` | CI checks                                |
+| RC tags      | —                                   | `vX.Y.Z-rc.N` + pre-release on each push |
+| Go stable    | Merge `development` → `main`        | `vX.Y.Z` tag + release + Electron build  |
+| Back-merge   | —                                   | Direct push `main` → `development`       |
 
-> **You never manually create tags.** Push to `release/*` → RC tags. Merge to `main` → stable tag.
+> **You never manually create tags.** Merge to `development` → RC tag. Merge to `main` → stable tag.
 
 ---
 
 ## Tagging Summary
 
-| Tag format    | When created   | Trigger                          |
-| ------------- | -------------- | -------------------------------- |
-| `v1.2.0-rc.1` | Pre-release    | Push to `release/v1.2.0`         |
-| `v1.2.0-rc.2` | Pre-release    | Another push to `release/v1.2.0` |
-| `v1.2.0`      | Stable release | Merge `release/v1.2.0` → `main`  |
+| Tag format    | When created   | Trigger                                |
+| ------------- | -------------- | -------------------------------------- |
+| `v1.2.0-rc.1` | Pre-release    | Push relevant commits to `development` |
+| `v1.2.0-rc.2` | Pre-release    | Another push with relevant commits     |
+| `v1.2.0`      | Stable release | Merge `development` → `main`           |

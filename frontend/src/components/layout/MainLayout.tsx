@@ -6,13 +6,14 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import Sidebar from './Sidebar';
 import ContextSwitcher from './ContextSwitcher';
-import SettingsDialog from '../common/SettingsDialog';
+import SettingsDialog from '../common/Settings/SettingsDialog';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAgent } from '../../context/AgentContext';
 import AgentChatPanel from '../agent/AgentChatPanel';
 import AgentConfigModal from '../agent/AgentConfigModal';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import Divider from '@mui/material/Divider';
+import { useSettings } from '../../context/SettingsContext';
 
 const LOGO_SRC = 'lumiov.png';
 const HEADER_HEIGHT = '50px';
@@ -21,6 +22,7 @@ function MainLayout() {
   const { mode, toggleTheme } = useThemeMode();
   const { isConfigured, toggleChat } = useAgent();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { changeClusterContextEnabed } = useSettings();
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -65,7 +67,7 @@ function MainLayout() {
           </Box>
 
           {/* Context Switcher */}
-          <ContextSwitcher />
+          {changeClusterContextEnabed && <ContextSwitcher />}
 
           {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />
@@ -92,7 +94,7 @@ function MainLayout() {
               <PsychologyIcon
                 fontSize="medium"
                 sx={{
-                  color: isConfigured ? '#b42323ff' : 'text.primary',
+                  color: isConfigured ? 'error.main' : 'text.primary',
                   filter: isConfigured
                     ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)'
                     : 'none',
@@ -113,7 +115,7 @@ function MainLayout() {
           <Divider
             orientation="vertical"
             flexItem
-            sx={{ bgcolor: 'grey', mx: 1, height: 24, alignSelf: 'center' }}
+            sx={{ bgcolor: 'divider', mx: 1, height: 24, alignSelf: 'center' }}
           />
           {/* Settings */}
           <Tooltip title="Settings">

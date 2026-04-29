@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const API_BASE = 'http://localhost:3030/api';
+import { API_PATH } from '../config/api';
+const API_BASE = API_PATH;
 
 export interface KubeContext {
   name: string;

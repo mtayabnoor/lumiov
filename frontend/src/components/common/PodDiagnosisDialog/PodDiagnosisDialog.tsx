@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { API_BASE } from '../../../config/api';
 import {
   Dialog,
   DialogTitle,
@@ -241,7 +242,7 @@ export default function PodDiagnosisDialog({
     const controller = new AbortController();
     const signal = controller.signal;
 
-    fetch('http://localhost:3030/api/diagnose', {
+    fetch(`${API_BASE}/api/diagnose`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ namespace, podName, apiKey }),

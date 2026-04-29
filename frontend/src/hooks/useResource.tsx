@@ -10,7 +10,7 @@ import {
 interface ResourceWithMetadata {
   metadata: {
     name: string;
-    [key: string]: any; // Allow other metadata fields
+    [key: string]: unknown; // Allow other metadata fields
   };
 }
 
@@ -133,7 +133,7 @@ export function useDeleteResource() {
   const deleteResouce = async ({ apiVersion, kind, name, namespace }: DeleteParams) => {
     setIsDeleting(true);
     const response = await fetch(
-      `http://localhost:3030/api/resource?apiVersion=${encodeURIComponent(apiVersion)}&kind=${encodeURIComponent(kind)}&namespace=${encodeURIComponent(namespace ?? '')}&name=${encodeURIComponent(name)}`,
+      `${API_BASE}/api/resource?apiVersion=${encodeURIComponent(apiVersion)}&kind=${encodeURIComponent(kind)}&namespace=${encodeURIComponent(namespace ?? '')}&name=${encodeURIComponent(name)}`,
       {
         method: 'DELETE',
       },

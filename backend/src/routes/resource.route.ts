@@ -2,6 +2,7 @@ import express from 'express';
 import { k8sService } from '../services/kubernetes.service';
 import { diagnosePod } from '../agent/diagnosis.service';
 import { analyzeYaml } from '../agent/yaml-analysis.service';
+import { toAppError } from '../types/errors';
 
 const router = express.Router();
 
@@ -11,8 +12,8 @@ router.get('/contexts', (_req, res) => {
   try {
     const result = k8sService.getContexts();
     res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to list contexts' });
+  } catch (err) {
+    res.status(500).json(toAppError(err, 'CONTEXTS_LIST_FAILED', true));
   }
 });
 
@@ -20,33 +21,48 @@ router.post('/contexts/switch', async (req, res) => {
   const { context } = req.body;
 
   if (!context || typeof context !== 'string') {
-    res.status(400).json({ error: 'Missing or invalid "context" in request body' });
+    res
+      .status(400)
+      .json(
+        toAppError(
+          'Missing or invalid "context" in request body',
+          'INVALID_CONTEXT',
+          false,
+        ),
+      );
+    return;
+  }
+
+  // Validate context exists before switching (prevents injection of arbitrary names)
+  const { contexts } = k8sService.getContexts();
+  if (!contexts.some((c: { name: string }) => c.name === context)) {
+    res
+      .status(400)
+      .json(toAppError(`Unknown context: ${context}`, 'UNKNOWN_CONTEXT', false));
     return;
   }
 
   try {
     await k8sService.switchContext(context);
-    res.json({
-      success: true,
-      context,
-      state: k8sService.k8sState,
-    });
-  } catch (err: any) {
-    res.status(500).json({
-      success: false,
-      error: err.message || 'Failed to switch context',
-      state: k8sService.k8sState,
-    });
+    res.json({ success: true, context, state: k8sService.k8sState });
+  } catch (err) {
+    res
+      .status(500)
+      .json({
+        success: false,
+        state: k8sService.k8sState,
+        ...toAppError(err, 'CONTEXT_SWITCH_FAILED', true),
+      });
   }
 });
 
 router.get('/resource/yaml', async (req, res) => {
   const { apiVersion, kind, namespace, name } = req.query;
 
-  // Basic validation
-  // In a real app we might validate 'resourceType' against the enum
   if (!namespace || !name) {
-    res.status(400).json({ error: 'Missing namespace or name' });
+    res
+      .status(400)
+      .json(toAppError('Missing namespace or name', 'VALIDATION_ERROR', false));
     return;
   }
 
@@ -58,8 +74,8 @@ router.get('/resource/yaml', async (req, res) => {
       name as string,
     );
     res.json(data);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to fetch resource' });
+  } catch (err) {
+    res.status(500).json(toAppError(err, 'RESOURCE_FETCH_FAILED', true));
   }
 });
 
@@ -68,15 +84,15 @@ router.put('/resource/yaml', async (req, res) => {
   const updatedBody = req.body;
 
   if (!updatedBody) {
-    res.status(400).json({ error: 'Missing request body' });
+    res.status(400).json(toAppError('Missing request body', 'VALIDATION_ERROR', false));
     return;
   }
 
   try {
     const result = await k8sService.updateResourceGeneric(updatedBody);
     res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to update resource' });
+  } catch (err) {
+    res.status(500).json(toAppError(err, 'RESOURCE_UPDATE_FAILED', true));
   }
 });
 
@@ -97,19 +113,24 @@ const CLUSTER_SCOPED_KINDS = new Set([
 router.delete('/resource', async (req, res) => {
   const { apiVersion, kind, namespace, name } = req.query;
 
-  // 1. Basic Validation: Name and Kind are always required
   if (!name || !kind) {
-    res.status(400).json({ error: 'Missing name or kind' });
+    res.status(400).json(toAppError('Missing name or kind', 'VALIDATION_ERROR', false));
     return;
   }
 
   const resourceKind = kind as string;
   const isClusterScoped = CLUSTER_SCOPED_KINDS.has(resourceKind);
 
-  // 2. Conditional Namespace Validation
-  // If it is NOT cluster-scoped, we enforce that a namespace must be provided
   if (!isClusterScoped && !namespace) {
-    res.status(400).json({ error: `Namespace is required for resource type: ${kind}` });
+    res
+      .status(400)
+      .json(
+        toAppError(
+          `Namespace is required for resource type: ${kind}`,
+          'VALIDATION_ERROR',
+          false,
+        ),
+      );
     return;
   }
 
@@ -118,12 +139,11 @@ router.delete('/resource', async (req, res) => {
       apiVersion as string,
       resourceKind,
       name as string,
-      // Pass 'undefined' if namespace is empty string or null, so the service knows it's global
       (namespace as string) || undefined,
     );
     res.json(data);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to delete resource' });
+  } catch (err) {
+    res.status(500).json(toAppError(err, 'RESOURCE_DELETE_FAILED', true));
   }
 });
 
@@ -133,7 +153,11 @@ router.post('/diagnose', async (req, res) => {
   const { namespace, podName, apiKey } = req.body;
 
   if (!namespace || !podName || !apiKey) {
-    res.status(400).json({ error: 'Missing namespace, podName, or apiKey' });
+    res
+      .status(400)
+      .json(
+        toAppError('Missing namespace, podName, or apiKey', 'VALIDATION_ERROR', false),
+      );
     return;
   }
 
@@ -141,13 +165,18 @@ router.post('/diagnose', async (req, res) => {
     const result = await diagnosePod({ namespace, podName, apiKey });
 
     if (result.error) {
-      res.status(422).json({ error: result.error, rawData: result.rawData });
+      res
+        .status(422)
+        .json({
+          ...toAppError(result.error, 'DIAGNOSIS_LLM_ERROR', false),
+          rawData: result.rawData,
+        });
       return;
     }
 
     res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Diagnosis failed' });
+  } catch (err) {
+    res.status(500).json(toAppError(err, 'DIAGNOSIS_FAILED', true));
   }
 });
 
@@ -157,7 +186,9 @@ router.post('/analyze-yaml', async (req, res) => {
   const { yaml: yamlContent, apiKey } = req.body;
 
   if (!yamlContent || !apiKey) {
-    res.status(400).json({ error: 'Missing yaml content or apiKey' });
+    res
+      .status(400)
+      .json(toAppError('Missing yaml content or apiKey', 'VALIDATION_ERROR', false));
     return;
   }
 
@@ -165,13 +196,13 @@ router.post('/analyze-yaml', async (req, res) => {
     const result = await analyzeYaml({ yaml: yamlContent, apiKey });
 
     if (result.error) {
-      res.status(422).json({ error: result.error });
+      res.status(422).json(toAppError(result.error, 'ANALYSIS_LLM_ERROR', false));
       return;
     }
 
     res.json(result.response);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'YAML analysis failed' });
+  } catch (err) {
+    res.status(500).json(toAppError(err, 'ANALYSIS_FAILED', true));
   }
 });
 
@@ -181,7 +212,9 @@ router.post('/resource/apply', async (req, res) => {
   const yamlBody = req.body;
 
   if (!yamlBody) {
-    res.status(400).json({ error: 'Missing YAML request body' });
+    res
+      .status(400)
+      .json(toAppError('Missing YAML request body', 'VALIDATION_ERROR', false));
     return;
   }
 
@@ -190,8 +223,8 @@ router.post('/resource/apply', async (req, res) => {
       typeof yamlBody === 'string' ? yamlBody : JSON.stringify(yamlBody),
     );
     res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to apply resource' });
+  } catch (err) {
+    res.status(500).json(toAppError(err, 'RESOURCE_APPLY_FAILED', true));
   }
 });
 

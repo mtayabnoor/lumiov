@@ -6,6 +6,7 @@
  * AI analysis, and "Apply to Cluster" functionality.
  */
 
+import { API_BASE } from '../../../config/api';
 import { useState, useCallback } from 'react';
 import {
   Dialog,
@@ -219,7 +220,7 @@ function CreateManifestDialog({ open, onClose }: CreateManifestDialogProps) {
     setSuccess(null);
 
     try {
-      const res = await fetch('http://localhost:3030/api/resource/apply', {
+      const res = await fetch(`${API_BASE}/api/resource/apply`, {
         method: 'POST',
         headers: { 'Content-Type': 'text/yaml' },
         body: content,

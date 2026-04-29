@@ -11,7 +11,7 @@ export interface Pod {
     annotations?: Record<string, string>;
   };
   spec: {
-    containers?: Container[];
+    containers: Container[];
     nodeName?: string;
     serviceAccountName: string;
     priority: number;
