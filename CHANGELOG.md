@@ -1,3 +1,19 @@
+## [1.5.0](https://github.com/mtayabnoor/lumiov/compare/v1.4.0...v1.5.0) (2026-04-29)
+
+### ✨ Features
+
+- Add button for enabling/disabling cluster context change ([0a9f59f](https://github.com/mtayabnoor/lumiov/commit/0a9f59f15fee9540fd05c6425c02d17c2cd29fa9))
+- Add button in settings to enable disable agent write permissions ([f0843ec](https://github.com/mtayabnoor/lumiov/commit/f0843ecb7021a28516db8d1bb4197d95f4586a61))
+- Add controlled agent write permissions with frontend toggle and backend enforcement ([7cee57e](https://github.com/mtayabnoor/lumiov/commit/7cee57e6c9d4ec7d15b58d0299784c9e79cd3ae8))
+- Centralize UI styling with global Material-UI theme ([5a7a1f4](https://github.com/mtayabnoor/lumiov/commit/5a7a1f43dcbe400283265e96819b661949c36f35))
+- Init co pilot and update docs ([b161c6a](https://github.com/mtayabnoor/lumiov/commit/b161c6a28e243abdfe5b3124d359f560eeaa439c))
+- Update theme files ([4a2e7b7](https://github.com/mtayabnoor/lumiov/commit/4a2e7b7a7ccb20dda307bdc7b63d8f37e3b2e1e1))
+
+### 🐞 Bug Fixes
+
+- Fix exec drawer color ([c00d0d7](https://github.com/mtayabnoor/lumiov/commit/c00d0d77b1e46c08eafc412ce7e1bd0b22cdde17))
+- Implement S1–R10 audit improvements security,frontend,backend ([6477ce2](https://github.com/mtayabnoor/lumiov/commit/6477ce2379db168ef60dad1dcf1c645a4d98400f)), closes [#cd3d53ff](https://github.com/mtayabnoor/lumiov/issues/cd3d53ff) [#b42323ff](https://github.com/mtayabnoor/lumiov/issues/b42323ff)
+
 ## [1.5.0-rc.3](https://github.com/mtayabnoor/lumiov/compare/v1.5.0-rc.2...v1.5.0-rc.3) (2026-04-29)
 
 ### ✨ Features
