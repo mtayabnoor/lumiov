@@ -1,3 +1,10 @@
+## [1.7.0-rc.1](https://github.com/mtayabnoor/lumiov/compare/v1.6.0...v1.7.0-rc.1) (2026-04-29)
+
+### ✨ Features
+
+- Add port-forward functionality for pod TCP tunneling ([79d05d4](https://github.com/mtayabnoor/lumiov/commit/79d05d4c973c456f9518d2798f51930b7f86dd42))
+- **electron:** Add periodic and focus-based update checks ([f39bfdf](https://github.com/mtayabnoor/lumiov/commit/f39bfdf681d71703ebd6960c36240f90b6061790))
+
 ## [1.6.0](https://github.com/mtayabnoor/lumiov/compare/v1.5.0...v1.6.0) (2026-04-29)
 
 ### ✨ Features
