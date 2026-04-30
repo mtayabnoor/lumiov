@@ -14,6 +14,7 @@ import { useState } from 'react';
 import PodExecDrawer from '../../components/drawer/PodExecDrawer';
 import PodLogsDrawer from '../../components/drawer/PodLogsDrawer';
 import PodPortForwardDrawer from '../../components/drawer/PodPortForwardDrawer';
+import PodDetailsDrawer from '../../components/drawer/PodDetailsDrawer';
 import PodDiagnosisDialog from '../../components/common/PodDiagnosisDialog/PodDiagnosisDialog';
 import { useAgent } from '../../context/AgentContext';
 import PageLayout from '../../components/common/PageLayout/PageLayout';
@@ -174,12 +175,58 @@ function Pods() {
     defaultContainer?: string;
     ports: number[];
   } | null>(null);
-  const [actionType, setActionType] = useState<'exec' | 'logs' | 'port-forward' | 'edit' | 'diagnosis' | 'delete' | null>(null);
+  const [actionType, setActionType] = useState<'exec' | 'logs' | 'port-forward' | 'edit' | 'diagnosis' | 'delete' | 'details' | null>(null);
+  const [selectedPodObject, setSelectedPodObject] = useState<Pod | null>(null);
+
+  // Helper to set pod as selected and action
+  const selectPodForAction = (pod: Pod, action: typeof actionType) => {
+    const namespace = pod.metadata.namespace;
+    const podName = pod.metadata.name;
+    const containers =
+      pod.spec.containers?.map((c) => ({
+        name: c.name,
+      })) || [];
+
+    const ports = Array.from(
+      new Set(
+        (pod.spec.containers || []).flatMap((container) =>
+          ((container as unknown as { ports?: Array<{ containerPort?: number }> }).ports || []).map((p) => p.containerPort).filter((p): p is number => typeof p === 'number'),
+        ),
+      ),
+    ).sort((a, b) => a - b);
+
+    const defaultContainer = containers[0]?.name;
+    setSelectedPod({ namespace, podName, containers, defaultContainer, ports });
+    setSelectedPodObject(pod);
+    setActionType(action);
+  };
 
   const podConfig: ResourceTableConfig = {
     columns: [
       { key: 'metadata.namespace', header: 'NAMESPACE' },
-      { key: 'metadata.name', header: 'NAME' },
+      {
+        key: 'metadata.name',
+        header: 'NAME',
+        accessor: (row: Pod) => (
+          <Box
+            component="span"
+            onClick={(e) => {
+              e.stopPropagation();
+              selectPodForAction(row, 'details');
+            }}
+            sx={{
+              cursor: 'pointer',
+              color: 'text.primary',
+              fontSize: 'inherit',
+              fontWeight: 'inherit',
+              textDecoration: 'none',
+              '&:hover': { textDecoration: 'underline' },
+            }}
+          >
+            {row.metadata?.name}
+          </Box>
+        ),
+      },
       {
         key: 'ready',
         header: 'READY',
@@ -267,54 +314,27 @@ function Pods() {
   };
 
   const handleDiagnose = (pod: Pod) => {
-    setActionType('diagnosis');
-    setSelectedPod({
-      namespace: pod.metadata.namespace,
-      podName: pod.metadata.name,
-      ports: [],
-    });
+    selectPodForAction(pod, 'diagnosis');
   };
 
   const handleAction = (actionId: string, pod: Pod) => {
-    const namespace = pod.metadata.namespace;
-    const podName = pod.metadata.name;
-    const containers =
-      pod.spec.containers?.map((c) => ({
-        name: c.name,
-      })) || [];
-
-    const ports = Array.from(
-      new Set(
-        (pod.spec.containers || []).flatMap((container) =>
-          ((container as unknown as { ports?: Array<{ containerPort?: number }> }).ports || []).map((p) => p.containerPort).filter((p): p is number => typeof p === 'number'),
-        ),
-      ),
-    ).sort((a, b) => a - b);
-
-    const defaultContainer = containers[0]?.name;
-
-    setSelectedPod({ namespace, podName, containers, defaultContainer, ports });
-
     if (actionId === 'edit') {
-      setActionType('edit');
-    }
-    if (actionId === 'delete') {
-      setActionType('delete');
-    }
-    if (actionId === 'logs') {
-      setActionType('logs');
-    }
-    if (actionId === 'exec') {
-      setActionType('exec');
-    }
-    if (actionId === 'port-forward') {
-      setActionType('port-forward');
+      selectPodForAction(pod, 'edit');
+    } else if (actionId === 'delete') {
+      selectPodForAction(pod, 'delete');
+    } else if (actionId === 'logs') {
+      selectPodForAction(pod, 'logs');
+    } else if (actionId === 'exec') {
+      selectPodForAction(pod, 'exec');
+    } else if (actionId === 'port-forward') {
+      selectPodForAction(pod, 'port-forward');
     }
   };
 
   const handleClose = () => {
     setActionType(null);
     setSelectedPod(null);
+    setSelectedPodObject(null);
   };
 
   const confirmDelete = () => {
@@ -380,6 +400,8 @@ function Pods() {
       {selectedPod && actionType === 'delete' && (
         <ResourceDeleteConfirmDialog open={true} onClose={handleClose} onConfirm={confirmDelete} resourceName={selectedPod?.podName || ''} resourceKind="Pod" isDeleting={isDeleting} />
       )}
+
+      <PodDetailsDrawer open={actionType === 'details'} onClose={handleClose} pod={selectedPodObject} socket={socket} />
     </PageLayout>
   );
 }

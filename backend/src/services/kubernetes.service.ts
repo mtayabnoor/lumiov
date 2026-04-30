@@ -910,6 +910,101 @@ export class K8sService {
     }
   }
 
+  /**
+   * Fetch comprehensive pod details (like kubectl describe pod)
+   * Returns: overview, containers, events, volumes, labels, and annotations
+   */
+  public async getPodDescribeDetails(
+    namespace: string,
+    podName: string,
+  ): Promise<{
+    overview: any;
+    containers: any[];
+    events: any[];
+    volumes: any[];
+    labels: Record<string, string>;
+    annotations: Record<string, string>;
+  }> {
+    this.checkInit();
+    try {
+      return await this.withRetry(async () => {
+        // Fetch pod full object
+        const pod = await this.coreApi!.readNamespacedPod({
+          namespace,
+          name: podName,
+        });
+
+        // Fetch events
+        const events = await this.getPodEvents(namespace, podName);
+
+        // Build overview
+        const overview = {
+          name: pod.metadata?.name,
+          namespace: pod.metadata?.namespace,
+          status: pod.status?.phase,
+          podIP: pod.status?.podIP,
+          hostIP: pod.status?.hostIP,
+          nodeName: pod.spec?.nodeName,
+          restartPolicy: pod.spec?.restartPolicy,
+          serviceAccountName: pod.spec?.serviceAccountName,
+          age: pod.metadata?.creationTimestamp,
+          uid: pod.metadata?.uid,
+          creationTimestamp: pod.metadata?.creationTimestamp,
+          deletionTimestamp: pod.metadata?.deletionTimestamp,
+          qosClass: pod.status?.qosClass,
+        };
+
+        // Build containers info
+        const containers = (pod.spec?.containers || []).map(
+          (container: any, idx: number) => {
+            const status = pod.status?.containerStatuses?.[idx];
+            return {
+              name: container.name,
+              image: container.image,
+              imagePullPolicy: container.imagePullPolicy,
+              ports: container.ports,
+              resources: container.resources,
+              env: container.env,
+              volumeMounts: container.volumeMounts,
+              livenessProbe: container.livenessProbe,
+              readinessProbe: container.readinessProbe,
+              startupProbe: container.startupProbe,
+              securityContext: container.securityContext,
+              ready: status?.ready,
+              restartCount: status?.restartCount,
+              state: status?.state,
+              containerID: status?.containerID,
+            };
+          },
+        );
+
+        // Build volumes info
+        const volumes = (pod.spec?.volumes || []).map((volume: any) => ({
+          name: volume.name,
+          type:
+            Object.keys(volume)
+              .filter((k) => k !== 'name')
+              .pop() || 'unknown',
+          details: Object.entries(volume)
+            .filter(([k]) => k !== 'name')
+            .reduce((acc: any, [k, v]) => ({ ...acc, [k]: v }), {}),
+        }));
+
+        return {
+          overview,
+          containers,
+          events,
+          volumes,
+          labels: pod.metadata?.labels || {},
+          annotations: pod.metadata?.annotations || {},
+        };
+      });
+    } catch (err: any) {
+      console.error(`❌ Error fetching pod details for ${podName}:`, err.message);
+      throw err;
+    }
+  }
+
   // ─── CONTEXT MANAGEMENT ─────────────────────────────────────
 
   /**

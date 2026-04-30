@@ -12,6 +12,7 @@ import { registerExecHandlers } from './handlers/exec.handler';
 import { registerLogHandlers } from './handlers/logs.handler';
 import { registerPortForwardHandlers } from './handlers/portforward.handler';
 import { registerAgentHandlers } from './handlers/agent.handler';
+import { registerPodDetailsHandlers } from './handlers/pod-details.handler';
 import { resourceRouter } from './routes/resource.route';
 
 dotenv.config();
@@ -106,6 +107,7 @@ io.on('connection', (socket) => {
   registerLogHandlers(socket);
   registerPortForwardHandlers(socket);
   registerAgentHandlers(socket);
+  registerPodDetailsHandlers(socket);
 
   socket.on('disconnect', () => {
     console.log(`❌ Client disconnected: ${socket.id}`);
