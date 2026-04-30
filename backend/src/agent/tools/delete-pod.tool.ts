@@ -8,8 +8,20 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { k8sService } from '../../services/kubernetes.service.js';
+import {
+  buildConfirmationMessage,
+  createPendingAction,
+  evaluateDeletePodRequest,
+  type PendingAction,
+} from '../safety/safety-policy.service';
 
-export function createDeletePodTool(): DynamicStructuredTool {
+interface ToolSafetyContext {
+  setPendingAction: (action: PendingAction) => void;
+}
+
+export function createDeletePodTool(
+  safetyContext?: ToolSafetyContext,
+): DynamicStructuredTool {
   return new DynamicStructuredTool({
     name: 'delete_pod',
     description:
@@ -20,6 +32,36 @@ export function createDeletePodTool(): DynamicStructuredTool {
     }),
     func: async ({ name, namespace }) => {
       try {
+        const decision = evaluateDeletePodRequest(name, namespace);
+
+        if (!decision.allow && !decision.requiresConfirmation) {
+          return JSON.stringify({
+            success: false,
+            code: decision.code,
+            error: decision.message || 'Delete request blocked by safety policy.',
+          });
+        }
+
+        if (decision.requiresConfirmation) {
+          const pendingAction = createPendingAction({
+            type: 'delete_pod',
+            summary: `Delete pod ${name} in namespace ${namespace}`,
+            params: {
+              name,
+              namespace,
+            },
+          });
+
+          safetyContext?.setPendingAction(pendingAction);
+
+          return JSON.stringify({
+            success: false,
+            code: decision.code,
+            error: decision.message,
+            confirmation: buildConfirmationMessage(pendingAction),
+          });
+        }
+
         const result = await k8sService.deleteResourceGeneric(
           'v1',
           'Pod',

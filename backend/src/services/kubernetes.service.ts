@@ -844,6 +844,30 @@ export class K8sService {
     }
   }
 
+  public async getDeploymentReplicaCount(
+    name: string,
+    namespace: string,
+  ): Promise<number | null> {
+    this.checkInit();
+
+    try {
+      const deployment = await this.appsApi!.readNamespacedDeployment({
+        name,
+        namespace,
+      });
+
+      if (typeof deployment.spec?.replicas === 'number') {
+        return deployment.spec.replicas;
+      }
+
+      return null;
+    } catch (err: any) {
+      const errorMessage = err.response?.body?.message || err.message;
+      console.error(`❌ Read Deployment Error: ${errorMessage}`);
+      throw new Error(errorMessage);
+    }
+  }
+
   // ─── DIAGNOSIS HELPERS ───────────────────────────────────────
 
   /**

@@ -16,6 +16,11 @@ import { createDescribePodTool } from './describe-pod.tool';
 import { createDeletePodTool } from './delete-pod.tool';
 import { createScaleDeploymentTool } from './scale-deployment';
 import { createDiagnosePodTool } from './diagnose-pod.tool';
+import type { PendingAction } from '../safety/safety-policy.service';
+
+interface ToolSafetyContext {
+  setPendingAction: (action: PendingAction) => void;
+}
 
 // Re-export for individual use
 export {
@@ -35,6 +40,7 @@ export {
 export function createAllTools(
   apiKey?: string,
   allowWrite: boolean = false,
+  safetyContext?: ToolSafetyContext,
 ): DynamicStructuredTool[] {
   const tools: DynamicStructuredTool[] = [
     createGetPodsTool(),
@@ -44,8 +50,8 @@ export function createAllTools(
   ];
 
   if (allowWrite) {
-    tools.push(createDeletePodTool());
-    tools.push(createScaleDeploymentTool());
+    tools.push(createDeletePodTool(safetyContext));
+    tools.push(createScaleDeploymentTool(safetyContext));
   }
 
   // Add diagnosis tool when API key is available

@@ -9,12 +9,19 @@ import { ChatOpenAI } from '@langchain/openai';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import { createAllTools } from './tools/index';
+import { k8sService } from '../services/kubernetes.service';
+import {
+  buildConfirmationMessage,
+  isPendingActionExpired,
+  type PendingAction,
+} from './safety/safety-policy.service';
 
 // Store for per-user agent instances and conversation history
 interface AgentSession {
   apiKey: string;
   history: BaseMessage[];
   lastActivity: number;
+  pendingAction: PendingAction | null;
 }
 
 // Simple in-memory session store (could be Redis in production)
@@ -100,6 +107,7 @@ export function configureSession(socketId: string, apiKey: string): void {
     apiKey,
     history: [],
     lastActivity: Date.now(),
+    pendingAction: null,
   });
 }
 
@@ -111,6 +119,7 @@ export function clearSession(socketId: string): void {
   if (session) {
     session.history = [];
     session.lastActivity = Date.now();
+    session.pendingAction = null;
   }
 }
 
@@ -148,6 +157,65 @@ export async function chat(
   try {
     session.lastActivity = Date.now();
 
+    const trimmedMessage = message.trim();
+    const confirmMatch = trimmedMessage.match(/^confirm\s+([a-f0-9-]{8,})$/i);
+    const cancelMatch = /^cancel$/i.test(trimmedMessage);
+
+    if (session.pendingAction && isPendingActionExpired(session.pendingAction)) {
+      session.pendingAction = null;
+      return {
+        response: 'The pending safety confirmation expired. Please re-run your request.',
+      };
+    }
+
+    if (session.pendingAction && cancelMatch) {
+      const canceledAction = session.pendingAction;
+      session.pendingAction = null;
+      return {
+        response: `Canceled action: ${canceledAction.summary}`,
+      };
+    }
+
+    if (session.pendingAction && confirmMatch) {
+      const confirmationId = confirmMatch[1];
+
+      if (session.pendingAction.id !== confirmationId) {
+        return {
+          response: [
+            'Confirmation id does not match the pending action.',
+            buildConfirmationMessage(session.pendingAction),
+          ].join('\n'),
+        };
+      }
+
+      if (!allowWrite) {
+        session.pendingAction = null;
+        return {
+          response: '',
+          error: 'Write actions are disabled in settings.',
+        };
+      }
+
+      const pendingAction = session.pendingAction;
+      session.pendingAction = null;
+
+      try {
+        const executionMessage = await executePendingAction(pendingAction);
+        return { response: executionMessage };
+      } catch (executeError: any) {
+        return {
+          response: '',
+          error: executeError.message || 'Failed to execute confirmed action.',
+        };
+      }
+    }
+
+    if (session.pendingAction) {
+      return {
+        response: buildConfirmationMessage(session.pendingAction),
+      };
+    }
+
     // Create the model with the user's API key
     const model = new ChatOpenAI({
       apiKey: session.apiKey,
@@ -156,7 +224,11 @@ export async function chat(
     });
 
     // Get all available tools (pass apiKey so diagnose tool is available)
-    const tools = createAllTools(session.apiKey, allowWrite);
+    const tools = createAllTools(session.apiKey, allowWrite, {
+      setPendingAction: (action) => {
+        session.pendingAction = action;
+      },
+    });
 
     const dynamicPrompt =
       SYSTEM_PROMPT +
@@ -172,7 +244,7 @@ export async function chat(
     });
 
     // Add user message to history
-    session.history.push(new HumanMessage(message));
+    session.history.push(new HumanMessage(trimmedMessage));
 
     // Invoke the agent with conversation history
     const result = await agent.invoke({
@@ -181,10 +253,16 @@ export async function chat(
 
     // Extract the AI response
     const lastMessage = result.messages[result.messages.length - 1];
-    const response =
+    let response =
       typeof lastMessage.content === 'string'
         ? lastMessage.content
         : JSON.stringify(lastMessage.content);
+
+    // Enforce explicit confirmation UX whenever a risky pending action was created.
+    // This guarantees users always see the confirm/cancel instruction.
+    if (session.pendingAction) {
+      response = buildConfirmationMessage(session.pendingAction);
+    }
 
     // Add AI response to history
     session.history.push(new AIMessage(response));
@@ -216,6 +294,32 @@ export async function chat(
       error: error.message || 'Failed to process message',
     };
   }
+}
+
+async function executePendingAction(action: PendingAction): Promise<string> {
+  if (action.type === 'scale_deployment') {
+    if (typeof action.params.replicas !== 'number') {
+      throw new Error('Pending scale action is missing replicas value.');
+    }
+
+    return k8sService.scaleDeployment(
+      action.params.name,
+      action.params.namespace,
+      action.params.replicas,
+    );
+  }
+
+  if (action.type === 'delete_pod') {
+    await k8sService.deleteResourceGeneric(
+      'v1',
+      'Pod',
+      action.params.name,
+      action.params.namespace,
+    );
+    return `Pod ${action.params.name} in namespace ${action.params.namespace} deleted successfully.`;
+  }
+
+  throw new Error(`Unsupported pending action type: ${action.type}`);
 }
 
 // Cleanup expired sessions periodically
