@@ -1,3 +1,20 @@
+## [1.7.0-rc.2](https://github.com/mtayabnoor/lumiov/compare/v1.7.0-rc.1...v1.7.0-rc.2) (2026-04-30)
+
+### ✨ Features
+
+- Add k9s-level resource details and richer drawer rendering ([fa42144](https://github.com/mtayabnoor/lumiov/commit/fa4214431773914b8e2c36a197d716caec3303a3))
+- Add pod details feature ([0ecaf07](https://github.com/mtayabnoor/lumiov/commit/0ecaf0776f2e2c5398509fa28f4bc3e500aa32f2))
+- **Agent:** Improve UI, responsiveness, shared constants, reusable icon, copy and smart auto-scroll ([2b81f54](https://github.com/mtayabnoor/lumiov/commit/2b81f54f6a27d3e6c4ebe7a17bb1fc4de2a43f13))
+- **Agent:** Safety guardrails, namespace protection, confirmation flow for risky actions ([729a727](https://github.com/mtayabnoor/lumiov/commit/729a727866a261d3a559db7f253f744372ae4ab9))
+- **Dashboard:** Professional redesign with live status bar, gradient charts, and icons ([2fd0396](https://github.com/mtayabnoor/lumiov/commit/2fd0396549b4b3e0e9ee12f330c3df62da23caaf))
+- Generic describe drawer for all resources, clickable names in table ([e423dda](https://github.com/mtayabnoor/lumiov/commit/e423dda7f2c7f33d0b1757a40baabfc042fde1c8))
+- **table:** Add search, column sorting, and remove debug log ([ae7f041](https://github.com/mtayabnoor/lumiov/commit/ae7f04171acaefd0fa2307c751645cec66b1dd34))
+
+### 🐞 Bug Fixes
+
+- **Agent:** Fix no autoscroll to end issue ([38a0d22](https://github.com/mtayabnoor/lumiov/commit/38a0d22f74a2f117ef472dcda7b9c783a5421f41))
+- Pod detail drawer width and auto scrollbar size ([bc3b06f](https://github.com/mtayabnoor/lumiov/commit/bc3b06fc94f058642cae00d6f6ed045722758872))
+
 ## [1.7.0-rc.1](https://github.com/mtayabnoor/lumiov/compare/v1.6.0...v1.7.0-rc.1) (2026-04-29)
 
 ### ✨ Features
