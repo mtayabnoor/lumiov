@@ -8,9 +8,9 @@ import { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Box, Typography, Alert, CircularProgress, IconButton, InputAdornment, Link, Divider } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import PsychologyIcon from '@mui/icons-material/Psychology';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAgent } from '../../context/AgentContext';
+import AgentStatusIcon from './AgentStatusIcon';
 
 export default function AgentConfigModal() {
   const { isConfigModalOpen, closeConfigModal, configureAgent, isConfiguring, configError, isConfigured, resetConfiguration } = useAgent();
@@ -68,14 +68,7 @@ export default function AgentConfigModal() {
     >
       <DialogTitle>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <PsychologyIcon
-            fontSize="medium"
-            sx={{
-              color: isConfigured ? '#b42323ff' : 'text.primary',
-              filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
-              transition: 'all 0.3s ease',
-            }}
-          />
+          <AgentStatusIcon isActive={isConfigured} fontSize="medium" />
           <Typography variant="h6" fontWeight={600}>
             {isConfigured ? 'AI Assistant Settings' : 'Configure AI Assistant'}
           </Typography>

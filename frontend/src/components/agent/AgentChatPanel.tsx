@@ -4,32 +4,43 @@
  * Sliding drawer panel for chatting with the AI cluster assistant.
  */
 
-import { useState, useRef, useEffect } from 'react';
-import { Drawer, Box, Typography, TextField, IconButton, Tooltip, Divider, Paper, CircularProgress } from '@mui/material';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Drawer, Box, Typography, TextField, IconButton, Tooltip, Divider, Paper, CircularProgress, Button } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
-import PsychologyIcon from '@mui/icons-material/Psychology';
 import PersonIcon from '@mui/icons-material/Person';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
 import { useAgent, type ChatMessage } from '../../context/AgentContext';
+import AgentStatusIcon from './AgentStatusIcon';
+import { AGENT_CHAT_DRAWER_WIDTH, APP_HEADER_HEIGHT, APP_HEADER_HEIGHT_PX } from '../layout/layoutConstants';
 
-const DRAWER_WIDTH = 420;
-const HEADER_HEIGHT = 50; // Match AppBar height
+const SCROLL_THRESHOLD_PX = 96;
+const COMPOSER_HELPER_ID = 'agent-chat-composer-hint';
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+interface MessageBubbleProps {
+  message: ChatMessage;
+  isConfigured: boolean;
+  copiedMessageId: string | null;
+  onCopy: (message: ChatMessage) => void;
+}
+
+function MessageBubble({ message, isConfigured, copiedMessageId, onCopy }: MessageBubbleProps) {
   const isUser = message.role === 'user';
   const isError = message.role === 'error';
-  const { isConfigured } = useAgent();
+  const isAssistant = message.role === 'assistant';
 
   return (
     <Box
       sx={{
         display: 'flex',
         flexDirection: isUser ? 'row-reverse' : 'row',
+        alignItems: 'flex-start',
         gap: 1.5,
-        mb: 2,
+        mb: 2.5,
       }}
     >
       {/* Avatar */}
@@ -50,14 +61,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         ) : isError ? (
           <ErrorOutlineIcon sx={{ fontSize: 18, color: 'text.primary' }} />
         ) : (
-          <PsychologyIcon
-            fontSize="medium"
-            sx={{
-              color: isConfigured ? '#b42323ff' : 'text.primary',
-              filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
-              transition: 'all 0.3s ease',
-            }}
-          />
+          <AgentStatusIcon isActive={isConfigured} fontSize="small" />
         )}
       </Box>
 
@@ -65,39 +69,50 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       <Paper
         elevation={0}
         sx={{
-          p: 1.5,
-          maxWidth: '85%',
+          p: 1.75,
+          maxWidth: { xs: '94%', sm: '88%', md: '82%' },
           borderRadius: 2,
           bgcolor: isUser ? 'primary.main' : isError ? 'error.light' : 'background.paper',
           color: isUser ? 'primary.contrastText' : 'text.primary',
           border: isUser || isError ? 'none' : '1px solid',
           borderColor: 'divider',
+          minWidth: 140,
         }}
       >
         <Box
           sx={{
             '& p': { m: 0, mb: 1, '&:last-child': { mb: 0 } },
             '& strong': { fontWeight: 600 },
-            lineHeight: 1.6,
-            fontSize: '0.875rem',
+            lineHeight: 1.65,
+            fontSize: '0.9rem',
           }}
         >
           {isUser ? <Typography variant="body2">{message.content}</Typography> : <FormattedMessage content={message.content} />}
         </Box>
-        <Typography
-          variant="caption"
+        <Box
           sx={{
-            display: 'block',
             mt: 0.5,
             opacity: 0.7,
-            textAlign: isUser ? 'right' : 'left',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: isUser ? 'flex-end' : 'flex-start',
+            gap: 0.5,
           }}
         >
-          {message.timestamp.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </Typography>
+          {isAssistant && (
+            <Tooltip title={copiedMessageId === message.id ? 'Copied' : 'Copy response'}>
+              <IconButton size="small" onClick={() => onCopy(message)} aria-label="Copy assistant response" sx={{ color: 'text.secondary', p: 0.25 }}>
+                {copiedMessageId === message.id ? <CheckIcon fontSize="inherit" /> : <ContentCopyIcon fontSize="inherit" />}
+              </IconButton>
+            </Tooltip>
+          )}
+          <Typography variant="caption">
+            {message.timestamp.toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </Typography>
+        </Box>
       </Paper>
     </Box>
   );
@@ -174,10 +189,9 @@ function FormattedText({ text }: { text: string }) {
   );
 }
 
-function TypingIndicator() {
-  const { isConfigured } = useAgent();
+function TypingIndicator({ isConfigured }: { isConfigured: boolean }) {
   return (
-    <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
+    <Box sx={{ display: 'flex', gap: 1.5, mb: 2.5 }}>
       <Box
         sx={{
           width: 32,
@@ -189,14 +203,7 @@ function TypingIndicator() {
           background: 'primary.main',
         }}
       >
-        <PsychologyIcon
-          fontSize="medium"
-          sx={{
-            color: isConfigured ? '#b42323ff' : 'text.primary',
-            filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
-            transition: 'all 0.3s ease',
-          }}
-        />
+        <AgentStatusIcon isActive={isConfigured} fontSize="small" />
       </Box>
       <Paper
         elevation={0}
@@ -224,21 +231,61 @@ export default function AgentChatPanel() {
   const { isChatOpen, closeChat, messages, isLoading, sendMessage, clearHistory, openConfigModal } = useAgent();
 
   const [input, setInput] = useState('');
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [showScrollToLatest, setShowScrollToLatest] = useState(false);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isConfigured } = useAgent();
 
-  // Auto-scroll to bottom when messages change
+  // Track whether the user was near bottom BEFORE a new message is rendered.
+  // We can't check this inside the effect because scrollHeight has already grown.
+  const wasNearBottomRef = useRef(true);
+
+  const isNearBottom = useCallback(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return true;
+    const distanceToBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    return distanceToBottom <= SCROLL_THRESHOLD_PX;
+  }, []);
+
+  const scrollToLatest = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+    // showScrollToLatest will be set to false via the onScroll handler once the container scrolls.
+  }, []);
+
+  // Auto-scroll when messages change, based on position recorded before the render.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+    if (wasNearBottomRef.current) {
+      scrollToLatest();
+    }
+  }, [messages, isLoading, scrollToLatest]);
 
   // Focus input when panel opens
   useEffect(() => {
     if (isChatOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+      const frame = requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+      return () => cancelAnimationFrame(frame);
     }
+    return undefined;
   }, [isChatOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current) {
+        clearTimeout(copiedTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleMessagesScroll = useCallback(() => {
+    const nearBottom = isNearBottom();
+    wasNearBottomRef.current = nearBottom;
+    setShowScrollToLatest(!nearBottom);
+  }, [isNearBottom]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -246,6 +293,22 @@ export default function AgentChatPanel() {
     const message = input;
     setInput('');
     await sendMessage(message);
+  };
+
+  const handleCopyMessage = async (message: ChatMessage) => {
+    if (message.role !== 'assistant') return;
+    if (!navigator.clipboard) return;
+
+    await navigator.clipboard.writeText(message.content);
+    setCopiedMessageId(message.id);
+
+    if (copiedTimerRef.current) {
+      clearTimeout(copiedTimerRef.current);
+    }
+
+    copiedTimerRef.current = setTimeout(() => {
+      setCopiedMessageId(null);
+    }, 1600);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -263,10 +326,10 @@ export default function AgentChatPanel() {
       slotProps={{
         paper: {
           sx: {
-            width: DRAWER_WIDTH,
+            width: { xs: '100vw', sm: AGENT_CHAT_DRAWER_WIDTH },
             maxWidth: '100vw',
-            height: `calc(100vh - ${HEADER_HEIGHT}px)`,
-            marginTop: `${HEADER_HEIGHT}px`,
+            height: `calc(100vh - ${APP_HEADER_HEIGHT}px)`,
+            marginTop: APP_HEADER_HEIGHT_PX,
             display: 'flex',
             flexDirection: 'column',
             bgcolor: 'background.default',
@@ -274,7 +337,7 @@ export default function AgentChatPanel() {
             borderColor: 'divider',
           },
         },
-        backdrop: { sx: { marginTop: `${HEADER_HEIGHT}px` } },
+        backdrop: { sx: { marginTop: APP_HEADER_HEIGHT_PX } },
       }}
     >
       {/* Header */}
@@ -285,20 +348,14 @@ export default function AgentChatPanel() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          bgcolor: 'primary.background',
-          color: 'primary.contrastText',
+          bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box>
-            <PsychologyIcon
-              fontSize="medium"
-              sx={{
-                color: isConfigured ? '#b42323ff' : 'text.primary',
-                filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
-                transition: 'all 0.3s ease',
-              }}
-            />
+            <AgentStatusIcon isActive={isConfigured} fontSize="medium" />
           </Box>
           <Box>
             <Typography variant="subtitle1" fontWeight={600} sx={{ color: 'text.primary' }}>
@@ -312,17 +369,17 @@ export default function AgentChatPanel() {
 
         <Box>
           <Tooltip title="Settings">
-            <IconButton size="small" onClick={openConfigModal} sx={{ color: 'text.primary' }}>
+            <IconButton size="small" onClick={openConfigModal} sx={{ color: 'text.primary' }} aria-label="Open AI assistant settings">
               <SettingsIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Clear history">
-            <IconButton size="small" onClick={clearHistory} sx={{ color: 'text.primary' }}>
+            <IconButton size="small" onClick={clearHistory} sx={{ color: 'text.primary' }} aria-label="Clear chat history">
               <DeleteOutlineIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Close">
-            <IconButton size="small" onClick={closeChat} sx={{ color: 'text.primary' }}>
+            <IconButton size="small" onClick={closeChat} sx={{ color: 'text.primary' }} aria-label="Close AI assistant panel">
               <CloseIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -331,12 +388,19 @@ export default function AgentChatPanel() {
 
       {/* Messages */}
       <Box
+        ref={messagesContainerRef}
+        onScroll={handleMessagesScroll}
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+        aria-busy={isLoading}
         sx={{
           flexGrow: 1,
           overflowY: 'auto',
           p: 2,
           display: 'flex',
           flexDirection: 'column',
+          position: 'relative',
         }}
       >
         {messages.length === 0 ? (
@@ -352,18 +416,11 @@ export default function AgentChatPanel() {
               px: 3,
             }}
           >
-            <PsychologyIcon
-              fontSize="medium"
-              sx={{
-                color: isConfigured ? '#b42323ff' : 'text.primary',
-                filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
-                transition: 'all 0.3s ease',
-              }}
-            />
+            <AgentStatusIcon isActive={isConfigured} fontSize="large" sx={{ mb: 1 }} />
             <Typography variant="body1" fontWeight={500} gutterBottom>
               Talk to your cluster
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" id={COMPOSER_HELPER_ID}>
               Ask questions like:
               <br />
               "How many pods are running?"
@@ -376,11 +433,26 @@ export default function AgentChatPanel() {
         ) : (
           <>
             {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
+              <MessageBubble key={msg.id} message={msg} isConfigured={isConfigured} copiedMessageId={copiedMessageId} onCopy={handleCopyMessage} />
             ))}
-            {isLoading && <TypingIndicator />}
+            {isLoading && <TypingIndicator isConfigured={isConfigured} />}
             <div ref={messagesEndRef} />
           </>
+        )}
+        {showScrollToLatest && messages.length > 0 && (
+          <Box sx={{ position: 'sticky', bottom: 8, alignSelf: 'flex-end' }}>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => {
+                scrollToLatest();
+                setShowScrollToLatest(false);
+              }}
+              sx={{ borderRadius: 8 }}
+            >
+              Jump to latest
+            </Button>
+          </Box>
         )}
       </Box>
 
@@ -390,7 +462,7 @@ export default function AgentChatPanel() {
       <Box sx={{ p: 2 }}>
         <TextField
           fullWidth
-          placeholder="Ask about your cluster..."
+          placeholder="Ask Lumiov AI about your cluster..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -399,21 +471,30 @@ export default function AgentChatPanel() {
           multiline
           maxRows={3}
           slotProps={{
+            htmlInput: {
+              'aria-label': 'Ask Lumiov AI about your cluster',
+              'aria-describedby': COMPOSER_HELPER_ID,
+            },
             input: {
               endAdornment: (
-                <IconButton
-                  onClick={handleSend}
-                  disabled={!input.trim() || isLoading}
-                  sx={{
-                    bgcolor: input.trim() ? 'primary.main' : 'transparent',
-                    color: input.trim() ? 'primary.contrastText' : 'text.secondary',
-                    '&:hover': {
-                      bgcolor: input.trim() ? 'primary.dark' : 'transparent',
-                    },
-                  }}
-                >
-                  <SendIcon fontSize="small" />
-                </IconButton>
+                <Tooltip title="Send message">
+                  <span>
+                    <IconButton
+                      onClick={handleSend}
+                      disabled={!input.trim() || isLoading}
+                      aria-label="Send message"
+                      sx={{
+                        bgcolor: input.trim() ? 'primary.main' : 'transparent',
+                        color: input.trim() ? 'primary.contrastText' : 'text.secondary',
+                        '&:hover': {
+                          bgcolor: input.trim() ? 'primary.dark' : 'transparent',
+                        },
+                      }}
+                    >
+                      <SendIcon fontSize="small" />
+                    </IconButton>
+                  </span>
+                </Tooltip>
               ),
             },
           }}
@@ -424,6 +505,9 @@ export default function AgentChatPanel() {
             },
           }}
         />
+        <Typography id={COMPOSER_HELPER_ID} variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+          Press Enter to send, Shift+Enter for a new line.
+        </Typography>
       </Box>
     </Drawer>
   );

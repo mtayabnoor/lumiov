@@ -11,12 +11,12 @@ import { useThemeMode } from '../../context/ThemeContext';
 import { useAgent } from '../../context/AgentContext';
 import AgentChatPanel from '../agent/AgentChatPanel';
 import AgentConfigModal from '../agent/AgentConfigModal';
-import PsychologyIcon from '@mui/icons-material/Psychology';
 import Divider from '@mui/material/Divider';
 import { useSettings } from '../../context/SettingsContext';
+import AgentStatusIcon from '../agent/AgentStatusIcon';
+import { APP_HEADER_HEIGHT_PX } from './layoutConstants';
 
 const LOGO_SRC = 'lumiov.png';
-const HEADER_HEIGHT = '50px';
 
 function MainLayout() {
   const { mode, toggleTheme } = useThemeMode();
@@ -31,13 +31,13 @@ function MainLayout() {
         elevation={0}
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          height: HEADER_HEIGHT,
+          height: APP_HEADER_HEIGHT_PX,
         }}
       >
         <Toolbar
           variant="dense"
           sx={{
-            minHeight: `${HEADER_HEIGHT} !important`,
+            minHeight: `${APP_HEADER_HEIGHT_PX} !important`,
             display: 'flex',
             alignItems: 'center',
             px: 2,
@@ -72,6 +72,7 @@ function MainLayout() {
             <IconButton
               onClick={toggleChat}
               size="medium"
+              aria-label="Open AI cluster assistant"
               //sx={{
               //  mr: 1,
               //  color: "#fff",
@@ -86,14 +87,7 @@ function MainLayout() {
               //},
               //}}
             >
-              <PsychologyIcon
-                fontSize="medium"
-                sx={{
-                  color: isConfigured ? 'error.main' : 'text.primary',
-                  filter: isConfigured ? 'drop-shadow(0 0 2px text.primary) drop-shadow(0 0 4px text.primary)' : 'none',
-                  transition: 'all 0.3s ease',
-                }}
-              />
+              <AgentStatusIcon isActive={isConfigured} fontSize="medium" />
             </IconButton>
           </Tooltip>
 
@@ -124,7 +118,7 @@ function MainLayout() {
           overflow: 'hidden',
         }}
       >
-        <Box sx={{ height: HEADER_HEIGHT }} />
+        <Box sx={{ height: APP_HEADER_HEIGHT_PX }} />
         <Outlet />
       </Box>
 
