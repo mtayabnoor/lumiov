@@ -262,16 +262,19 @@ export default function AgentChatPanel() {
     }
   }, [messages, isLoading, scrollToLatest]);
 
-  // Focus input when panel opens
+  // When panel opens: jump instantly to the latest message, then focus the input.
   useEffect(() => {
     if (isChatOpen) {
       const frame = requestAnimationFrame(() => {
+        scrollToLatest('instant');
+        wasNearBottomRef.current = true;
+        setShowScrollToLatest(false);
         inputRef.current?.focus();
       });
       return () => cancelAnimationFrame(frame);
     }
     return undefined;
-  }, [isChatOpen]);
+  }, [isChatOpen, scrollToLatest]);
 
   useEffect(() => {
     return () => {
