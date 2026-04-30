@@ -11,6 +11,30 @@ interface AppError {
   recoverable: boolean;
 }
 
+interface ContainerDetail {
+  name: string;
+  image?: string;
+  imagePullPolicy?: string;
+  ports?: Array<{ containerPort: number; protocol?: string; name?: string }>;
+  resources?: { requests?: Record<string, string>; limits?: Record<string, string> };
+  env?: Array<{ name: string; value?: string; valueFrom?: any }>;
+  volumeMounts?: Array<{ name: string; mountPath: string; readOnly?: boolean }>;
+  command?: string[];
+  args?: string[];
+  livenessProbe?: any;
+  readinessProbe?: any;
+  startupProbe?: any;
+  ready?: boolean;
+  restartCount?: number;
+  state?: { running?: { startedAt?: string }; waiting?: { reason?: string; message?: string }; terminated?: { reason?: string; exitCode?: number; finishedAt?: string } };
+}
+
+interface VolumeDetail {
+  name: string;
+  type: string;
+  details: Record<string, any>;
+}
+
 interface DescribeDetails {
   metadata: Record<string, any>;
   overview: Record<string, string | number | boolean | undefined>;
@@ -18,6 +42,9 @@ interface DescribeDetails {
   events: any[];
   labels: Record<string, string>;
   annotations: Record<string, string>;
+  containers?: ContainerDetail[];
+  initContainers?: ContainerDetail[];
+  volumes?: VolumeDetail[];
   raw: any;
 }
 
@@ -93,7 +120,7 @@ export default function ResourceDescribeDrawer({ open, onClose, apiVersion, kind
       slotProps={{
         paper: {
           sx: {
-            width: { xs: '95%', sm: '680px' },
+            width: { xs: '95%', sm: '860px' },
             height: 'calc(100vh - 50px)',
             marginTop: '50px',
             display: 'flex',
@@ -198,15 +225,40 @@ export default function ResourceDescribeDrawer({ open, onClose, apiVersion, kind
               </Section>
             )}
 
+            {/* ── Init Containers ── */}
+            {(details.initContainers?.length ?? 0) > 0 && (
+              <Section title={`Init Containers (${details.initContainers!.length})`}>
+                {details.initContainers!.map((c) => (
+                  <ContainerInfo key={c.name} container={c} />
+                ))}
+              </Section>
+            )}
+
+            {/* ── Containers ── */}
+            {(details.containers?.length ?? 0) > 0 && (
+              <Section title={`Containers (${details.containers!.length})`}>
+                {details.containers!.map((c) => (
+                  <ContainerInfo key={c.name} container={c} />
+                ))}
+              </Section>
+            )}
+
+            {/* ── Volumes ── */}
+            {(details.volumes?.length ?? 0) > 0 && (
+              <Section title={`Volumes (${details.volumes!.length})`}>
+                <KVTable rows={details.volumes!.map((v) => [v.name, v.type] as [string, any])} />
+              </Section>
+            )}
+
             {/* ── Conditions ── */}
             {details.conditions?.length > 0 && (
               <Section title={`Conditions (${details.conditions.length})`}>
                 <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
                   <colgroup>
-                    <col style={{ width: '20%' }} />
-                    <col style={{ width: '12%' }} />
-                    <col style={{ width: '20%' }} />
-                    <col style={{ width: '32%' }} />
+                    <col style={{ width: '26%' }} />
+                    <col style={{ width: '10%' }} />
+                    <col style={{ width: '18%' }} />
+                    <col style={{ width: '30%' }} />
                     <col style={{ width: '16%' }} />
                   </colgroup>
                   <TableHead>
@@ -235,7 +287,7 @@ export default function ResourceDescribeDrawer({ open, onClose, apiVersion, kind
                   <TableBody>
                     {details.conditions.map((c, i) => (
                       <TableRow key={i} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
-                        <TableCell sx={{ px: 2, py: 0.75, fontSize: '0.78rem', fontFamily: 'monospace', verticalAlign: 'top' }}>{c.type}</TableCell>
+                        <TableCell sx={{ px: 2, py: 0.75, fontSize: '0.78rem', fontFamily: 'monospace', verticalAlign: 'top', wordBreak: 'break-all' }}>{c.type}</TableCell>
                         <TableCell sx={{ px: 2, py: 0.75, verticalAlign: 'top' }}>
                           <Chip label={c.status} size="small" color={c.status === 'True' ? 'success' : c.status === 'False' ? 'error' : 'default'} sx={{ fontSize: '0.7rem', height: 20 }} />
                         </TableCell>
@@ -405,5 +457,70 @@ function KVTable({ rows, monoKey }: { rows: [string, any][]; monoKey?: boolean }
           ))}
       </TableBody>
     </Table>
+  );
+}
+
+function fmtContainerState(state: ContainerDetail['state']): string {
+  if (!state) return '—';
+  if (state.running) return `Running (started ${fmtTime(state.running.startedAt)})`;
+  if (state.waiting) return `Waiting: ${state.waiting.reason ?? 'Unknown'}${state.waiting.message ? ' — ' + state.waiting.message : ''}`;
+  if (state.terminated) return `Terminated: ${state.terminated.reason ?? 'exit ' + state.terminated.exitCode} (${fmtTime(state.terminated.finishedAt)})`;
+  return '—';
+}
+
+function fmtProbe(probe: any): string | undefined {
+  if (!probe) return undefined;
+  const parts: string[] = [];
+  if (probe.httpGet) parts.push(`HTTP GET :${probe.httpGet.port}${probe.httpGet.path ?? ''}`);
+  else if (probe.tcpSocket) parts.push(`TCP :${probe.tcpSocket.port}`);
+  else if (probe.exec?.command) parts.push(`exec [${probe.exec.command.join(' ')}]`);
+  if (probe.initialDelaySeconds !== undefined) parts.push(`delay=${probe.initialDelaySeconds}s`);
+  if (probe.periodSeconds !== undefined) parts.push(`period=${probe.periodSeconds}s`);
+  if (probe.failureThreshold !== undefined) parts.push(`failThresh=${probe.failureThreshold}`);
+  return parts.join(', ') || undefined;
+}
+
+function ContainerInfo({ container: c }: { container: ContainerDetail }) {
+  const ports = (c.ports || []).map((p) => `${p.containerPort}/${p.protocol ?? 'TCP'}${p.name ? ' (' + p.name + ')' : ''}`).join(', ');
+  const mounts = (c.volumeMounts || []).map((m) => `${m.mountPath}${m.readOnly ? ' (ro)' : ''}`).join(', ');
+  const envVars = (c.env || [])
+    .map((e) => {
+      if (e.value !== undefined) return `${e.name}=***`;
+      if (e.valueFrom?.fieldRef) return `${e.name}=(fieldRef: ${e.valueFrom.fieldRef.fieldPath})`;
+      if (e.valueFrom?.secretKeyRef) return `${e.name}=(secret: ${e.valueFrom.secretKeyRef.name})`;
+      if (e.valueFrom?.configMapKeyRef) return `${e.name}=(cm: ${e.valueFrom.configMapKeyRef.name})`;
+      return e.name;
+    })
+    .join(', ');
+
+  const rows: [string, any][] = [
+    ['Image', c.image],
+    ['Pull Policy', c.imagePullPolicy],
+    ['State', fmtContainerState(c.state)],
+    ['Ready', c.ready !== undefined ? (c.ready ? 'Yes' : 'No') : undefined],
+    ['Restarts', c.restartCount],
+    ['Ports', ports || undefined],
+    ['CPU Request', c.resources?.requests?.cpu],
+    ['CPU Limit', c.resources?.limits?.cpu],
+    ['Memory Request', c.resources?.requests?.memory],
+    ['Memory Limit', c.resources?.limits?.memory],
+    ['Command', c.command?.join(' ') || undefined],
+    ['Args', c.args?.join(' ') || undefined],
+    ['Env Vars', envVars || undefined],
+    ['Volume Mounts', mounts || undefined],
+    ['Liveness', fmtProbe(c.livenessProbe)],
+    ['Readiness', fmtProbe(c.readinessProbe)],
+    ['Startup', fmtProbe(c.startupProbe)],
+  ];
+
+  return (
+    <Box sx={{ mb: 1 }}>
+      <Box sx={{ px: 2, py: 0.5, bgcolor: 'action.selected', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="caption" sx={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.78rem' }}>
+          {c.name}
+        </Typography>
+      </Box>
+      <KVTable rows={rows} />
+    </Box>
   );
 }

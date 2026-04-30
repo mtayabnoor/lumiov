@@ -944,10 +944,13 @@ export class K8sService {
   ): Promise<{
     overview: any;
     containers: any[];
+    initContainers: any[];
     events: any[];
     volumes: any[];
+    conditions: any[];
     labels: Record<string, string>;
     annotations: Record<string, string>;
+    raw: any;
   }> {
     this.checkInit();
     try {
@@ -971,35 +974,45 @@ export class K8sService {
           nodeName: pod.spec?.nodeName,
           restartPolicy: pod.spec?.restartPolicy,
           serviceAccountName: pod.spec?.serviceAccountName,
-          age: pod.metadata?.creationTimestamp,
-          uid: pod.metadata?.uid,
+          priorityClassName: pod.spec?.priorityClassName,
+          qosClass: pod.status?.qosClass,
+          nominatedNodeName: pod.status?.nominatedNodeName,
           creationTimestamp: pod.metadata?.creationTimestamp,
           deletionTimestamp: pod.metadata?.deletionTimestamp,
-          qosClass: pod.status?.qosClass,
+          uid: pod.metadata?.uid,
         };
+
+        // Helper to build a container info object from spec + status
+        const buildContainerInfo = (container: any, statusEntry: any) => ({
+          name: container.name,
+          image: container.image,
+          imagePullPolicy: container.imagePullPolicy,
+          ports: container.ports,
+          resources: container.resources,
+          env: container.env,
+          volumeMounts: container.volumeMounts,
+          command: container.command,
+          args: container.args,
+          livenessProbe: container.livenessProbe,
+          readinessProbe: container.readinessProbe,
+          startupProbe: container.startupProbe,
+          securityContext: container.securityContext,
+          ready: statusEntry?.ready,
+          restartCount: statusEntry?.restartCount,
+          state: statusEntry?.state,
+          containerID: statusEntry?.containerID,
+        });
 
         // Build containers info
         const containers = (pod.spec?.containers || []).map(
-          (container: any, idx: number) => {
-            const status = pod.status?.containerStatuses?.[idx];
-            return {
-              name: container.name,
-              image: container.image,
-              imagePullPolicy: container.imagePullPolicy,
-              ports: container.ports,
-              resources: container.resources,
-              env: container.env,
-              volumeMounts: container.volumeMounts,
-              livenessProbe: container.livenessProbe,
-              readinessProbe: container.readinessProbe,
-              startupProbe: container.startupProbe,
-              securityContext: container.securityContext,
-              ready: status?.ready,
-              restartCount: status?.restartCount,
-              state: status?.state,
-              containerID: status?.containerID,
-            };
-          },
+          (container: any, idx: number) =>
+            buildContainerInfo(container, pod.status?.containerStatuses?.[idx]),
+        );
+
+        // Build init containers info
+        const initContainers = (pod.spec?.initContainers || []).map(
+          (container: any, idx: number) =>
+            buildContainerInfo(container, pod.status?.initContainerStatuses?.[idx]),
         );
 
         // Build volumes info
@@ -1014,13 +1027,25 @@ export class K8sService {
             .reduce((acc: any, [k, v]) => ({ ...acc, [k]: v }), {}),
         }));
 
+        // Build conditions
+        const conditions = (pod.status?.conditions || []).map((c: any) => ({
+          type: c.type,
+          status: c.status,
+          reason: c.reason,
+          message: c.message,
+          lastTransitionTime: c.lastTransitionTime,
+        }));
+
         return {
           overview,
           containers,
+          initContainers,
           events,
           volumes,
+          conditions,
           labels: pod.metadata?.labels || {},
           annotations: pod.metadata?.annotations || {},
+          raw: pod,
         };
       });
     } catch (err: any) {
@@ -1089,6 +1114,9 @@ export class K8sService {
     events: any[];
     labels: Record<string, string>;
     annotations: Record<string, string>;
+    containers?: any[];
+    initContainers?: any[];
+    volumes?: any[];
     raw: any;
   }> {
     this.checkInit();
@@ -1105,11 +1133,14 @@ export class K8sService {
           deletionTimestamp: d.overview.deletionTimestamp,
         },
         overview: d.overview,
-        conditions: [],
+        conditions: d.conditions,
         events: d.events,
         labels: d.labels,
         annotations: d.annotations,
-        raw: d,
+        containers: d.containers,
+        initContainers: d.initContainers,
+        volumes: d.volumes,
+        raw: d.raw,
       };
     }
 
@@ -1122,8 +1153,6 @@ export class K8sService {
       })) as any;
 
       const meta = raw.metadata || {};
-      const spec = raw.spec || {};
-      const status = raw.status || {};
 
       const metadata = {
         name: meta.name,
@@ -1135,9 +1164,9 @@ export class K8sService {
         generation: meta.generation,
       };
 
-      const overview = extractKindOverview(kind, spec, status);
+      const overview = extractKindOverview(kind, raw);
 
-      const conditions = (status.conditions || []).map((c: any) => ({
+      const conditions = ((raw.status || {}).conditions || []).map((c: any) => ({
         type: c.type,
         status: c.status,
         reason: c.reason,
@@ -1291,9 +1320,25 @@ export const k8sService = new K8sService();
 // describe drawer degrades gracefully (only metadata + events + raw JSON shown).
 function extractKindOverview(
   kind: string,
-  spec: any,
-  status: any,
+  raw: any,
 ): Record<string, string | number | boolean | undefined> {
+  const spec: any = raw.spec || {};
+  const status: any = raw.status || {};
+
+  // Helper: format matchLabels as "k=v, k=v" string
+  const fmtLabels = (labels: Record<string, string> | undefined) =>
+    labels
+      ? Object.entries(labels)
+          .map(([k, v]) => `${k}=${v}`)
+          .join(', ')
+      : undefined;
+
+  // Helper: format rollingUpdate params
+  const fmtRollingUpdate = (ru: any) =>
+    ru
+      ? `maxSurge=${ru.maxSurge ?? 1}, maxUnavailable=${ru.maxUnavailable ?? 1}`
+      : undefined;
+
   switch (kind) {
     case 'Deployment':
       return {
@@ -1301,11 +1346,11 @@ function extractKindOverview(
         Available: status.availableReplicas ?? 0,
         'Up-to-Date': status.updatedReplicas ?? 0,
         Strategy: spec.strategy?.type,
+        'Rolling Update': fmtRollingUpdate(spec.strategy?.rollingUpdate),
         'Min Ready Seconds': spec.minReadySeconds,
-        Selector: spec.selector?.matchLabels
-          ? JSON.stringify(spec.selector.matchLabels)
-          : undefined,
+        Selector: fmtLabels(spec.selector?.matchLabels),
       };
+
     case 'StatefulSet':
       return {
         Replicas: `${status.readyReplicas ?? 0} / ${status.replicas ?? spec.replicas ?? 0}`,
@@ -1314,10 +1359,10 @@ function extractKindOverview(
         'Update Strategy': spec.updateStrategy?.type,
         'Service Name': spec.serviceName,
         'Pod Management Policy': spec.podManagementPolicy,
-        Selector: spec.selector?.matchLabels
-          ? JSON.stringify(spec.selector.matchLabels)
-          : undefined,
+        Selector: fmtLabels(spec.selector?.matchLabels),
+        'Volume Claim Templates': spec.volumeClaimTemplates?.length ?? 0,
       };
+
     case 'DaemonSet':
       return {
         Desired: status.desiredNumberScheduled ?? 0,
@@ -1326,28 +1371,37 @@ function extractKindOverview(
         Available: status.numberAvailable ?? 0,
         'Up-to-Date': status.updatedNumberScheduled ?? 0,
         'Update Strategy': spec.updateStrategy?.type,
-        Selector: spec.selector?.matchLabels
-          ? JSON.stringify(spec.selector.matchLabels)
-          : undefined,
+        Selector: fmtLabels(spec.selector?.matchLabels),
       };
-    case 'Service':
+
+    case 'Service': {
+      const ports = (spec.ports || [])
+        .map((p: any) => {
+          const parts = [`${p.port}/${p.protocol ?? 'TCP'}`];
+          if (p.targetPort !== undefined) parts.push(`→ ${p.targetPort}`);
+          if (p.nodePort !== undefined) parts.push(`nodePort:${p.nodePort}`);
+          return `${p.name ? p.name + ' ' : ''}${parts.join(' ')}`;
+        })
+        .join(', ');
       return {
         Type: spec.type,
         'Cluster IP': spec.clusterIP,
+        'Cluster IPs': spec.clusterIPs?.join(', '),
         'External IPs': spec.externalIPs?.join(', '),
         'Load Balancer IP': spec.loadBalancerIP,
-        Ports: (spec.ports || [])
-          .map(
-            (p: any) =>
-              `${p.port}${p.nodePort ? ':' + p.nodePort : ''}/${p.protocol ?? 'TCP'} → ${p.targetPort}`,
-          )
+        'Load Balancer Ingress': status.loadBalancer?.ingress
+          ?.map((i: any) => i.ip || i.hostname)
           .join(', '),
+        Ports: ports || undefined,
         Selector: spec.selector
-          ? JSON.stringify(spec.selector)
+          ? (fmtLabels(spec.selector) ?? 'None')
           : 'None (headless or external)',
         'Session Affinity': spec.sessionAffinity,
         'External Traffic Policy': spec.externalTrafficPolicy,
+        'IP Family Policy': spec.ipFamilyPolicy,
       };
+    }
+
     case 'Ingress':
       return {
         'Ingress Class': spec.ingressClassName ?? '(default)',
@@ -1357,6 +1411,7 @@ function extractKindOverview(
           ?.map((i: any) => i.ip || i.hostname)
           .join(', '),
       };
+
     case 'Job':
       return {
         Completions: `${status.succeeded ?? 0} / ${spec.completions ?? 1}`,
@@ -1366,17 +1421,262 @@ function extractKindOverview(
         'Completion Time': status.completionTime,
         Parallelism: spec.parallelism,
         'Backoff Limit': spec.backoffLimit,
+        'Active Deadline Seconds': spec.activeDeadlineSeconds,
+        Selector: fmtLabels(spec.selector?.matchLabels),
       };
+
     case 'CronJob':
       return {
         Schedule: spec.schedule,
+        Timezone: spec.timeZone,
         'Last Schedule': status.lastScheduleTime,
+        'Last Successful': status.lastSuccessfulTime,
         'Active Jobs': status.active?.length ?? 0,
         Suspended: spec.suspend ? 'Yes' : 'No',
         'Concurrency Policy': spec.concurrencyPolicy,
         'Successful History Limit': spec.successfulJobsHistoryLimit,
         'Failed History Limit': spec.failedJobsHistoryLimit,
+        'Active Deadline Seconds': spec.jobTemplate?.spec?.activeDeadlineSeconds,
       };
+
+    case 'ConfigMap': {
+      const keys = Object.keys(raw.data || {}).concat(Object.keys(raw.binaryData || {}));
+      return {
+        'Data Keys': keys.length,
+        Keys: keys.join(', ') || '(none)',
+      };
+    }
+
+    case 'Secret': {
+      const secretKeys = Object.keys(raw.data || {});
+      return {
+        Type: raw.type,
+        'Data Keys': secretKeys.length,
+        Keys: secretKeys.join(', ') || '(none)',
+      };
+    }
+
+    case 'PersistentVolumeClaim':
+      return {
+        Phase: status.phase,
+        'Volume Name': spec.volumeName,
+        'Storage Class': spec.storageClassName ?? '(default)',
+        'Access Modes': (spec.accessModes || []).join(', '),
+        'Volume Mode': spec.volumeMode,
+        Capacity: status.capacity?.storage ?? spec.resources?.requests?.storage,
+      };
+
+    case 'PersistentVolume': {
+      const claimRef = spec.claimRef;
+      return {
+        Phase: status.phase,
+        Capacity: spec.capacity?.storage,
+        'Access Modes': (spec.accessModes || []).join(', '),
+        'Reclaim Policy': spec.persistentVolumeReclaimPolicy,
+        'Storage Class': spec.storageClassName,
+        'Volume Mode': spec.volumeMode,
+        'Claim Ref': claimRef ? `${claimRef.namespace}/${claimRef.name}` : undefined,
+        Reason: status.reason,
+        Message: status.message,
+      };
+    }
+
+    case 'Namespace':
+      return {
+        Phase: status.phase,
+      };
+
+    case 'ServiceAccount':
+      return {
+        Secrets: raw.secrets?.length ?? 0,
+        'Image Pull Secrets': raw.imagePullSecrets?.length ?? 0,
+      };
+
+    case 'Role':
+    case 'ClusterRole':
+      return {
+        'Rules Count': (raw.rules || []).length,
+        Rules: (raw.rules || [])
+          .map((r: any) => {
+            const resources = (r.resources || []).join(', ') || '*';
+            const verbs = (r.verbs || []).join(', ');
+            return `[${resources}]: ${verbs}`;
+          })
+          .slice(0, 5)
+          .join(' | '),
+      };
+
+    case 'RoleBinding':
+    case 'ClusterRoleBinding': {
+      const subjects = (raw.subjects || [])
+        .map(
+          (s: any) => `${s.kind}/${s.name}${s.namespace ? ' (' + s.namespace + ')' : ''}`,
+        )
+        .join(', ');
+      return {
+        'Role Ref': raw.roleRef ? `${raw.roleRef.kind}/${raw.roleRef.name}` : undefined,
+        'Subjects Count': raw.subjects?.length ?? 0,
+        Subjects: subjects || undefined,
+      };
+    }
+
+    case 'CustomResourceDefinition': {
+      const versions = (spec.versions || [])
+        .map(
+          (v: any) =>
+            `${v.name}${v.storage ? ' (storage)' : ''}${v.served ? '' : ' (deprecated)'}`,
+        )
+        .join(', ');
+      return {
+        Group: spec.group,
+        Scope: spec.scope,
+        Kind: spec.names?.kind,
+        Plural: spec.names?.plural,
+        'Short Names': (spec.names?.shortNames || []).join(', ') || undefined,
+        Versions: versions,
+        Established: (status.conditions || []).find((c: any) => c.type === 'Established')
+          ?.status,
+      };
+    }
+
+    case 'NetworkPolicy': {
+      const podSel = fmtLabels(spec.podSelector?.matchLabels) ?? '(all pods)';
+      return {
+        'Pod Selector': podSel,
+        'Policy Types': (spec.policyTypes || []).join(', '),
+        'Ingress Rules': (spec.ingress || []).length,
+        'Egress Rules': (spec.egress || []).length,
+      };
+    }
+
+    case 'HorizontalPodAutoscaler': {
+      // v1 uses targetCPUUtilizationPercentage; v2 uses metrics[]
+      const cpuTarget =
+        spec.targetCPUUtilizationPercentage !== undefined
+          ? `${spec.targetCPUUtilizationPercentage}%`
+          : (spec.metrics || [])
+              .filter((m: any) => m.type === 'Resource' && m.resource?.name === 'cpu')
+              .map((m: any) => {
+                const t = m.resource?.target;
+                return t?.averageUtilization !== undefined
+                  ? `${t.averageUtilization}%`
+                  : (t?.averageValue ?? undefined);
+              })[0];
+      const cpuCurrent =
+        status.currentCPUUtilizationPercentage !== undefined
+          ? `${status.currentCPUUtilizationPercentage}%`
+          : (status.currentMetrics || [])
+              .filter((m: any) => m.type === 'Resource' && m.resource?.name === 'cpu')
+              .map((m: any) =>
+                m.resource?.current?.averageUtilization !== undefined
+                  ? `${m.resource.current.averageUtilization}%`
+                  : m.resource?.current?.averageValue,
+              )[0];
+      return {
+        'Scale Target': spec.scaleTargetRef
+          ? `${spec.scaleTargetRef.kind}/${spec.scaleTargetRef.name}`
+          : undefined,
+        'Min Replicas': spec.minReplicas ?? 1,
+        'Max Replicas': spec.maxReplicas,
+        'Current Replicas': status.currentReplicas ?? 0,
+        'Desired Replicas': status.desiredReplicas ?? 0,
+        'CPU Target': cpuTarget,
+        'CPU Current': cpuCurrent,
+        'Last Scale Time': status.lastScaleTime,
+      };
+    }
+
+    case 'LimitRange': {
+      const types = [...new Set((spec.limits || []).map((l: any) => l.type))].join(', ');
+      return {
+        'Limit Count': (spec.limits || []).length,
+        Types: types || undefined,
+      };
+    }
+
+    case 'ResourceQuota': {
+      const hard = spec.hard || {};
+      const used = status.used || {};
+      const rows = Object.keys(hard)
+        .map((k) => `${k}: ${used[k] ?? '—'} / ${hard[k]}`)
+        .join(', ');
+      return {
+        'Scope Selector': spec.scopeSelector
+          ? JSON.stringify(spec.scopeSelector)
+          : undefined,
+        Scopes: (spec.scopes || []).join(', ') || undefined,
+        Resources: rows || undefined,
+      };
+    }
+
+    case 'StorageClass':
+      return {
+        Provisioner: raw.provisioner,
+        'Reclaim Policy': raw.reclaimPolicy,
+        'Volume Binding Mode': raw.volumeBindingMode,
+        'Allow Volume Expansion': raw.allowVolumeExpansion ? 'Yes' : 'No',
+        Parameters: raw.parameters
+          ? Object.entries(raw.parameters as Record<string, string>)
+              .map(([k, v]) => `${k}=${v}`)
+              .join(', ')
+          : undefined,
+      };
+
+    case 'Endpoints': {
+      const addresses = (raw.subsets || [])
+        .flatMap((s: any) => (s.addresses || []).map((a: any) => a.ip))
+        .join(', ');
+      const ports = (raw.subsets || [])
+        .flatMap((s: any) =>
+          (s.ports || []).map(
+            (p: any) =>
+              `${p.port}/${p.protocol ?? 'TCP'}${p.name ? ' (' + p.name + ')' : ''}`,
+          ),
+        )
+        .filter((v: string, i: number, a: string[]) => a.indexOf(v) === i)
+        .join(', ');
+      return {
+        Addresses: addresses || '(none)',
+        Ports: ports || '(none)',
+        Subsets: (raw.subsets || []).length,
+      };
+    }
+
+    case 'Node': {
+      const internalIP = (status.addresses || []).find(
+        (a: any) => a.type === 'InternalIP',
+      )?.address;
+      const externalIP = (status.addresses || []).find(
+        (a: any) => a.type === 'ExternalIP',
+      )?.address;
+      const hostname = (status.addresses || []).find(
+        (a: any) => a.type === 'Hostname',
+      )?.address;
+      const nodeInfo = status.nodeInfo || {};
+      const taints = (spec.taints || [])
+        .map((t: any) => `${t.key}=${t.value ?? ''}:${t.effect}`)
+        .join(', ');
+      return {
+        'Internal IP': internalIP,
+        'External IP': externalIP,
+        Hostname: hostname,
+        'OS Image': nodeInfo.osImage,
+        'OS Architecture': nodeInfo.architecture,
+        'Kernel Version': nodeInfo.kernelVersion,
+        'Container Runtime': nodeInfo.containerRuntimeVersion,
+        'Kubelet Version': nodeInfo.kubeletVersion,
+        'Kube-Proxy Version': nodeInfo.kubeProxyVersion,
+        Unschedulable: spec.unschedulable ? 'Yes' : undefined,
+        Taints: taints || undefined,
+        'Allocatable CPU': status.allocatable?.cpu,
+        'Allocatable Memory': status.allocatable?.memory,
+        'Allocatable Pods': status.allocatable?.pods,
+        'Capacity CPU': status.capacity?.cpu,
+        'Capacity Memory': status.capacity?.memory,
+        'Capacity Pods': status.capacity?.pods,
+      };
+    }
+
     default:
       return {};
   }
