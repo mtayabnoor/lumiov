@@ -209,6 +209,9 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
                   const val = getValue(row, col);
                   // Check if it's our custom status object
                   const isStatusObj = val && typeof val === 'object' && 'kind' in val && (val as any).kind === 'status';
+                  // Auto-linkify the name column when a describe action is available
+                  const isNameCol = col.key === 'metadata.name' && !col.accessor;
+                  const hasDescribe = config.actions?.some((a) => a.id === 'describe');
 
                   return (
                     <TableCell key={col.key}>
@@ -223,6 +226,20 @@ function ResourceTable({ config, data, onAction, resourceType }: ResourceTablePr
                             fontWeight: 600,
                           }}
                         />
+                      ) : isNameCol && hasDescribe ? (
+                        <Box
+                          component="span"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAction?.('describe', row);
+                          }}
+                          sx={{
+                            cursor: 'pointer',
+                            '&:hover': { textDecoration: 'underline' },
+                          }}
+                        >
+                          {val}
+                        </Box>
                       ) : (
                         val
                       )}

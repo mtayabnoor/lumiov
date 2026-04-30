@@ -2,12 +2,14 @@ import { useResource } from '../../hooks/useResource';
 import type { ResourceTableConfig } from '../../interfaces/common';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
 import ResourceTable from '../../components/common/Table/ResourceTable';
 import type { Node } from '../../interfaces/node';
 import { Box, CircularProgress, Alert } from '@mui/material';
 import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
 import PageLayout from '../../components/common/PageLayout/PageLayout';
 import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import ResourceDescribeDrawer from '../../components/common/ResourceDescribeDrawer/ResourceDescribeDrawer';
 import { useState } from 'react';
 
 const getNodeStatus = (node: Node) => {
@@ -31,6 +33,8 @@ function Nodes() {
   const [editingNode, setEditingNode] = useState<{
     name: string;
   } | null>(null);
+  const [describeOpen, setDescribeOpen] = useState(false);
+  const [describeName, setDescribeName] = useState('');
 
   const nodeConfig: ResourceTableConfig = {
     columns: [
@@ -67,6 +71,7 @@ function Nodes() {
       },
     ],
     actions: [
+      { id: 'describe', label: 'Describe', icon: InfoIcon },
       { id: 'edit', label: 'Edit', icon: EditIcon },
       { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
@@ -76,6 +81,9 @@ function Nodes() {
     if (actionId === 'edit') {
       setEditingNode({ name: node.metadata.name });
       setEditDrawerOpen(true);
+    } else if (actionId === 'describe') {
+      setDescribeName(node.metadata.name);
+      setDescribeOpen(true);
     }
   };
 
@@ -108,6 +116,17 @@ function Nodes() {
           name={editingNode.name}
         />
       )}
+      <ResourceDescribeDrawer
+        open={describeOpen}
+        onClose={() => {
+          setDescribeOpen(false);
+          setDescribeName('');
+        }}
+        apiVersion="v1"
+        kind="Node"
+        namespace=""
+        name={describeName}
+      />
     </PageLayout>
   );
 }

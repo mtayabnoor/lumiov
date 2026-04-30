@@ -14,7 +14,8 @@ import { useState } from 'react';
 import PodExecDrawer from '../../components/drawer/PodExecDrawer';
 import PodLogsDrawer from '../../components/drawer/PodLogsDrawer';
 import PodPortForwardDrawer from '../../components/drawer/PodPortForwardDrawer';
-import PodDetailsDrawer from '../../components/drawer/PodDetailsDrawer';
+import InfoIcon from '@mui/icons-material/Info';
+import ResourceDescribeDrawer from '../../components/common/ResourceDescribeDrawer/ResourceDescribeDrawer';
 import PodDiagnosisDialog from '../../components/common/PodDiagnosisDialog/PodDiagnosisDialog';
 import { useAgent } from '../../context/AgentContext';
 import PageLayout from '../../components/common/PageLayout/PageLayout';
@@ -175,8 +176,7 @@ function Pods() {
     defaultContainer?: string;
     ports: number[];
   } | null>(null);
-  const [actionType, setActionType] = useState<'exec' | 'logs' | 'port-forward' | 'edit' | 'diagnosis' | 'delete' | 'details' | null>(null);
-  const [selectedPodObject, setSelectedPodObject] = useState<Pod | null>(null);
+  const [actionType, setActionType] = useState<'exec' | 'logs' | 'port-forward' | 'edit' | 'diagnosis' | 'delete' | 'describe' | null>(null);
 
   // Helper to set pod as selected and action
   const selectPodForAction = (pod: Pod, action: typeof actionType) => {
@@ -197,36 +197,13 @@ function Pods() {
 
     const defaultContainer = containers[0]?.name;
     setSelectedPod({ namespace, podName, containers, defaultContainer, ports });
-    setSelectedPodObject(pod);
     setActionType(action);
   };
 
   const podConfig: ResourceTableConfig = {
     columns: [
       { key: 'metadata.namespace', header: 'NAMESPACE' },
-      {
-        key: 'metadata.name',
-        header: 'NAME',
-        accessor: (row: Pod) => (
-          <Box
-            component="span"
-            onClick={(e) => {
-              e.stopPropagation();
-              selectPodForAction(row, 'details');
-            }}
-            sx={{
-              cursor: 'pointer',
-              color: 'text.primary',
-              fontSize: 'inherit',
-              fontWeight: 'inherit',
-              textDecoration: 'none',
-              '&:hover': { textDecoration: 'underline' },
-            }}
-          >
-            {row.metadata?.name}
-          </Box>
-        ),
-      },
+      { key: 'metadata.name', header: 'NAME' },
       {
         key: 'ready',
         header: 'READY',
@@ -305,6 +282,7 @@ function Pods() {
       },
     ],
     actions: [
+      { id: 'describe', label: 'Describe', icon: InfoIcon },
       { id: 'edit', label: 'Edit', icon: EditIcon },
       { id: 'logs', label: 'Logs', icon: ArticleIcon },
       { id: 'exec', label: 'Exec', icon: TerminalIcon },
@@ -328,13 +306,14 @@ function Pods() {
       selectPodForAction(pod, 'exec');
     } else if (actionId === 'port-forward') {
       selectPodForAction(pod, 'port-forward');
+    } else if (actionId === 'describe') {
+      selectPodForAction(pod, 'describe');
     }
   };
 
   const handleClose = () => {
     setActionType(null);
     setSelectedPod(null);
-    setSelectedPodObject(null);
   };
 
   const confirmDelete = () => {
@@ -401,7 +380,7 @@ function Pods() {
         <ResourceDeleteConfirmDialog open={true} onClose={handleClose} onConfirm={confirmDelete} resourceName={selectedPod?.podName || ''} resourceKind="Pod" isDeleting={isDeleting} />
       )}
 
-      <PodDetailsDrawer open={actionType === 'details'} onClose={handleClose} pod={selectedPodObject} socket={socket} />
+      <ResourceDescribeDrawer open={actionType === 'describe'} onClose={handleClose} apiVersion="v1" kind="Pod" namespace={selectedPod?.namespace ?? ''} name={selectedPod?.podName ?? ''} />
     </PageLayout>
   );
 }

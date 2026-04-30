@@ -2,12 +2,14 @@ import { useResource } from '../../hooks/useResource';
 import type { ResourceTableConfig } from '../../interfaces/common';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
 import ResourceTable from '../../components/common/Table/ResourceTable';
 import type { PersistentVolume } from '../../interfaces/persistent-volume';
 import { Box, CircularProgress, Alert } from '@mui/material';
 import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
 import PageLayout from '../../components/common/PageLayout/PageLayout';
 import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import ResourceDescribeDrawer from '../../components/common/ResourceDescribeDrawer/ResourceDescribeDrawer';
 import { useState } from 'react';
 
 const getPvStatus = (pv: PersistentVolume) => {
@@ -33,6 +35,8 @@ function PersistentVolumes() {
   const [editingResource, setEditingResource] = useState<{
     name: string;
   } | null>(null);
+  const [describeOpen, setDescribeOpen] = useState(false);
+  const [describeName, setDescribeName] = useState('');
 
   const config: ResourceTableConfig = {
     columns: [
@@ -74,6 +78,7 @@ function PersistentVolumes() {
       },
     ],
     actions: [
+      { id: 'describe', label: 'Describe', icon: InfoIcon },
       { id: 'edit', label: 'Edit', icon: EditIcon },
       { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
@@ -83,6 +88,9 @@ function PersistentVolumes() {
     if (actionId === 'edit') {
       setEditingResource({ name: row.metadata.name });
       setEditDrawerOpen(true);
+    } else if (actionId === 'describe') {
+      setDescribeName(row.metadata.name);
+      setDescribeOpen(true);
     }
   };
 
@@ -115,6 +123,17 @@ function PersistentVolumes() {
           name={editingResource.name}
         />
       )}
+      <ResourceDescribeDrawer
+        open={describeOpen}
+        onClose={() => {
+          setDescribeOpen(false);
+          setDescribeName('');
+        }}
+        apiVersion="v1"
+        kind="PersistentVolume"
+        namespace=""
+        name={describeName}
+      />
     </PageLayout>
   );
 }

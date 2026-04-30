@@ -1,5 +1,6 @@
 import type { ResourceTableConfig } from '../../interfaces/common';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
 import ResourceTable from '../../components/common/Table/ResourceTable';
 import type { Namespace } from '../../interfaces/namespace';
 import { Box, CircularProgress, Alert } from '@mui/material';
@@ -8,6 +9,7 @@ import PageLayout from '../../components/common/PageLayout/PageLayout';
 import { useResource } from '../../hooks/useResource';
 import { useDeleteResource } from '../../hooks/useResource';
 import ResourceDeleteConfirmDialog from '../../components/common/DeleteConfirmDialog/ResourceDeleteConfirmDialog';
+import ResourceDescribeDrawer from '../../components/common/ResourceDescribeDrawer/ResourceDescribeDrawer';
 import { useState } from 'react';
 
 function Namespaces() {
@@ -16,6 +18,8 @@ function Namespaces() {
 
   const [selectedNamespace, setSelectedNamespace] = useState<Namespace | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [describeOpen, setDescribeOpen] = useState(false);
+  const [describeName, setDescribeName] = useState('');
 
   const namespaceConfig: ResourceTableConfig = {
     columns: [
@@ -27,7 +31,10 @@ function Namespaces() {
         accessor: (namespace: Namespace) => <ResourceLiveAge creationTimestamp={namespace.metadata.creationTimestamp} />,
       },
     ],
-    actions: [{ id: 'delete', label: 'Delete', icon: DeleteIcon }],
+    actions: [
+      { id: 'describe', label: 'Describe', icon: InfoIcon },
+      { id: 'delete', label: 'Delete', icon: DeleteIcon },
+    ],
   };
 
   const confirmDelete = () => {
@@ -47,6 +54,9 @@ function Namespaces() {
     setSelectedNamespace(row);
     if (actionId === 'delete') {
       setDeleteDialogOpen(true);
+    } else if (actionId === 'describe') {
+      setDescribeName(row.metadata.name);
+      setDescribeOpen(true);
     }
   };
 
@@ -76,6 +86,17 @@ function Namespaces() {
           isDeleting={isDeleting}
         />
       )}
+      <ResourceDescribeDrawer
+        open={describeOpen}
+        onClose={() => {
+          setDescribeOpen(false);
+          setDescribeName('');
+        }}
+        apiVersion="v1"
+        kind="Namespace"
+        namespace=""
+        name={describeName}
+      />
     </PageLayout>
   );
 }

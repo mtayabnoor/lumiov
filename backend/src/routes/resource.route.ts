@@ -145,6 +145,43 @@ router.delete('/resource', async (req, res) => {
   }
 });
 
+// ─── GENERIC DESCRIBE ──────────────────────────────────────────
+
+router.get('/resource/describe', async (req, res) => {
+  const { apiVersion, kind, namespace, name } = req.query;
+
+  if (!kind || !name) {
+    res.status(400).json(toAppError('Missing kind or name', 'VALIDATION_ERROR', false));
+    return;
+  }
+
+  const isClusterScoped = CLUSTER_SCOPED_KINDS.has(kind as string);
+  if (!isClusterScoped && !namespace) {
+    res
+      .status(400)
+      .json(
+        toAppError(
+          'Namespace is required for this resource type',
+          'VALIDATION_ERROR',
+          false,
+        ),
+      );
+    return;
+  }
+
+  try {
+    const data = await k8sService.getResourceDescribeDetails(
+      (apiVersion as string) ?? '',
+      kind as string,
+      (namespace as string) ?? '',
+      name as string,
+    );
+    res.json(data);
+  } catch (err) {
+    res.status(500).json(toAppError(err, 'DESCRIBE_FAILED', true));
+  }
+});
+
 // ─── POD DIAGNOSIS ──────────────────────────────────────────────
 
 router.post('/diagnose', async (req, res) => {

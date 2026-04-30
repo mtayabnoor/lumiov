@@ -2,12 +2,14 @@ import { useResource } from '../../hooks/useResource';
 import type { ResourceTableConfig } from '../../interfaces/common';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
 import ResourceTable from '../../components/common/Table/ResourceTable';
 import type { PersistentVolumeClaim } from '../../interfaces/persistent-volume-claim';
 import { Box, CircularProgress, Alert } from '@mui/material';
 import ResourceLiveAge from '../../components/common/ResourceLiveAge/ResourceLiveAge';
 import PageLayout from '../../components/common/PageLayout/PageLayout';
 import ResourceEditor from '../../components/common/Editor/ResourceEditor';
+import ResourceDescribeDrawer from '../../components/common/ResourceDescribeDrawer/ResourceDescribeDrawer';
 import { useState } from 'react';
 
 const getPvcStatus = (pvc: PersistentVolumeClaim) => {
@@ -32,6 +34,8 @@ function PersistentVolumeClaims() {
     namespace: string;
     name: string;
   } | null>(null);
+  const [describeOpen, setDescribeOpen] = useState(false);
+  const [describeResource, setDescribeResource] = useState<{ namespace: string; name: string } | null>(null);
 
   const config: ResourceTableConfig = {
     columns: [
@@ -61,6 +65,7 @@ function PersistentVolumeClaims() {
       },
     ],
     actions: [
+      { id: 'describe', label: 'Describe', icon: InfoIcon },
       { id: 'edit', label: 'Edit', icon: EditIcon },
       { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
@@ -73,6 +78,9 @@ function PersistentVolumeClaims() {
         name: row.metadata.name,
       });
       setEditDrawerOpen(true);
+    } else if (actionId === 'describe') {
+      setDescribeResource({ namespace: row.metadata.namespace, name: row.metadata.name });
+      setDescribeOpen(true);
     }
   };
 
@@ -105,6 +113,17 @@ function PersistentVolumeClaims() {
           name={editingResource.name}
         />
       )}
+      <ResourceDescribeDrawer
+        open={describeOpen}
+        onClose={() => {
+          setDescribeOpen(false);
+          setDescribeResource(null);
+        }}
+        apiVersion="v1"
+        kind="PersistentVolumeClaim"
+        namespace={describeResource?.namespace ?? ''}
+        name={describeResource?.name ?? ''}
+      />
     </PageLayout>
   );
 }

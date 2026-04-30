@@ -1029,6 +1029,136 @@ export class K8sService {
     }
   }
 
+  /**
+   * Generic event retrieval for any namespaced resource.
+   * Uses involvedObject.kind + involvedObject.name field selectors.
+   * Returns empty array on failure so events are always optional.
+   */
+  public async getResourceEvents(
+    kind: string,
+    namespace: string,
+    name: string,
+  ): Promise<any[]> {
+    this.checkInit();
+    try {
+      return await this.withRetry(async () => {
+        const selector = `involvedObject.kind=${kind},involvedObject.name=${name}`;
+        const events = namespace
+          ? await this.coreApi!.listNamespacedEvent({
+              namespace,
+              fieldSelector: selector,
+            })
+          : await this.coreApi!.listEventForAllNamespaces({ fieldSelector: selector });
+        return events.items.map((e: any) => ({
+          type: e.type,
+          reason: e.reason,
+          message: e.message,
+          count: e.count,
+          firstTimestamp: e.firstTimestamp,
+          lastTimestamp: e.lastTimestamp,
+          source: e.source?.component,
+        }));
+      });
+    } catch (err: any) {
+      console.error(`❌ Error fetching events for ${kind}/${name}:`, err.message);
+      return [];
+    }
+  }
+
+  /**
+   * Generic describe for any Kubernetes resource.
+   * Returns structured metadata, kind-specific overview KV pairs, conditions,
+   * events, labels, annotations, and the raw K8s object.
+   * Pods are delegated to getPodDescribeDetails for richer container/volume detail.
+   */
+  public async getResourceDescribeDetails(
+    apiVersion: string,
+    kind: string,
+    namespace: string,
+    name: string,
+  ): Promise<{
+    metadata: Record<string, any>;
+    overview: Record<string, string | number | boolean | undefined>;
+    conditions: {
+      type: string;
+      status: string;
+      reason?: string;
+      message?: string;
+      lastTransitionTime?: string;
+    }[];
+    events: any[];
+    labels: Record<string, string>;
+    annotations: Record<string, string>;
+    raw: any;
+  }> {
+    this.checkInit();
+
+    // Pods: delegate to dedicated method for richer containers/volumes sections
+    if (kind === 'Pod') {
+      const d = await this.getPodDescribeDetails(namespace, name);
+      return {
+        metadata: {
+          name: d.overview.name,
+          namespace: d.overview.namespace,
+          uid: d.overview.uid,
+          creationTimestamp: d.overview.creationTimestamp,
+          deletionTimestamp: d.overview.deletionTimestamp,
+        },
+        overview: d.overview,
+        conditions: [],
+        events: d.events,
+        labels: d.labels,
+        annotations: d.annotations,
+        raw: d,
+      };
+    }
+
+    return await this.withRetry(async () => {
+      // Read raw K8s object directly (avoids the YAML-string path of getResourceGeneric)
+      const raw = (await this.objectApi!.read({
+        apiVersion,
+        kind,
+        metadata: { name, namespace: namespace || undefined },
+      })) as any;
+
+      const meta = raw.metadata || {};
+      const spec = raw.spec || {};
+      const status = raw.status || {};
+
+      const metadata = {
+        name: meta.name,
+        namespace: meta.namespace,
+        uid: meta.uid,
+        creationTimestamp: meta.creationTimestamp,
+        deletionTimestamp: meta.deletionTimestamp,
+        resourceVersion: meta.resourceVersion,
+        generation: meta.generation,
+      };
+
+      const overview = extractKindOverview(kind, spec, status);
+
+      const conditions = (status.conditions || []).map((c: any) => ({
+        type: c.type,
+        status: c.status,
+        reason: c.reason,
+        message: c.message,
+        lastTransitionTime: c.lastTransitionTime,
+      }));
+
+      const events = await this.getResourceEvents(kind, namespace, name);
+
+      return {
+        metadata,
+        overview,
+        conditions,
+        events,
+        labels: meta.labels || {},
+        annotations: meta.annotations || {},
+        raw,
+      };
+    });
+  }
+
   // ─── CONTEXT MANAGEMENT ─────────────────────────────────────
 
   /**
@@ -1154,3 +1284,100 @@ export class K8sService {
 }
 
 export const k8sService = new K8sService();
+
+// ── Per-kind overview extractor ──────────────────────────────────────────────
+// Module-level helper: pulls structured key-value pairs from spec/status for
+// known resource kinds. Returns an empty object for unknown kinds so that the
+// describe drawer degrades gracefully (only metadata + events + raw JSON shown).
+function extractKindOverview(
+  kind: string,
+  spec: any,
+  status: any,
+): Record<string, string | number | boolean | undefined> {
+  switch (kind) {
+    case 'Deployment':
+      return {
+        Replicas: `${status.readyReplicas ?? 0} / ${status.replicas ?? spec.replicas ?? 0}`,
+        Available: status.availableReplicas ?? 0,
+        'Up-to-Date': status.updatedReplicas ?? 0,
+        Strategy: spec.strategy?.type,
+        'Min Ready Seconds': spec.minReadySeconds,
+        Selector: spec.selector?.matchLabels
+          ? JSON.stringify(spec.selector.matchLabels)
+          : undefined,
+      };
+    case 'StatefulSet':
+      return {
+        Replicas: `${status.readyReplicas ?? 0} / ${status.replicas ?? spec.replicas ?? 0}`,
+        Current: status.currentReplicas ?? 0,
+        Updated: status.updatedReplicas ?? 0,
+        'Update Strategy': spec.updateStrategy?.type,
+        'Service Name': spec.serviceName,
+        'Pod Management Policy': spec.podManagementPolicy,
+        Selector: spec.selector?.matchLabels
+          ? JSON.stringify(spec.selector.matchLabels)
+          : undefined,
+      };
+    case 'DaemonSet':
+      return {
+        Desired: status.desiredNumberScheduled ?? 0,
+        Current: status.currentNumberScheduled ?? 0,
+        Ready: status.numberReady ?? 0,
+        Available: status.numberAvailable ?? 0,
+        'Up-to-Date': status.updatedNumberScheduled ?? 0,
+        'Update Strategy': spec.updateStrategy?.type,
+        Selector: spec.selector?.matchLabels
+          ? JSON.stringify(spec.selector.matchLabels)
+          : undefined,
+      };
+    case 'Service':
+      return {
+        Type: spec.type,
+        'Cluster IP': spec.clusterIP,
+        'External IPs': spec.externalIPs?.join(', '),
+        'Load Balancer IP': spec.loadBalancerIP,
+        Ports: (spec.ports || [])
+          .map(
+            (p: any) =>
+              `${p.port}${p.nodePort ? ':' + p.nodePort : ''}/${p.protocol ?? 'TCP'} → ${p.targetPort}`,
+          )
+          .join(', '),
+        Selector: spec.selector
+          ? JSON.stringify(spec.selector)
+          : 'None (headless or external)',
+        'Session Affinity': spec.sessionAffinity,
+        'External Traffic Policy': spec.externalTrafficPolicy,
+      };
+    case 'Ingress':
+      return {
+        'Ingress Class': spec.ingressClassName ?? '(default)',
+        Rules: (spec.rules || []).map((r: any) => r.host ?? '*').join(', '),
+        TLS: spec.tls?.length ? `${spec.tls.length} rule(s)` : 'None',
+        'Load Balancer': status.loadBalancer?.ingress
+          ?.map((i: any) => i.ip || i.hostname)
+          .join(', '),
+      };
+    case 'Job':
+      return {
+        Completions: `${status.succeeded ?? 0} / ${spec.completions ?? 1}`,
+        Active: status.active ?? 0,
+        Failed: status.failed ?? 0,
+        'Start Time': status.startTime,
+        'Completion Time': status.completionTime,
+        Parallelism: spec.parallelism,
+        'Backoff Limit': spec.backoffLimit,
+      };
+    case 'CronJob':
+      return {
+        Schedule: spec.schedule,
+        'Last Schedule': status.lastScheduleTime,
+        'Active Jobs': status.active?.length ?? 0,
+        Suspended: spec.suspend ? 'Yes' : 'No',
+        'Concurrency Policy': spec.concurrencyPolicy,
+        'Successful History Limit': spec.successfulJobsHistoryLimit,
+        'Failed History Limit': spec.failedJobsHistoryLimit,
+      };
+    default:
+      return {};
+  }
+}

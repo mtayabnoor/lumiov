@@ -2,6 +2,8 @@ import { useResource } from '../../hooks/useResource';
 import type { ResourceTableConfig } from '../../interfaces/common';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
+import ResourceDescribeDrawer from '../../components/common/ResourceDescribeDrawer/ResourceDescribeDrawer';
 import ResourceTable from '../../components/common/Table/ResourceTable';
 import type { DaemonSet } from '../../interfaces/daemon-set';
 import { Box, CircularProgress, Alert } from '@mui/material';
@@ -18,6 +20,8 @@ function DaemonSets() {
     namespace: string;
     name: string;
   } | null>(null);
+  const [describeOpen, setDescribeOpen] = useState(false);
+  const [describeResource, setDescribeResource] = useState<{ namespace: string; name: string } | null>(null);
 
   const config: ResourceTableConfig = {
     columns: [
@@ -50,12 +54,17 @@ function DaemonSets() {
       },
     ],
     actions: [
+      { id: 'describe', label: 'Describe', icon: InfoIcon },
       { id: 'edit', label: 'Edit', icon: EditIcon },
       { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
   };
 
   const handleAction = (actionId: string, row: DaemonSet) => {
+    if (actionId === 'describe') {
+      setDescribeResource({ namespace: row.metadata.namespace, name: row.metadata.name });
+      setDescribeOpen(true);
+    }
     if (actionId === 'edit') {
       setEditingResource({
         namespace: row.metadata.namespace,
@@ -94,6 +103,17 @@ function DaemonSets() {
           name={editingResource.name}
         />
       )}
+      <ResourceDescribeDrawer
+        open={describeOpen}
+        onClose={() => {
+          setDescribeOpen(false);
+          setDescribeResource(null);
+        }}
+        apiVersion="apps/v1"
+        kind="DaemonSet"
+        namespace={describeResource?.namespace ?? ''}
+        name={describeResource?.name ?? ''}
+      />
     </PageLayout>
   );
 }

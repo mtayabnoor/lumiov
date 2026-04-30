@@ -2,6 +2,8 @@ import { useResource } from '../../hooks/useResource';
 import type { ResourceTableConfig } from '../../interfaces/common';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
+import ResourceDescribeDrawer from '../../components/common/ResourceDescribeDrawer/ResourceDescribeDrawer';
 import ResourceTable from '../../components/common/Table/ResourceTable';
 import type { Deployment } from '../../interfaces/deployment';
 import { Box, CircularProgress, Alert, Typography } from '@mui/material';
@@ -25,6 +27,8 @@ function Deployments() {
   const [selectedDeployment, setSelectedDeployment] = useState<Deployment | null>(null);
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [describeOpen, setDescribeOpen] = useState(false);
+  const [describeResource, setDescribeResource] = useState<{ namespace: string; name: string } | null>(null);
 
   const deploymentConfig: ResourceTableConfig = {
     columns: [
@@ -44,6 +48,7 @@ function Deployments() {
       },
     ],
     actions: [
+      { id: 'describe', label: 'Describe', icon: InfoIcon },
       { id: 'edit', label: 'Edit', icon: EditIcon },
       { id: 'delete', label: 'Delete', icon: DeleteIcon },
     ],
@@ -66,6 +71,10 @@ function Deployments() {
   const handleAction = (actionId: string, deployment: Deployment) => {
     setSelectedDeployment(deployment);
 
+    if (actionId === 'describe') {
+      setDescribeResource({ namespace: deployment.metadata.namespace, name: deployment.metadata.name });
+      setDescribeOpen(true);
+    }
     if (actionId === 'edit') {
       setEditDrawerOpen(true);
     }
@@ -113,6 +122,17 @@ function Deployments() {
           isDeleting={isDeleting}
         />
       )}
+      <ResourceDescribeDrawer
+        open={describeOpen}
+        onClose={() => {
+          setDescribeOpen(false);
+          setDescribeResource(null);
+        }}
+        apiVersion="apps/v1"
+        kind="Deployment"
+        namespace={describeResource?.namespace ?? ''}
+        name={describeResource?.name ?? ''}
+      />
     </PageLayout>
   );
 }
