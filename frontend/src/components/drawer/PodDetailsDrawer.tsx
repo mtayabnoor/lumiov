@@ -112,7 +112,7 @@ export default function PodDetailsDrawer({ open, onClose, pod, socket }: PodDeta
       slotProps={{
         paper: {
           sx: {
-            width: { xs: '95%', sm: '640px' },
+            width: { xs: '95%', sm: '680px' },
             height: 'calc(100vh - 50px)',
             marginTop: '50px',
             display: 'flex',
@@ -262,70 +262,75 @@ export default function PodDetailsDrawer({ open, onClose, pod, socket }: PodDeta
             {/* ── Events ── */}
             {details.events?.length > 0 && (
               <Section title={`Events (${details.events.length})`}>
-                <Box sx={{ overflowX: 'auto' }}>
-                  <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
-                    <TableHead>
-                      <TableRow>
-                        {['Type', 'Reason', 'Message', 'Count', 'Last Seen'].map((h) => (
-                          <TableCell
-                            key={h}
-                            sx={{
-                              fontWeight: 600,
-                              fontSize: '0.7rem',
-                              color: 'text.secondary',
-                              textTransform: 'uppercase',
-                              letterSpacing: 0.5,
-                              px: 2,
-                              py: 1,
-                              borderBottom: '1px solid',
-                              borderColor: 'divider',
-                              bgcolor: 'action.hover',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {h}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {details.events.map((ev: any, i: number) => (
-                        <TableRow key={i} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
-                          <TableCell sx={{ px: 2, py: 0.75, verticalAlign: 'top' }}>
-                            <Chip label={ev.type ?? '—'} size="small" color={ev.type === 'Warning' ? 'warning' : 'default'} sx={{ fontSize: '0.7rem', height: 20 }} />
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              px: 2,
-                              py: 0.75,
-                              verticalAlign: 'top',
-                              fontFamily: 'monospace',
-                              fontSize: '0.78rem',
-                              color: 'text.primary',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {ev.reason ?? '—'}
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              px: 2,
-                              py: 0.75,
-                              verticalAlign: 'top',
-                              fontSize: '0.78rem',
-                              color: 'text.secondary',
-                              wordBreak: 'break-word',
-                            }}
-                          >
-                            {ev.message ?? '—'}
-                          </TableCell>
-                          <TableCell sx={{ px: 2, py: 0.75, verticalAlign: 'top', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{ev.count ?? 1}</TableCell>
-                          <TableCell sx={{ px: 2, py: 0.75, verticalAlign: 'top', fontSize: '0.78rem', whiteSpace: 'nowrap', color: 'text.secondary' }}>{fmtTime(ev.lastTimestamp)}</TableCell>
-                        </TableRow>
+                <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
+                  <colgroup>
+                    <col style={{ width: '14%' }} />
+                    <col style={{ width: '18%' }} />
+                    <col style={{ width: '44%' }} />
+                    <col style={{ width: '8%' }} />
+                    <col style={{ width: '16%' }} />
+                  </colgroup>
+                  <TableHead>
+                    <TableRow>
+                      {['Type', 'Reason', 'Message', 'Count', 'Last Seen'].map((h) => (
+                        <TableCell
+                          key={h}
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                            color: 'text.secondary',
+                            textTransform: 'uppercase',
+                            letterSpacing: 0.5,
+                            px: 2,
+                            py: 1,
+                            borderBottom: '1px solid',
+                            borderColor: 'divider',
+                            bgcolor: 'action.hover',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {h}
+                        </TableCell>
                       ))}
-                    </TableBody>
-                  </Table>
-                </Box>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {details.events.map((ev: any, i: number) => (
+                      <TableRow key={i} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
+                        <TableCell sx={{ px: 2, py: 0.75, verticalAlign: 'top' }}>
+                          <Chip label={ev.type ?? '—'} size="small" color={ev.type === 'Warning' ? 'warning' : 'default'} sx={{ fontSize: '0.7rem', height: 20 }} />
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            px: 2,
+                            py: 0.75,
+                            verticalAlign: 'top',
+                            fontFamily: 'monospace',
+                            fontSize: '0.78rem',
+                            color: 'text.primary',
+                            wordBreak: 'break-word',
+                          }}
+                        >
+                          {ev.reason ?? '—'}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            px: 2,
+                            py: 0.75,
+                            verticalAlign: 'top',
+                            fontSize: '0.78rem',
+                            color: 'text.secondary',
+                            wordBreak: 'break-word',
+                          }}
+                        >
+                          {ev.message ?? '—'}
+                        </TableCell>
+                        <TableCell sx={{ px: 2, py: 0.75, verticalAlign: 'top', fontSize: '0.78rem', textAlign: 'center' }}>{ev.count ?? 1}</TableCell>
+                        <TableCell sx={{ px: 1, py: 0.75, verticalAlign: 'top', fontSize: '0.75rem', color: 'text.secondary', wordBreak: 'break-word' }}>{fmtTime(ev.lastTimestamp)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </Section>
             )}
 
