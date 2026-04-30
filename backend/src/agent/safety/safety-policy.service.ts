@@ -1,5 +1,7 @@
 import { randomUUID } from 'crypto';
 
+// ─── Types ────────────────────────────────────────────────────
+
 export type GuardrailCode =
   | 'PROTECTED_NAMESPACE'
   | 'REPLICA_LIMIT_EXCEEDED'
@@ -30,6 +32,8 @@ export interface GuardrailDecision {
   message?: string;
 }
 
+// ─── Constants ────────────────────────────────────────────────
+
 const PROTECTED_NAMESPACES = new Set(['kube-system', 'kube-public', 'kube-node-lease']);
 
 const PROTECTED_POD_NAME_PREFIXES = [
@@ -47,6 +51,8 @@ export const SAFETY_LIMITS = {
   maxReplicaMultiplierPerAction: 3,
   pendingActionTtlMs: 2 * 60 * 1000,
 } as const;
+
+// ─── Evaluators ───────────────────────────────────────────────
 
 export function isProtectedNamespace(namespace: string): boolean {
   return PROTECTED_NAMESPACES.has(namespace);
@@ -152,6 +158,8 @@ export function evaluateDeletePodRequest(
   };
 }
 
+// ─── Pending Action Helpers ───────────────────────────────────
+
 export function createPendingAction(
   action: Omit<PendingAction, 'id' | 'createdAt' | 'expiresAt'>,
 ): PendingAction {
@@ -168,6 +176,8 @@ export function createPendingAction(
 export function isPendingActionExpired(action: PendingAction): boolean {
   return Date.now() > action.expiresAt;
 }
+
+// ─── Message Builders ─────────────────────────────────────────
 
 export function buildConfirmationMessage(action: PendingAction): string {
   return [

@@ -5,12 +5,8 @@ import {
   buildConfirmationMessage,
   createPendingAction,
   evaluateScaleRequest,
-  type PendingAction,
 } from '../safety/safety-policy.service';
-
-interface ToolSafetyContext {
-  setPendingAction: (action: PendingAction) => void;
-}
+import type { ToolSafetyContext } from './tool-safety-context';
 
 export function createScaleDeploymentTool(
   safetyContext?: ToolSafetyContext,

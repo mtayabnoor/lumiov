@@ -1,13 +1,27 @@
 /**
  * Agent Service
  *
- * Core LangChain agent service that manages conversations and tool execution.
- * Designed for scalability - new tools are automatically picked up from the tools directory.
+ * Public API consumed by agent.handler.ts (Socket.IO handler).
+ * Thin orchestrator — delegates each concern to a focused module:
+ *
+ *   session.store.ts     → per-socket session lifecycle (CRUD, cleanup)
+ *   agent.prompt.ts      → system prompt and write-permission rules
+ *   safety-policy.service.ts → guardrails and pending-action helpers
+ *   tools/index.ts       → all available LangChain tools
  */
 
 import { ChatOpenAI } from '@langchain/openai';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
-import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, AIMessage } from '@langchain/core/messages';
+import {
+  createSession,
+  getSession,
+  hasSession,
+  clearSessionHistory,
+  deleteSession,
+  type AgentSession,
+} from './session.store';
+import { buildSystemPrompt } from './agent.prompt';
 import { createAllTools } from './tools/index';
 import { k8sService } from '../services/kubernetes.service';
 import {
@@ -16,136 +30,53 @@ import {
   type PendingAction,
 } from './safety/safety-policy.service';
 
-// Store for per-user agent instances and conversation history
-interface AgentSession {
-  apiKey: string;
-  history: BaseMessage[];
-  lastActivity: number;
-  pendingAction: PendingAction | null;
-}
-
-// Simple in-memory session store (could be Redis in production)
-const sessions = new Map<string, AgentSession>();
-
-// Session timeout: 30 minutes
-const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
+// ─── Public API ───────────────────────────────────────────────
 
 /**
- * System prompt that instructs the AI how to behave
- */
-const SYSTEM_PROMPT = `You are Lumiov AI, an intelligent assistant for Kubernetes cluster management.
-
-Your capabilities:
-- Fetch and analyze pod information (status, restarts, resource usage)
-- Monitor deployment health and replica counts
-- List and describe namespaces
-- Provide insights about cluster health
-- Diagnose pod issues
-
-Response Formatting Guidelines:
-1. Always use bullet points (•) for lists
-2. Use **bold** for important names, counts, and status values
-3. Start with a brief summary line, then provide details
-4. Group related information together
-5. For issues, use ⚠️ emoji to highlight warnings
-6. For healthy items, use ✅ emoji
-7. Keep responses concise but informative
-
-Example response format:
-"You have **12 pods** across **3 namespaces**.
-
-**Healthy:**
-• ✅ nginx-deployment: 3/3 replicas ready
-• ✅ redis: 1/1 ready
-
-**Issues:**
-• ⚠️ api-server: 2 restarts in the last hour"
-
-Guidelines:
-1. Always use the available tools to get real-time data before answering questions
-2. If you detect issues (pending pods, restart loops, unhealthy deployments), proactively mention them
-3. If a tool returns an error, explain what went wrong and suggest solutions
-5. Never answer questions not related to Kubernetes operations.
-
-You are helpful, accurate, and focused on Kubernetes operations.`;
-
-/**
- * Validates an OpenAI API key by making a test request
+ * Validates an OpenAI API key by making a minimal test request.
  */
 export async function validateApiKey(
   apiKey: string,
 ): Promise<{ valid: boolean; error?: string }> {
   try {
-    const model = new ChatOpenAI({
-      apiKey: apiKey,
-      model: 'gpt-4o-mini',
-      maxTokens: 10,
-    });
-
+    const model = new ChatOpenAI({ apiKey, model: 'gpt-4o-mini', maxTokens: 10 });
     await model.invoke([new HumanMessage('test')]);
     return { valid: true };
   } catch (error: any) {
-    const message = error.message || 'Invalid API key';
-    if (message.includes('401') || message.includes('invalid_api_key')) {
-      return {
-        valid: false,
-        error: 'Invalid API key. Please check your OpenAI API key.',
-      };
-    }
-    if (message.includes('429')) {
-      return { valid: false, error: 'Rate limited. Please try again later.' };
-    }
-    return { valid: false, error: message };
+    return { valid: false, error: mapLLMError(error) };
   }
 }
 
-/**
- * Creates or retrieves an agent session for a socket
- */
+/** Creates a new session for the socket, replacing any existing one. */
 export function configureSession(socketId: string, apiKey: string): void {
-  sessions.set(socketId, {
-    apiKey,
-    history: [],
-    lastActivity: Date.now(),
-    pendingAction: null,
-  });
+  createSession(socketId, apiKey);
 }
 
-/**
- * Clears a session's conversation history
- */
+/** Resets conversation history for a socket, keeping the API key. */
 export function clearSession(socketId: string): void {
-  const session = sessions.get(socketId);
-  if (session) {
-    session.history = [];
-    session.lastActivity = Date.now();
-    session.pendingAction = null;
-  }
+  clearSessionHistory(socketId);
 }
 
-/**
- * Removes a session entirely
- */
+/** Removes the session entirely (called on socket disconnect). */
 export function removeSession(socketId: string): void {
-  sessions.delete(socketId);
+  deleteSession(socketId);
 }
 
-/**
- * Gets session status
- */
+/** Returns whether a socket has a configured session. */
 export function getSessionStatus(socketId: string): { configured: boolean } {
-  return { configured: sessions.has(socketId) };
+  return { configured: hasSession(socketId) };
 }
 
 /**
- * Processes a chat message and returns the AI response
+ * Processes a user chat message and returns the AI response.
+ * Handles the safety confirmation flow before delegating to the LangChain agent.
  */
 export async function chat(
   socketId: string,
   message: string,
   allowWrite: boolean,
 ): Promise<{ response: string; error?: string }> {
-  const session = sessions.get(socketId);
+  const session = getSession(socketId);
 
   if (!session) {
     return {
@@ -154,154 +85,148 @@ export async function chat(
     };
   }
 
+  session.lastActivity = Date.now();
+
   try {
-    session.lastActivity = Date.now();
+    const confirmationResult = await handleConfirmationFlow(
+      message.trim(),
+      session,
+      allowWrite,
+    );
+    if (confirmationResult !== null) return confirmationResult;
 
-    const trimmedMessage = message.trim();
-    const confirmMatch = trimmedMessage.match(/^confirm\s+([a-f0-9-]{8,})$/i);
-    const cancelMatch = /^cancel$/i.test(trimmedMessage);
-
-    if (session.pendingAction && isPendingActionExpired(session.pendingAction)) {
-      session.pendingAction = null;
-      return {
-        response: 'The pending safety confirmation expired. Please re-run your request.',
-      };
-    }
-
-    if (session.pendingAction && cancelMatch) {
-      const canceledAction = session.pendingAction;
-      session.pendingAction = null;
-      return {
-        response: `Canceled action: ${canceledAction.summary}`,
-      };
-    }
-
-    if (session.pendingAction && confirmMatch) {
-      const confirmationId = confirmMatch[1];
-
-      if (session.pendingAction.id !== confirmationId) {
-        return {
-          response: [
-            'Confirmation id does not match the pending action.',
-            buildConfirmationMessage(session.pendingAction),
-          ].join('\n'),
-        };
-      }
-
-      if (!allowWrite) {
-        session.pendingAction = null;
-        return {
-          response: '',
-          error: 'Write actions are disabled in settings.',
-        };
-      }
-
-      const pendingAction = session.pendingAction;
-      session.pendingAction = null;
-
-      try {
-        const executionMessage = await executePendingAction(pendingAction);
-        return { response: executionMessage };
-      } catch (executeError: any) {
-        return {
-          response: '',
-          error: executeError.message || 'Failed to execute confirmed action.',
-        };
-      }
-    }
-
-    if (session.pendingAction) {
-      return {
-        response: buildConfirmationMessage(session.pendingAction),
-      };
-    }
-
-    // Create the model with the user's API key
-    const model = new ChatOpenAI({
-      apiKey: session.apiKey,
-      model: 'gpt-4o',
-      temperature: 0.1,
-    });
-
-    // Get all available tools (pass apiKey so diagnose tool is available)
-    const tools = createAllTools(session.apiKey, allowWrite, {
-      setPendingAction: (action) => {
-        session.pendingAction = action;
-      },
-    });
-
-    const dynamicPrompt =
-      SYSTEM_PROMPT +
-      (allowWrite
-        ? '\n\nCRITICAL RULE: You are authorized to perform write actions (e.g. delete pods) as the user has enabled write permissions.'
-        : "\n\nCRITICAL RULE: Write actions are disabled in settings. If asked to perform any write action (create, update, delete, restart, scale), you MUST respond exactly with 'Write actions are disabled in settings.' and do not execute it.");
-
-    // Create the agent
-    const agent = createReactAgent({
-      llm: model,
-      tools,
-      messageModifier: dynamicPrompt,
-    });
-
-    // Add user message to history
-    session.history.push(new HumanMessage(trimmedMessage));
-
-    // Invoke the agent with conversation history
-    const result = await agent.invoke({
-      messages: session.history,
-    });
-
-    // Extract the AI response
-    const lastMessage = result.messages[result.messages.length - 1];
-    let response =
-      typeof lastMessage.content === 'string'
-        ? lastMessage.content
-        : JSON.stringify(lastMessage.content);
-
-    // Enforce explicit confirmation UX whenever a risky pending action was created.
-    // This guarantees users always see the confirm/cancel instruction.
-    if (session.pendingAction) {
-      response = buildConfirmationMessage(session.pendingAction);
-    }
-
-    // Add AI response to history
-    session.history.push(new AIMessage(response));
-
-    // Keep history manageable (last 20 messages)
-    if (session.history.length > 20) {
-      session.history = session.history.slice(-20);
-    }
-
-    return { response };
+    return await invokeAgent(session, message.trim(), allowWrite);
   } catch (error: any) {
     console.error('Agent chat error:', error);
-
-    if (error.message?.includes('401')) {
-      return {
-        response: '',
-        error: 'API key is invalid or expired. Please reconfigure.',
-      };
-    }
-    if (error.message?.includes('429')) {
-      return {
-        response: '',
-        error: 'Rate limited by OpenAI. Please try again in a moment.',
-      };
-    }
-
-    return {
-      response: '',
-      error: error.message || 'Failed to process message',
-    };
+    return { response: '', error: mapLLMError(error) };
   }
 }
 
+// ─── Confirmation Flow ────────────────────────────────────────
+
+/**
+ * Handles all pending-action states before the agent is invoked.
+ * Returns a result object when the message was consumed by the confirmation flow,
+ * or null when the message should be forwarded to the LangChain agent.
+ */
+async function handleConfirmationFlow(
+  message: string,
+  session: AgentSession,
+  allowWrite: boolean,
+): Promise<{ response: string; error?: string } | null> {
+  if (!session.pendingAction) return null;
+
+  // 1. Expired — clear and tell the user to re-run
+  if (isPendingActionExpired(session.pendingAction)) {
+    session.pendingAction = null;
+    return {
+      response: 'The pending safety confirmation expired. Please re-run your request.',
+    };
+  }
+
+  // 2. User typed "cancel"
+  if (/^cancel$/i.test(message)) {
+    const canceled = session.pendingAction;
+    session.pendingAction = null;
+    return { response: `Canceled action: ${canceled.summary}` };
+  }
+
+  // 3. User typed "confirm <uuid>"
+  const confirmMatch = message.match(/^confirm\s+([a-f0-9-]{8,})$/i);
+  if (confirmMatch) {
+    const confirmedId = confirmMatch[1];
+
+    if (session.pendingAction.id !== confirmedId) {
+      return {
+        response: [
+          'Confirmation ID does not match the pending action.',
+          buildConfirmationMessage(session.pendingAction),
+        ].join('\n'),
+      };
+    }
+
+    if (!allowWrite) {
+      session.pendingAction = null;
+      return { response: '', error: 'Write actions are disabled in settings.' };
+    }
+
+    const action = session.pendingAction;
+    session.pendingAction = null;
+    const executionMessage = await executePendingAction(action);
+    return { response: executionMessage };
+  }
+
+  // 4. Some other message while an action is pending — re-show the prompt
+  return { response: buildConfirmationMessage(session.pendingAction) };
+}
+
+// ─── Agent Invocation ─────────────────────────────────────────
+
+/**
+ * Builds the LangChain agent, invokes it with the conversation history,
+ * and manages history trimming. If the tool registered a pending action
+ * during invocation, the response is overridden with the confirmation prompt.
+ */
+async function invokeAgent(
+  session: AgentSession,
+  message: string,
+  allowWrite: boolean,
+): Promise<{ response: string; error?: string }> {
+  const model = new ChatOpenAI({
+    apiKey: session.apiKey,
+    model: 'gpt-4o',
+    temperature: 0.1,
+  });
+
+  const tools = createAllTools(session.apiKey, allowWrite, {
+    setPendingAction: (action) => {
+      session.pendingAction = action;
+    },
+  });
+
+  const agent = createReactAgent({
+    llm: model,
+    tools,
+    messageModifier: buildSystemPrompt(allowWrite),
+  });
+
+  session.history.push(new HumanMessage(message));
+
+  const result = await agent.invoke({ messages: session.history });
+
+  const lastMessage = result.messages[result.messages.length - 1];
+  let response =
+    typeof lastMessage.content === 'string'
+      ? lastMessage.content
+      : JSON.stringify(lastMessage.content);
+
+  // If a tool registered a pending action, always override the response with
+  // the confirmation prompt so the user sees the confirm/cancel instructions.
+  if (session.pendingAction) {
+    response = buildConfirmationMessage(session.pendingAction);
+  }
+
+  session.history.push(new AIMessage(response));
+
+  // Keep history bounded to avoid runaway token usage
+  if (session.history.length > 20) {
+    session.history = session.history.slice(-20);
+  }
+
+  return { response };
+}
+
+// ─── Pending Action Executor ──────────────────────────────────
+
+/**
+ * Executes a user-confirmed pending action against the Kubernetes API.
+ * Throws on unsupported action types or missing parameters.
+ */
 async function executePendingAction(action: PendingAction): Promise<string> {
   if (action.type === 'scale_deployment') {
     if (typeof action.params.replicas !== 'number') {
       throw new Error('Pending scale action is missing replicas value.');
     }
-
     return k8sService.scaleDeployment(
       action.params.name,
       action.params.namespace,
@@ -322,13 +247,19 @@ async function executePendingAction(action: PendingAction): Promise<string> {
   throw new Error(`Unsupported pending action type: ${action.type}`);
 }
 
-// Cleanup expired sessions periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [socketId, session] of sessions.entries()) {
-    if (now - session.lastActivity > SESSION_TIMEOUT_MS) {
-      sessions.delete(socketId);
-      console.log(`Cleaned up expired agent session: ${socketId}`);
-    }
+// ─── Error Classifier ─────────────────────────────────────────
+
+/**
+ * Maps raw OpenAI / network errors into user-friendly messages.
+ * Used by both validateApiKey() and the chat() error handler.
+ */
+function mapLLMError(error: any): string {
+  const message: string = error?.message ?? 'Unknown error';
+  if (message.includes('401') || message.includes('invalid_api_key')) {
+    return 'API key is invalid or expired. Please reconfigure.';
   }
-}, 60000); // Check every minute
+  if (message.includes('429')) {
+    return 'Rate limited by OpenAI. Please try again in a moment.';
+  }
+  return message || 'Failed to process message';
+}

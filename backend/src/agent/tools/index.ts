@@ -16,11 +16,9 @@ import { createDescribePodTool } from './describe-pod.tool';
 import { createDeletePodTool } from './delete-pod.tool';
 import { createScaleDeploymentTool } from './scale-deployment';
 import { createDiagnosePodTool } from './diagnose-pod.tool';
-import type { PendingAction } from '../safety/safety-policy.service';
+import type { ToolSafetyContext } from './tool-safety-context';
 
-interface ToolSafetyContext {
-  setPendingAction: (action: PendingAction) => void;
-}
+export type { ToolSafetyContext };
 
 // Re-export for individual use
 export {
